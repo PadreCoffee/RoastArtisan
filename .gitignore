@@ -72,6 +72,12 @@ dmypy.json
 ehthumbs.db
 Thumbs.db
 
+# Traffic captures (never commit raw packet captures)
+captures/
+traffic/
+*.pcap
+*.pcapng
+
 #Keeps derived files out of the Artisan repository
 #   To remove these files from the repository a commit must first be made
 #   with the these files deleted, then this section should be uncommented.

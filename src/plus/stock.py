@@ -1782,3 +1782,57 @@ def getBlendSpecStockPosition(blendSpec:Blend, stockId:str, blends:list[BlendStr
     if len(res) > 0:
         return res[0]
     return None
+
+
+# Returns a normalized list of reference dicts from the backend references endpoint.
+# Each dict has at minimum: 'uuid' (str, normalized hex), 'label' (str).
+# Filters by coffee_hr_id or blend_hr_id, and optionally by machine.
+# Backend applies machine fallback automatically (returns all if no match by machine).
+def _parseReferenceItems(items:list) -> list[dict]:
+    result = []
+    for item in items:
+        raw_uuid = str(item.get('id', ''))
+        if not raw_uuid:
+            continue
+        normalized = util.normalizeUUID(raw_uuid)
+        if not normalized:
+            continue
+        label = (item.get('reference_name') or item.get('title') or '').strip() or normalized[:8]
+        result.append({'uuid': normalized, 'label': label, '_raw': item})
+    return result
+
+
+def getReferencesFromAPI(coffee_hr_id:str|None = None, blend_hr_id:str|None = None, machine:str|None = None) -> list[dict]:
+    _log.debug('getReferencesFromAPI(%s, %s, %s)', coffee_hr_id, blend_hr_id, machine)
+    try:
+        params:dict[str, str] = {}
+        if coffee_hr_id:
+            params['coffee_hr_id'] = coffee_hr_id
+        if blend_hr_id:
+            params['blend_hr_id'] = blend_hr_id
+        if machine:
+            params['machine'] = machine
+        r = connection.getData(config.references_url, params=params)
+        if r is not None and r.status_code == 200:
+            items = r.json().get('data', {}).get('items', [])
+            result = _parseReferenceItems(items)
+            if result:
+                _log.debug('getReferencesFromAPI -> %d items', len(result))
+                return result
+            # Zero results with a coffee/blend filter — the reference may be linked via
+            # green_bean_id (warehouse model) rather than coffee_id. Retry without the
+            # coffee/blend filter so the backend machine-based fallback can find it.
+            if coffee_hr_id or blend_hr_id:
+                _log.info('getReferencesFromAPI: 0 items with coffee/blend filter, retrying without')
+                params2:dict[str, str] = {}
+                if machine:
+                    params2['machine'] = machine
+                r2 = connection.getData(config.references_url, params=params2)
+                if r2 is not None and r2.status_code == 200:
+                    items2 = r2.json().get('data', {}).get('items', [])
+                    result2 = _parseReferenceItems(items2)
+                    _log.info('getReferencesFromAPI fallback -> %d items', len(result2))
+                    return result2
+    except Exception as e:  # pylint: disable=broad-except
+        _log.exception(e)
+    return []

@@ -106,11 +106,14 @@ def addSyncShelve(uuid: str, modified_at:float, fh:IO[str]) -> None:
 def addSync(uuid:str, modified_at:float) -> None:
     import portalocker
     fh:IO[str]
+    normalized_uuid = util.normalizeUUID(uuid)
+    if normalized_uuid is None:
+        return
     try:
         sync_cache_semaphore.acquire(1)
-        _log.debug('addSync(%s,%s)', uuid, modified_at)
+        _log.debug('addSync(%s->%s,%s)', uuid, normalized_uuid, modified_at)
         with portalocker.Lock(getSyncPath(lock=True), timeout=0.5) as fh:
-            addSyncShelve(uuid, modified_at, fh)
+            addSyncShelve(normalized_uuid, modified_at, fh)
     except portalocker.exceptions.LockException as e:
         _log.exception(e)
         # we couldn't fetch this lock. It seems to be blocked forever
@@ -120,10 +123,10 @@ def addSync(uuid:str, modified_at:float) -> None:
         _log.info('clean lock %s', str(lock_path))
         lock_path.unlink()
         _log.debug(
-            'retry sync:addSync(%s,%s)', str(uuid), str(modified_at)
+            'retry sync:addSync(%s->%s,%s)', str(uuid), str(normalized_uuid), str(modified_at)
         )
         with portalocker.Lock(lock_path, timeout=0.3) as fh:
-            addSyncShelve(uuid, modified_at, fh)
+            addSyncShelve(normalized_uuid, modified_at, fh)
     except Exception as e:  # pylint: disable=broad-except
         _log.exception(e)
     finally:
@@ -138,14 +141,17 @@ def getSync(uuid:str) -> float|None:
     import shelve
     fh:IO[str]
     db:shelve.Shelf[float]
+    normalized_uuid = util.normalizeUUID(uuid)
+    if normalized_uuid is None:
+        return None
     try:
         sync_cache_semaphore.acquire(1)
-        _log.debug('getSync(%s)', str(uuid))
+        _log.debug('getSync(%s->%s)', str(uuid), str(normalized_uuid))
         with portalocker.Lock(getSyncPath(lock=True), timeout=0.5) as fh:
             try:
                 with shelve.open(getSyncPath()) as db:
                     try:
-                        ts:float = float(db[uuid])
+                        ts:float = float(db[normalized_uuid])
                         _log.debug(' -> sync:getSync = %s', ts)
                         return ts
                     except Exception:  # pylint: disable=broad-except
@@ -165,12 +171,12 @@ def getSync(uuid:str) -> float|None:
         lock_path = Path(getSyncPath(lock=True))
         _log.info('clean lock %s', str(lock_path))
         lock_path.unlink()
-        _log.debug('retry sync:getSync(%s)', str(uuid))
+        _log.debug('retry sync:getSync(%s->%s)', str(uuid), str(normalized_uuid))
         with portalocker.Lock(getSyncPath(lock=True), timeout=0.3) as fh:
             try:
                 with shelve.open(getSyncPath()) as db:
                     try:
-                        ts = db[uuid]
+                        ts = db[normalized_uuid]
                         _log.debug(' -> sync:getSync = %s', ts)
                         return ts
                     except Exception:  # pylint: disable=broad-except
@@ -194,13 +200,16 @@ def delSync(uuid:str) -> None:
     import portalocker
     import shelve
     fh:IO[str]
+    normalized_uuid = util.normalizeUUID(uuid)
+    if normalized_uuid is None:
+        return
     try:
         sync_cache_semaphore.acquire(1)
-        _log.debug('delSync(%s)', str(uuid))
+        _log.debug('delSync(%s->%s)', str(uuid), str(normalized_uuid))
         with portalocker.Lock(getSyncPath(lock=True), timeout=0.5) as fh:
             try:
                 with shelve.open(getSyncPath()) as db:
-                    del db[uuid]
+                    del db[normalized_uuid]
             except Exception:  # pylint: disable=broad-except
                 pass # fails if uuid is not in db
             finally:
@@ -214,11 +223,11 @@ def delSync(uuid:str) -> None:
         lock_path = Path(getSyncPath(lock=True))
         _log.info('clean lock %s', str(lock_path))
         lock_path.unlink()
-        _log.debug('retry sync:delSync(%s)', str(uuid))
+        _log.debug('retry sync:delSync(%s->%s)', str(uuid), str(normalized_uuid))
         with portalocker.Lock(getSyncPath(lock=True), timeout=0.3) as fh:
             try:
                 with shelve.open(getSyncPath()) as db:
-                    del db[uuid]
+                    del db[normalized_uuid]
             except Exception as ex:  # pylint: disable=broad-except
                 _log.exception(ex)
             finally:

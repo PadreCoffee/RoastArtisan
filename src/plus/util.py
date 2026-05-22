@@ -33,6 +33,7 @@ import datetime
 import dateutil.parser
 import logging
 import os
+import uuid as uuidlib
 import numpy
 from typing import Final, Any, TYPE_CHECKING
 
@@ -55,6 +56,18 @@ def getModificationDate(path:str) -> float|None:
     except Exception as e:  # pylint: disable=broad-except
         _log.exception(e)
         return None
+
+
+def normalizeUUID(value:str|None) -> str|None:
+    if value is None:
+        return None
+    candidate = value.strip()
+    if candidate == '':
+        return None
+    try:
+        return uuidlib.UUID(candidate).hex
+    except Exception:  # pylint: disable=broad-except
+        return candidate
 
 
 # Timestamps

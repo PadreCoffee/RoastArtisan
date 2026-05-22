@@ -43,11 +43,11 @@ from artisanlib.atypes import ProfileData
 
 _log: Final[logging.Logger] = logging.getLogger(__name__)
 
-application_name: Final[str] = 'Artisan'
-application_viewer_name: Final[str] = 'ArtisanViewer'
-application_organization_name: Final[str] = 'artisan-scope'
-application_organization_domain: Final[str] = 'artisan-scope.org'
-application_desktop_file_name: Final[str] = 'org.artisan_scope.artisan'
+application_name: Final[str] = 'RoastArtisan'
+application_viewer_name: Final[str] = 'RoastArtisanViewer'
+application_organization_name: Final[str] = 'roastartisan'
+application_organization_domain: Final[str] = 'roastartisan.local'
+application_desktop_file_name: Final[str] = 'com.roastartisan.desktop'
 
 
 from PyQt6.QtCore import QStandardPaths, QCoreApplication, QTime, QDate, QDateTime

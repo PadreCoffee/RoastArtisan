@@ -25,7 +25,7 @@ from PyQt6.QtCore import QSemaphore
 
 from pathlib import Path
 from artisanlib.util import getDirectory
-from plus import config
+from plus import config, util
 import os
 import logging
 
@@ -88,13 +88,16 @@ def addPathShelve(uuid: str, path: str, fh:IO[str]) -> None:
 # register the path for the given uuid, assuming it points to the .alog profile
 # containing that uuid
 def addPath(uuid: str, path: str) -> None:
-    _log.debug('addPath(%s,%s)', uuid, path)
+    normalized_uuid = util.normalizeUUID(uuid)
+    _log.debug('addPath(%s->%s,%s)', uuid, normalized_uuid, path)
+    if normalized_uuid is None:
+        return
     import portalocker
     fh:IO[str]
     try:
         register_semaphore.acquire(1)
         with portalocker.Lock(uuid_cache_path_lock, timeout=0.5) as fh:
-            addPathShelve(uuid, path, fh)
+            addPathShelve(normalized_uuid, path, fh)
     except portalocker.exceptions.LockException as e:
         _log.exception(e)
         # we couldn't fetch this lock. It seems to be blocked forever
@@ -104,10 +107,10 @@ def addPath(uuid: str, path: str) -> None:
             _log.info('clean lock %s', str(uuid_cache_path))
             Path(uuid_cache_path_lock).unlink()
             _log.debug(
-                'retry register:addPath(%s,%s)', str(uuid), str(path)
+                'retry register:addPath(%s->%s,%s)', str(uuid), str(normalized_uuid), str(path)
             )
             with portalocker.Lock(uuid_cache_path_lock, timeout=0.3) as fh:
-                addPathShelve(uuid, path, fh)
+                addPathShelve(normalized_uuid, path, fh)
         except Exception as ex:  # pylint: disable=broad-except
             _log.exception(ex)
     except Exception as e:  # pylint: disable=broad-except
@@ -119,7 +122,10 @@ def addPath(uuid: str, path: str) -> None:
 
 # returns None if given UUID is not registered, otherwise the registered path
 def getPath(uuid: str) -> str|None:
-    _log.debug('getPath(%s)', uuid)
+    normalized_uuid = util.normalizeUUID(uuid)
+    _log.debug('getPath(%s->%s)', uuid, normalized_uuid)
+    if normalized_uuid is None:
+        return None
     import portalocker
     import shelve
     fh:IO[str]
@@ -130,9 +136,9 @@ def getPath(uuid: str) -> str|None:
             try:
                 with shelve.open(uuid_cache_path) as db:
                     try:
-                        res_path = str(db[uuid])
+                        res_path = str(db[normalized_uuid])
                         _log.debug(
-                            'getPath(%s): %s', str(uuid), res_path
+                            'getPath(%s->%s): %s', str(uuid), str(normalized_uuid), res_path
                         )
                         return res_path
                     except Exception:  # pylint: disable=broad-except
@@ -153,14 +159,14 @@ def getPath(uuid: str) -> str|None:
                 'clean lock %s', str(uuid_cache_path_lock)
             )
             Path(uuid_cache_path_lock).unlink()
-            _log.debug('retry register:getPath(%s)', str(uuid))
+            _log.debug('retry register:getPath(%s->%s)', str(uuid), str(normalized_uuid))
             with portalocker.Lock(uuid_cache_path_lock, timeout=0.3) as fh:
                 try:
                     with shelve.open(uuid_cache_path) as db:
                         try:
-                            res_path = str(db[uuid])
+                            res_path = str(db[normalized_uuid])
                             _log.debug(
-                                'getPath(%s): %s', str(uuid), res_path
+                                'getPath(%s->%s): %s', str(uuid), str(normalized_uuid), res_path
                             )
                             return res_path
                         except Exception:  # pylint: disable=broad-except

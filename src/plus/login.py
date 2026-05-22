@@ -38,7 +38,7 @@ _log: Final[logging.Logger] = logging.getLogger(__name__)
 
 class Login(ArtisanDialog):
 
-    __slots__ = [ 'login', 'passwd', 'remember', 'linkRegister', 'linkResetPassword', 'textPass', 'textName', 'rememberCheckbox' ]
+    __slots__ = [ 'login', 'passwd', 'remember', 'server_url', 'linkRegister', 'linkResetPassword', 'textPass', 'textName', 'textServer', 'rememberCheckbox' ]
 
 
     def __init__(
@@ -47,6 +47,7 @@ class Login(ArtisanDialog):
         aw:'ApplicationWindow',
         email:str|None = None,
         saved_password:str|None = None,
+        server_url:str|None = None,
         remember_credentials: bool = True,
     ) -> None:
         super().__init__(parent,aw)
@@ -54,6 +55,7 @@ class Login(ArtisanDialog):
         self.login:str|None = None
         self.passwd:str|None = None
         self.remember:bool = remember_credentials
+        self.server_url:str = config.normalize_server_url(server_url)
 
         self.linkRegister = QLabel(
             f'<small><a href="{config.register_url}">{QApplication.translate('Plus', 'Register')}</a></small>'
@@ -112,10 +114,17 @@ class Login(ArtisanDialog):
             QApplication.translate('Plus', 'Email')
         )
         self.textName.textChanged.connect(self.textChanged)
-        if email is not None:
-            self.textName.setText(email)
 
         self.textPass.textChanged.connect(self.textChanged)
+
+        self.textServer:QLineEdit = QLineEdit(self)
+        self.textServer.setPlaceholderText(
+            QApplication.translate('Plus', 'Server URL')
+        )
+        self.textServer.setText(self.server_url)
+        self.textServer.textChanged.connect(self.textChanged)
+        if email is not None:
+            self.textName.setText(email)
 
         self.rememberCheckbox = QCheckBox(
             QApplication.translate('Plus', 'Remember')
@@ -124,6 +133,7 @@ class Login(ArtisanDialog):
         self.rememberCheckbox.stateChanged.connect(self.rememberCheckChanged)
 
         credentialsLayout:QVBoxLayout = QVBoxLayout(self)
+        credentialsLayout.addWidget(self.textServer)
         credentialsLayout.addWidget(self.textName)
         credentialsLayout.addWidget(self.textPass)
         credentialsLayout.addWidget(self.rememberCheckbox)
@@ -173,7 +183,8 @@ class Login(ArtisanDialog):
         login = self.textName.text()
         passwd = self.textPass.text()
         return (
-            len(passwd) >= config.min_passwd_len
+            len(self.textServer.text().strip()) > 0
+            and len(passwd) >= config.min_passwd_len
             and len(login) >= config.min_login_len
             and '@' in login
             and '.' in login
@@ -198,6 +209,7 @@ class Login(ArtisanDialog):
     def setCredentials(self) -> None:
         self.login = self.textName.text()
         self.passwd = self.textPass.text()
+        self.server_url = config.normalize_server_url(self.textServer.text())
         self.accept()
 
 
@@ -206,13 +218,14 @@ def plus_login(
     aw: 'ApplicationWindow',
     email: str|None = None,
     saved_password: str|None = None,
+    server_url: str|None = None,
     remember_credentials: bool = True
-) -> tuple[str|None, str|None, bool, int]:
+) -> tuple[str|None, str|None, str, bool, int]:
     _log.debug('plus_login()')
-    ld = Login(window, aw, email, saved_password, remember_credentials)
+    ld = Login(window, aw, email, saved_password, server_url, remember_credentials)
     ld.setWindowTitle('plus')
     ld.setWindowFlags(Qt.WindowType.Sheet)
     ld.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
     res:int = ld.exec()
     login_processed:str|None = ld.login.strip() if ld.login is not None else None
-    return login_processed, ld.passwd, ld.remember, res
+    return login_processed, ld.passwd, ld.server_url, ld.remember, res

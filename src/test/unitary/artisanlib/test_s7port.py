@@ -610,6 +610,22 @@ class TestS7PortWriteOperations:
         mock_set_int.assert_called_once_with(bytearray([0x00, 0x00]), 0, 1234)
         mock_s7_client.write_area.assert_called_once()
 
+    def test_write_byte_success(self, s7port_instance: s7port, mock_s7_client: Mock) -> None:
+        """Test successful byte writing."""
+        # Arrange
+        s7port_instance.plc = mock_s7_client
+        s7port_instance.is_connected = True
+        s7port_instance.commError = False
+        s7port_instance.initArrays()
+
+        # Act
+        s7port_instance.writeByte(1, 5, 10, 0x0B)
+
+        # Assert
+        mock_s7_client.write_area.assert_called_once()
+        args = mock_s7_client.write_area.call_args.args
+        assert args[1:] == (5, 10, bytearray([0x0B]))
+
     @patch('artisanlib.s7port.set_real')
     def test_write_float_success(
         self, mock_set_real: Mock, s7port_instance: s7port, mock_s7_client: Mock

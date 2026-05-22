@@ -25,9 +25,11 @@
 from PyQt6.QtCore import QCoreApplication, QObject, QThread, pyqtSlot, pyqtSignal, QSemaphore
 from PyQt6.QtWidgets import QApplication
 
-from artisanlib.util import getDirectory
-from plus import config, util, roast, connection, sync, controller
+from artisanlib.util import getDirectory, serialize
+from plus import config, util, roast, connection, sync, controller, register
 import threading
+import os
+import tempfile
 import time
 import datetime
 import requests.models
@@ -53,6 +55,91 @@ queue:'persistqueue.SQLiteQueue|None' = None # holdes the persistqueue.SQLiteQue
 #   data  : the data dictionary that will be send in the body as JSON
 #   verb  : the HTTP verb to be used (POST or PUT)
 
+PROFILE_UPLOAD_ITEM_TYPE: Final[str] = 'profile_upload'
+PROFILE_UPLOAD_FIELD_NAME: Final[str] = 'file'
+
+
+def is_profile_upload_item(item:dict[str, Any]) -> bool:
+    return bool(item.get('type') == PROFILE_UPLOAD_ITEM_TYPE)
+
+
+def get_response_json(r:requests.models.Response|None) -> dict[str, Any]|None:
+    if r is None or r.status_code == 204:
+        return None
+    content_type = r.headers.get('content-type', '').strip()
+    if not content_type.startswith('application/json'):
+        return None
+    try:
+        res = r.json()
+        return res if isinstance(res, dict) else None
+    except json.decoder.JSONDecodeError as e:
+        if not e.doc:
+            _log.error('Empty response.')
+        else:
+            _log.error("Decoding error at char %s (line %s, col %s): '%s'", e.pos, e.lineno, e.colno, e.doc)
+    except ValueError:
+        _log.error('Response content is not valid JSON')
+    except Exception as e:  # pylint: disable=broad-except
+        _log.exception(e)
+    return None
+
+
+def extract_authoritative_roast_id(response:dict[str, Any]|None, fallback:str|None) -> str|None:
+    fallback_normalized = util.normalizeUUID(fallback)
+    if response is None:
+        return fallback_normalized
+    for key in ('roast_id', 'id'):
+        value = response.get(key)
+        if isinstance(value, str) and value != '':
+            return util.normalizeUUID(value)
+    result = response.get('result')
+    if isinstance(result, dict):
+        for key in ('roast_id', 'id'):
+            value = result.get(key)
+            if isinstance(value, str) and value != '':
+                return util.normalizeUUID(value)
+        roast_result = result.get('roast')
+        if isinstance(roast_result, dict):
+            for key in ('roast_id', 'id'):
+                value = roast_result.get(key)
+                if isinstance(value, str) and value != '':
+                    return util.normalizeUUID(value)
+    return fallback_normalized
+
+
+def capture_profile_upload_source(roast_id:str) -> tuple[str|None, bool]:
+    roast_id = util.normalizeUUID(roast_id) or roast_id
+    aw = config.app_window
+    if aw is None:
+        return None, False
+
+    if not aw.qmc.safesaveflag:
+        try:
+            if aw.curFile is not None and os.path.exists(aw.curFile):
+                return aw.curFile, False
+        except Exception as e:  # pylint: disable=broad-except
+            _log.exception(e)
+        try:
+            profile_path = register.getPath(roast_id)
+            if profile_path is not None and os.path.exists(profile_path):
+                return profile_path, False
+        except Exception as e:  # pylint: disable=broad-except
+            _log.exception(e)
+
+    try:
+        profile = aw.getProfile()
+        fd, tmp_path = tempfile.mkstemp(
+            prefix=f'artisan-plus-{roast_id}-',
+            suffix=f'.{config.profile_ext}',
+        )
+        os.close(fd)
+        serialize(tmp_path, profile)
+        return tmp_path, True
+    except Exception as e:  # pylint: disable=broad-except
+        _log.exception(e)
+        return None, False
+
+
 worker:'Worker|None' = None
 worker_thread:QThread|None = None
 
@@ -74,9 +161,12 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
     def addSyncItem(item:dict[str, Any]) -> None:
         # successfully transmitted, we add/update the roasts UUID sync-cache
         if 'roast_id' in item['data'] and 'modified_at' in item['data']:
+            roast_id = util.normalizeUUID(item['data']['roast_id'])
+            if roast_id is None:
+                return
             # we update the plus status icon
             sync.addSync(
-                item['data']['roast_id'],
+                roast_id,
                 util.ISO86012epoch(item['data']['modified_at']),
             )
             aw = config.app_window
@@ -104,6 +194,8 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                         '-> worker processing item: %s', item
                     )
                     iters = 1 # by default, if no modified_at timestamp is given (no roast; maybe just a lock schedule message) thus we don't retry this
+                    requeued = False
+                    profile_item = is_profile_upload_item(item)
                     if 'url' not in item:
                         # items without an url are discarded
                         iters = 0
@@ -112,7 +204,7 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                         if (config.queue_discard_after > 0 and item_age > config.queue_discard_after):
                             # old item scheduled to be removed from the queue
                             iters = 0
-                            _log.debug('-> expired item %s removed from queue (%s min)',item['data']['roast_id'],int(round(item_age/60)))
+                            _log.debug('-> expired item %s removed from queue (%s min)',item['data'].get('roast_id', '?'),int(round(item_age/60)))
                         else:
                             iters = config.queue_retries + 1
                     while iters > 0:
@@ -121,12 +213,54 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                         )
                         r:requests.models.Response|None = None
                         try:
-                            # we upload only full roast records, or partial updates
-                            # in case they are under sync
-                            # (registered in the sync cache)
-                            if is_full_roast_record(item['data']) or (
+                            if profile_item:
+                                roast_id = util.normalizeUUID(item['data'].get('roast_id')) if 'data' in item else None
+                                if roast_id is None:
+                                    iters = 0
+                                elif sync.getSync(roast_id) is None:
+                                    _log.warning('profile upload skipped for roast_id=%s: sync key missing', roast_id)
+                                    if full_roast_in_queue(roast_id):
+                                        _log.debug('requeue profile upload for roast_id=%s while full roast is still queued', roast_id)
+                                        queue.put(item)
+                                        requeued = True
+                                    iters = 0
+                                else:
+                                    profile_path = item['data'].get('profile_path') if 'data' in item else None
+                                    if not isinstance(profile_path, str) or not os.path.exists(profile_path):
+                                        aw = config.app_window
+                                        if aw is not None:
+                                            aw.sendmessage(
+                                                QApplication.translate(
+                                                    'Plus',
+                                                    'Roast summary uploaded, but full profile upload file is unavailable'
+                                                )
+                                            )  # @UndefinedVariable
+                                        iters = 0
+                                    else:
+                                        controller.connect(
+                                            clear_on_failure=False, interactive=False
+                                        )
+                                        r = connection.sendFile(
+                                            item['url'], profile_path, field_name=PROFILE_UPLOAD_FIELD_NAME
+                                        )
+                                        r.raise_for_status()
+                                        aw = config.app_window
+                                        if aw is not None:
+                                            aw.sendmessage(
+                                                QApplication.translate(
+                                                    'Plus',
+                                                    'Full roast profile uploaded to {}'
+                                                ).format(config.app_name)
+                                            )  # @UndefinedVariable
+                                        if item.get('cleanup_profile_path'):
+                                            try:
+                                                os.remove(profile_path)
+                                            except OSError:
+                                                pass
+                                        iters = 0
+                            elif is_full_roast_record(item['data']) or (
                                 'roast_id' in item['data']
-                                and sync.getSync(item['data']['roast_id'])
+                                and sync.getSync(util.normalizeUUID(item['data']['roast_id']) or item['data']['roast_id'])
                             ):
                                 controller.connect(
                                     clear_on_failure=False, interactive=False
@@ -143,35 +277,33 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                             'Roast successfully uploaded to {}'
                                         ).format(config.app_name)
                                     )  # @UndefinedVariable
-                                # successfully transmitted, we add/update the
-                                # roasts UUID sync-cache
                                 self.addSyncItem(item)
-                                # if current roast was just successfully uploaded,
-                                # we set the syncRecordHash to the full sync record
-                                # to track further edits. Note we take
-                                # a fresh (full) SyncRecord here as the uploaded
-                                # record might contain only changed attributes
                                 sr, h = roast.getSyncRecord()
-                                if item['data']['roast_id'] == sr['roast_id']:
+                                if util.normalizeUUID(item['data']['roast_id']) == util.normalizeUUID(sr['roast_id']):
                                     sync.setSyncRecordHash(sync_record=sr, h=h)
-                                try:
-                                    if r.status_code != 204 and r.headers['content-type'].strip().startswith('application/json'):
-                                        response = r.json()
-                                        if response:
-                                            rlimit,rused,pu,notifications, machines = util.extractAccountState(response)
-                                            self.replySignal.emit(rlimit,rused,pu,notifications,machines)
 
-                                except json.decoder.JSONDecodeError as e:
-                                    if not e.doc:
-                                        _log.error('Empty response.')
-                                    else:
-                                        _log.error("Decoding error at char %s (line %s, col %s): '%s'", e.pos, e.lineno, e.colno, e.doc)
-                                except ValueError:
-                                    _log.error('Response content is not valid JSON')
-                                except Exception as e:  # pylint: disable=broad-except
-                                    _log.exception(e)
+                                response = get_response_json(r)
+                                if response:
+                                    rlimit,rused,pu,notifications, machines = util.extractAccountState(response)
+                                    self.replySignal.emit(rlimit,rused,pu,notifications,machines)
+
+                                if is_full_roast_record(item['data']) and config.profile_upload_enabled():
+                                    profile_path = item.get('profile_path')
+                                    authoritative_roast_id = extract_authoritative_roast_id(
+                                        response,
+                                        item['data'].get('roast_id'),
+                                    )
+                                    if (
+                                        isinstance(profile_path, str)
+                                        and os.path.exists(profile_path)
+                                        and authoritative_roast_id is not None
+                                    ):
+                                        addProfileUpload(
+                                            authoritative_roast_id,
+                                            profile_path,
+                                            bool(item.get('cleanup_profile_path', False)),
+                                        )
                             elif 'url' in item and item['url'].startswith(config.lock_schedule_url):
-                                # this is not be a roast record, but a lock schedule message to be send to the server
                                 controller.connect(
                                     clear_on_failure=False, interactive=False
                                 )
@@ -179,20 +311,9 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                     item['url'], item['data'], item['verb']
                                 )
                                 r.raise_for_status()
-# maybe to much noise:
-#                                if config.app_window is not None:
-#                                    config.app_window.sendmessage(
-#                                        QApplication.translate(
-#                                            'Plus',
-#                                            'Roast schedule of today locked on {}'
-#                                        ).format(config.app_name)
-#                                    )  # @UndefinedVariable
 
-                            # partial sync updates for roasts not registered
-                            # for syncing are ignored
                             iters = 0
                         except RequestsConnectionError as e:
-                            # DNS failure, refused connection
                             try:
                                 if controller.is_connected():
                                     _log.debug(
@@ -200,18 +321,13 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                          ' disconnecting: %s'),
                                         e,
                                     )
-                                    # we disconnect
                                     controller.disconnect(
                                         remove_credentials=False, stop_queue=True
                                     )
                             except Exception as ex:  # pylint: disable=broad-except
                                 _log.exception(ex)
-                            # we don't change the iter, but retry to connect after
-                            # a delay in the next iteration once the queue got restarted
                             time.sleep(config.queue_retry_delay)
                         except Exception as e:  # pylint: disable=broad-except
-                            # could be a requests.exceptions.Timeout or requests.exceptions.TooManyRedirects
-                            # or any HTTP error like 401
                             _log.debug('-> task failed: %s', e)
                             if r is not None:
                                 _log.debug(
@@ -220,8 +336,8 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                             else:
                                 _log.debug('-> no status code')
                             if (
-                                r is not None and r.status_code == 401 # 401: Unauthorized
-                            ):  # authentication failed
+                                r is not None and r.status_code == 401
+                            ):
                                 try:
                                     if controller.is_connected():
                                         _log.debug(
@@ -229,9 +345,6 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                              ' disconnecting: %s'),
                                             e,
                                         )
-                                        # we disconnect, but keep the queue running
-                                        # to let it automatically reconnect
-                                        # if possible
                                         controller.disconnect(
                                             remove_credentials=False,
                                             stop_queue=False,
@@ -239,23 +352,24 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                 except Exception as ex:  # pylint: disable=broad-except
                                     _log.exception(ex)
                                 iters = iters - 1
-                                # we retry to connect after a delay in the next
-                                # iteration
                                 time.sleep(config.queue_retry_delay)
                             elif (
                                 r is not None and r.status_code == 409
-                            ):  # conflict
-                                # we don't retry, but remove the task
-                                # as it is faulty
+                            ):
                                 iters = 0
                             else:
-                                # 500 internal server error, 429 Client Error:
-                                # Too Many Requests, 404 Client Error: Not Found
-                                # or others something went wrong we don't mark
-                                # this task as done and retry
                                 iters = iters - 1
                                 time.sleep(2*config.queue_retry_delay)
-                    # we call task_done to remove the item from the queue
+
+                            if profile_item and not requeued and iters == 0:
+                                aw = config.app_window
+                                if aw is not None:
+                                    aw.sendmessage(
+                                        QApplication.translate(
+                                            'Plus',
+                                            'Roast summary uploaded, but full profile upload failed'
+                                        )
+                                    )  # @UndefinedVariable
                     queue.task_done()
                     item = None
                     _log.debug(
@@ -344,6 +458,7 @@ def stop() -> None:  # pylint: disable=global-statement
 # the sync cache as they are not yet uploaded successfully to the server as their initial item
 # is still stuck in the outgoing queue
 def full_roast_in_queue(roast_id: str) -> bool:
+    roast_id = util.normalizeUUID(roast_id) or roast_id
     import persistqueue
     if hasattr(persistqueue, 'SQLiteQueue'):
         q = None
@@ -355,7 +470,7 @@ def full_roast_in_queue(roast_id: str) -> bool:
                 item = q.get(block=False)
                 if 'data' in item:
                     r = item['data']
-                    if is_full_roast_record(r) and roast_id == r['roast_id']:
+                    if is_full_roast_record(r) and roast_id == (util.normalizeUUID(r['roast_id']) or r['roast_id']):
                         # there is a full roast record already in queue
                         break
             del q
@@ -376,15 +491,19 @@ def is_full_roast_record(r:dict[str, Any]) -> bool:
 
 # holds the last queued roast item
 last_queued_roast_item:dict[str, Any]|None = None
+last_queued_profile_item:tuple[str, str, int, int]|None = None
 
 
 # adds given item to the outgoing queue to be send to the server, but ignores items that contain no additional information over the item just queued before (last_queued_roast).
 # NOTE: it can happen that the new item to be queued (queued on SAVE/AUTOSAVE) is just an update of a previous queued roast but not yet send roast (queued on DROP) and thus the
 #   mechanism (via sync.py cached_sync_record_hash/cached_sync_record) to just send updates does not yet applies.
-def queue_roast_item(roast_item:dict[str, Any]) -> bool:
+def queue_roast_item(
+    roast_item:dict[str, Any],
+    profile_path:str|None = None,
+    cleanup_profile_path:bool = False,
+) -> bool:
     global last_queued_roast_item  # pylint: disable=global-statement
 
-    # is roast1 a subset of roast2 modulo the attribute 'modified_at'?
     def roast_subset_of(roast1:dict[str, Any], roast2:dict[str, Any]) -> bool:
         return all(item in roast2.items() for item in roast1.items() if item[0] != 'modified_at')
 
@@ -394,8 +513,12 @@ def queue_roast_item(roast_item:dict[str, Any]) -> bool:
             '-> roast not queued as queue'
                 ' is not running')
     elif last_queued_roast_item is None or not roast_subset_of(roast_item, last_queued_roast_item):
+        queue_item:dict[str, Any] = {'url': config.roast_url, 'data': roast_item, 'verb': 'POST'}
+        if profile_path is not None:
+            queue_item['profile_path'] = profile_path
+            queue_item['cleanup_profile_path'] = cleanup_profile_path
         queue.put(
-            {'url': config.roast_url, 'data': roast_item, 'verb': 'POST'},
+            queue_item,
             # timeout=config.queue_put_timeout
             # sql queue does not feature a timeout
         )
@@ -403,6 +526,49 @@ def queue_roast_item(roast_item:dict[str, Any]) -> bool:
         last_queued_roast_item = roast_item
 
     return queued
+
+
+def addProfileUpload(
+    roast_id:str|None,
+    profile_path:str|None,
+    cleanup_profile_path:bool = False,
+) -> bool:
+    roast_id = util.normalizeUUID(roast_id)
+    global last_queued_profile_item  # pylint: disable=global-statement
+
+    if (
+        not config.profile_upload_enabled()
+        or queue is None
+        or roast_id is None
+        or roast_id == ''
+        or profile_path is None
+    ):
+        return False
+
+    profile_path = os.path.abspath(profile_path)
+    if not os.path.exists(profile_path):
+        return False
+
+    stat = os.stat(profile_path)
+    signature = (roast_id, profile_path, int(stat.st_mtime_ns), int(stat.st_size))
+    if last_queued_profile_item == signature:
+        return False
+
+    queue.put(
+        {
+            'type': PROFILE_UPLOAD_ITEM_TYPE,
+            'url': config.get_profile_upload_url(roast_id),
+            'data': {
+                'roast_id': roast_id,
+                'profile_path': profile_path,
+                'modified_at': util.epoch2ISO8601(time.time()),
+            },
+            'verb': 'POST',
+            'cleanup_profile_path': cleanup_profile_path,
+        },
+    )
+    last_queued_profile_item = signature
+    return True
 
 # called on completed roasts with roast data
 # if roast_record is given, we assume an update is queued, otherwise a new
@@ -464,7 +630,15 @@ def addRoast(roast_record:dict[str, Any]|None = None, unsynced:bool=False) -> No
                     rr = r
                 # send zero values like 0 and '' for corresponding attributes as None to allow the server to clean those up
                 rr = sync.suppress_zero_values(rr)
-                queued:bool = queue_roast_item(rr)
+                profile_path:str|None = None
+                cleanup_profile_path:bool = False
+                if is_full_roast_record(rr) and config.profile_upload_enabled():
+                    profile_path, cleanup_profile_path = capture_profile_upload_source(rr['roast_id'])
+                queued:bool = queue_roast_item(
+                    rr,
+                    profile_path=profile_path,
+                    cleanup_profile_path=cleanup_profile_path,
+                )
                 if queued:
                     _log.debug('-> roast queued up')
                     if 'roast_id' in rr:

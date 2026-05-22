@@ -19,6 +19,7 @@ import sys
 import math
 import platform
 import logging
+import threading
 from collections.abc import Callable
 from typing import override, Final, cast, Any, TYPE_CHECKING
 
@@ -40,6 +41,7 @@ import plus.stock
 import plus.controller
 import plus.queue
 import plus.blend
+import plus.register
 
 #from artisanlib.suppress_errors import suppress_stdout_stderr
 from artisanlib.util import (deltaLabelUTF8, stringfromseconds,stringtoseconds, toInt, toFloat, abbrevString,
@@ -541,6 +543,7 @@ class editGraphDlg(ArtisanResizeablDialog):
     scaleWeightUpdated = pyqtSignal(float)
     connectScaleSignal = pyqtSignal()
     readScaleSignal = pyqtSignal()
+    referencesReady = pyqtSignal(int, list)  # (generation, items) — emitted from background fetch thread
 
     # if start_recording_on_exit is set, on leaving the dialog with OK, the recording is started in case plus is connected and beans have been set
     # and the flags "Open on CHARGE" and "Open on DROP" are not set
@@ -625,6 +628,7 @@ class editGraphDlg(ArtisanResizeablDialog):
         self.template_uuid:str|None = None
         self.template_batchnr:int|None = None
         self.template_batchprefix:str|None = None
+        self.plus_templates:list[plus.stock.ScheduledItem] = []  # schedule items matching current coffee/blend + machine
 
         # energy variables (explicitly define constructors)
         self.curvenames:list[str] = []
@@ -1427,7 +1431,19 @@ class editGraphDlg(ArtisanResizeablDialog):
             textLayout.addLayout(selectedLineLayout,4,1)
             textLayout.addWidget(plusCoffeeslabel,5,0)
             textLayout.addLayout(plusLine,5,1)
-            textLayoutPlusOffset = 2 # to insert the plus widget row, we move the remaining ones one step lower
+            # reference/template row
+            self.plusReferencelabel = QLabel('<b>' + QApplication.translate('Label', 'Reference') + '</b>')
+            self.plusReferencelabel.setToolTip(QApplication.translate('Tooltip', 'Select a reference roast template'))
+            self.plus_templates_combo = MyQComboBox(self)
+            self.plus_templates_combo.setToolTip(QApplication.translate('Tooltip', 'Select a reference roast template'))
+            self.plus_templates_combo.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Maximum)
+            self.plus_templates_combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+            self.plus_templates_combo.setMinimumContentsLength(20)
+            self.plus_templates_combo.currentIndexChanged.connect(self.templateSelectionChanged)
+            self.referencesReady.connect(self._onReferencesFetched)
+            textLayout.addWidget(self.plusReferencelabel,6,0)
+            textLayout.addWidget(self.plus_templates_combo,6,1)
+            textLayoutPlusOffset = 3 # to insert the plus widget rows, we move the remaining ones one step lower
         else:
             textLayoutPlusOffset = 0
         textLayout.addWidget(self.template_line,2,1)
@@ -2141,6 +2157,7 @@ class editGraphDlg(ArtisanResizeablDialog):
 
                 self.markPlusCoffeeFields(mark_coffee_fields)
                 self.updatePlusSelectedLine()
+                self.populateTemplateCombo()
             except Exception as e: # pylint: disable=broad-except
                 _log.exception(e)
             finally:
@@ -2346,6 +2363,7 @@ class editGraphDlg(ArtisanResizeablDialog):
             self.fillCoffeeData(selected_coffee,prev_coffee_label,prev_blend_label)
         self.checkWeightIn()
         self.updatePlusSelectedLine()
+        self.populateTemplateCombo()
 
     def getBlendDictCurrentWeight(self, blend:tuple[str, tuple[plus.stock.Blend, plus.stock.StockItem, float, dict[str, str], float, list[tuple[float, plus.stock.Blend]]]]) -> plus.stock.Blend:
         if self.weightinedit.text() != '':
@@ -2404,6 +2422,105 @@ class editGraphDlg(ArtisanResizeablDialog):
 
         self.checkWeightIn()
         self.updatePlusSelectedLine()
+        self.populateTemplateCombo()
+
+    # fallback: returns normalized template dicts from scheduler (used when remote API is not available)
+    def _getTemplatesFromSchedule(self) -> list[dict]:
+        coffee_hr_id:str|None = self.plus_coffee_selected
+        blend_hr_id:str|None = (self.plus_blend_selected_spec.get('hr_id') if self.plus_blend_selected_spec is not None else None)
+        machine_name:str = self.aw.qmc.roastertype_setup.strip().lower()
+        results:list[dict] = []
+        for si in plus.stock.getSchedule():
+            template_str = si.get('template')
+            if not template_str:
+                continue
+            coffee_match = (coffee_hr_id is not None and si.get('coffee') == coffee_hr_id)
+            blend_match  = (blend_hr_id  is not None and si.get('blend')  == blend_hr_id)
+            if not (coffee_match or blend_match):
+                continue
+            si_machine = (si.get('machine') or '').strip().lower()
+            if si_machine and machine_name and si_machine != machine_name:
+                continue
+            normalized = plus.util.normalizeUUID(template_str)
+            if normalized:
+                label = (si.get('title') or '').strip() or normalized[:8]
+                results.append({'uuid': normalized, 'label': label})
+        return results
+
+    def populateTemplateCombo(self) -> None:
+        if not hasattr(self, 'plus_templates_combo'):
+            return
+        self.template_uuid = None
+        self.template_file = None
+        coffee_hr_id:str|None = self.plus_coffee_selected
+        blend_hr_id:str|None = (self.plus_blend_selected_spec.get('hr_id') if self.plus_blend_selected_spec is not None else None)
+        _log.info('populateTemplateCombo: coffee=%s blend=%s remote=%s', coffee_hr_id, blend_hr_id, plus.config.remote_profile_fetch_enabled())
+        if not (coffee_hr_id or blend_hr_id):
+            # nothing selected — show empty disabled combo
+            self.plus_templates = []
+            self.plus_templates_combo.blockSignals(True)
+            self.plus_templates_combo.clear()
+            self.plus_templates_combo.addItem('')
+            self.plus_templates_combo.setEnabled(False)
+            self.plus_templates_combo.blockSignals(False)
+            return
+        if plus.config.remote_profile_fetch_enabled():
+            # fetch from dedicated references API in background thread
+            machine:str = self.aw.qmc.roastertype_setup.strip()
+            self._template_fetch_gen = getattr(self, '_template_fetch_gen', 0) + 1
+            gen:int = self._template_fetch_gen
+            self.plus_templates_combo.blockSignals(True)
+            self.plus_templates_combo.clear()
+            self.plus_templates_combo.addItem(QApplication.translate('Label', '...'))
+            self.plus_templates_combo.setEnabled(False)
+            self.plus_templates_combo.blockSignals(False)
+            def _fetch() -> None:
+                items = plus.stock.getReferencesFromAPI(coffee_hr_id, blend_hr_id, machine or None)
+                _log.info('references fetch complete: %d items (gen=%d)', len(items), gen)
+                self.referencesReady.emit(gen, items)
+            threading.Thread(target=_fetch, daemon=True).start()
+        else:
+            # fallback: use scheduler ScheduledItems
+            templates = self._getTemplatesFromSchedule()
+            self._applyTemplatesToCombo(templates)
+
+    @pyqtSlot(int, list)
+    def _onReferencesFetched(self, gen:int, items:list) -> None:
+        try:
+            _log.info('_onReferencesFetched: gen=%d current=%d items=%d', gen, getattr(self, '_template_fetch_gen', -1), len(items))
+            if gen != getattr(self, '_template_fetch_gen', 0):
+                return  # stale result from a previous coffee selection
+            if not hasattr(self, 'plus_templates_combo'):
+                return
+            self._applyTemplatesToCombo(items)
+        except Exception as e:  # pylint: disable=broad-except
+            _log.exception(e)  # dialog may have been closed before callback fired
+
+    def _applyTemplatesToCombo(self, templates:list[dict]) -> None:
+        self.plus_templates = templates
+        self.plus_templates_combo.blockSignals(True)
+        self.plus_templates_combo.clear()
+        self.plus_templates_combo.addItem('')
+        for t in templates:
+            self.plus_templates_combo.addItem(t.get('label', ''))
+        self.plus_templates_combo.setCurrentIndex(0)
+        self.plus_templates_combo.setEnabled(len(templates) > 0)
+        self.plus_templates_combo.blockSignals(False)
+
+    @pyqtSlot(int)
+    def templateSelectionChanged(self, n:int) -> None:
+        if n > 0 and self.plus_templates and n - 1 < len(self.plus_templates):
+            t = self.plus_templates[n - 1]
+            uuid_str:str = t.get('uuid', '')
+            if uuid_str:
+                self.template_uuid = uuid_str  # already normalized hex
+                self.template_file = plus.register.getPath(self.template_uuid)
+            else:
+                self.template_uuid = None
+                self.template_file = None
+        else:
+            self.template_uuid = None
+            self.template_file = None
 
     # keeps the weightoutdefectsedit placeholder text set along the weightoutedit text
     def weightouteditSetText(self, txt:str) -> None:

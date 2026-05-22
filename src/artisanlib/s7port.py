@@ -426,6 +426,34 @@ class s7port:
             if self.aw.seriallogflag:
                 self.aw.addserial(f'S7 writeInt({area},{dbnumber},{start},{value})')
 
+    def writeByte(self, area:int, dbnumber:int, start:int, value:int) -> None:
+        _log.debug('writeByte(%d,%d,%d,%d)',area,dbnumber,start,value)
+        try:
+            #### lock shared resources #####
+            self.COMsemaphore.acquire(1)
+            self.connect()
+            if self.isConnected():
+                self.waitToEnsureMinTimeBetweenRequests()
+                assert self.plc is not None
+                assert self.areas is not None
+                ba = bytearray([int(value) & 0xFF])
+                self.waitToEnsureMinTimeBetweenRequests()
+                self.plc.write_area(self.areas[area],dbnumber,start,ba)
+            else:
+                self.commError = True
+                self.aw.qmc.adderror(QApplication.translate('Error Message','S7 Error: connecting to PLC failed'))
+        except Exception as e: # pylint: disable=broad-except
+            _log.info('writeByte(%d,%d,%d,%d) failed',area,dbnumber,start,value)
+            _log.debug(e)
+            if self.aw.qmc.flagon:
+                _, _, exc_tb = sys.exc_info()
+                self.aw.qmc.adderror(QApplication.translate('Error Message','S7 Communication Error') + ' writeByte: ' + str(e),getattr(exc_tb, 'tb_lineno', '?'))
+        finally:
+            if self.COMsemaphore.available() < 1:
+                self.COMsemaphore.release(1)
+            if self.aw.seriallogflag:
+                self.aw.addserial(f'S7 writeByte({area},{dbnumber},{start},{value})')
+
     def maskWriteInt(self, area:int, dbnumber:int, start:int, and_mask:int, or_mask:int, value:int) -> None:
         _log.debug('maskWriteInt(%d,%d,%d,%s,%s,%d)',area,dbnumber,start,and_mask,or_mask,value)
         try:

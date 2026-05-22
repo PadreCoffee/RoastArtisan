@@ -239,8 +239,8 @@ if sys.platform.startswith('darwin'):
 light_blue: Final[str] = '#4c97c3' # buttons CONTROL & RESET (was #2298c7)
 dark_blue: Final[str] = '#3979ae' # buttons ON & START (was #147bb3)
 
-appGuid:Final[str] = '9068bd2fa8e54945a6be1f1a0a589e92'
-viewerAppGuid:Final[str] = '9068bd2fa8e54945a6be1f1a0a589e93'
+appGuid:Final[str] = '7c8923c82fc74f9bb28b94eb26ea6f10'
+viewerAppGuid:Final[str] = '7c8923c82fc74f9bb28b94eb26ea6f11'
 
 class Artisan(QtSingleApplication):
 
@@ -629,9 +629,9 @@ try:
             _datadir = getDataDirectory()
             if _datadir is not None:
                 if app.artisanviewerMode:
-                    conf['handlers']['file']['filename'] = os.path.join(_datadir,'artisanViewer.log')
+                    conf['handlers']['file']['filename'] = os.path.join(_datadir,'roastartisanViewer.log')
                 else:
-                    conf['handlers']['file']['filename'] = os.path.join(_datadir,'artisan.log')
+                    conf['handlers']['file']['filename'] = os.path.join(_datadir,'roastartisan.log')
         except Exception: # pylint: disable=broad-except
             pass
         logging.config.dictConfig(conf)
@@ -675,7 +675,7 @@ _log: Final[logging.Logger] = logging.getLogger(__name__)
 if multiprocessing.current_process().name == 'MainProcess':
     _log.info(
         '%s v%s (%s, %s)',
-        ('ArtisanViewer' if app.artisanviewerMode else 'Artisan'),
+        (application_viewer_name if app.artisanviewerMode else application_name),
         str(__version__),
         str(__revision__),
         str(__build__),
@@ -694,7 +694,7 @@ else:
 if platform.system().startswith('Windows'):
     # on Windows we use the Fusion style per default which supports the dark mode
     app.setStyle('Fusion')
-    app.setWindowIcon(QIcon(os.path.join(getAppPath(),'artisan.png')))
+    app.setWindowIcon(QIcon(os.path.join(getAppPath(),'roastartisan.png')))
 
 from artisanlib.s7port import s7port
 from artisanlib.wsport import wsport
@@ -1451,7 +1451,7 @@ class ApplicationWindow(QMainWindow):
     updateScheduleSignal = pyqtSignal()
     disconnectPlusSignal = pyqtSignal()
 
-    __slots__ = [ 'locale_str', 'app', 'superusermode', 'sample_loop_running', 'time_stopped', 'plus_account', 'plus_account_id', 'plus_remember_credentials', 'plus_email', 'plus_language', 'plus_subscription', 'percent_decimals',
+    __slots__ = [ 'locale_str', 'app', 'superusermode', 'sample_loop_running', 'time_stopped', 'plus_account', 'plus_account_id', 'plus_remember_credentials', 'plus_email', 'plus_server_url', 'plus_language', 'plus_subscription', 'percent_decimals',
         'plus_paidUntil', 'plus_rlimit', 'plus_used', 'plus_readonly', 'plus_user_id', 'appearance', 'mpl_fontproperties', 'full_screen_mode_active', 'processingKeyEvent', 'quickEventShortCut',
         'eventaction_running_threads', 'curFile', 'MaxRecentFiles', 'recentFileActs', 'recentSettingActs',
         'recentThemeActs', 'applicationDirectory', 'helpdialog', 'redrawTimer', 'lastLoadedProfile', 'lastLoadedBackground', 'LargeScaleLCDsFlag', 'largeScaleLCDs_dialog',
@@ -1554,6 +1554,7 @@ class ApplicationWindow(QMainWindow):
         self.plus_user_id:str|None = None # holds the UUID of the last logged in user; preserved over restart
         self.plus_remember_credentials:bool = True # store plus account credentials in systems keychain
         self.plus_email:str|None = None # if self.plus_remember_credentials is ticked, we remember here the login to be pre-set as plus_account in the dialog
+        self.plus_server_url:str = plus.config.server_url # persisted server URL for the Plus-compatible backend
         self.plus_language:str = 'en' # one of ["en", "de", "it", ..] indicates the language setting of the plus_account used on the artisan.plus platform,
                 # used in links back to objects on the platform (see plus/util.py#storeLink() and similars)
         self.plus_subscription:str|None = None # one of [None, "HOME", "PRO"]
@@ -4975,19 +4976,19 @@ class ApplicationWindow(QMainWindow):
         if self.plus_email is not None:
             message['From'] = self.plus_email
         message['To'] = f"{'logfile'}@{'artisan.plus'}"
-        message['Subject'] = 'artisan log'
+        message['Subject'] = 'roastartisan log'
         message['X-Unsent'] = '1'
         # message["X-Uniform-Type-Identifier"] = "com.apple.mail-draft"
         message.attach(
             MIMEText(
-                f"Please find attached the log files written by Artisan!\nPlease forward this email to {message['To']}\n--\n",
+                f"Please find attached the log files written by RoastArtisan!\nPlease forward this email to {message['To']}\n--\n",
                 'plain',
             )
         )
         try:
             directory = getDataDirectory()
             if directory is not None:
-                for log_file_name in ['artisan.log', 'artisanViewer.log']:
+                for log_file_name in ['roastartisan.log', 'roastartisanViewer.log']:
                     try:
                         with open(os.path.join(directory, os.path.normpath(log_file_name)), 'rb') as attachment:
                             # Add file as application/octet-stream
@@ -10031,6 +10032,7 @@ class ApplicationWindow(QMainWindow):
                     # getDBfloat(<dbnumber>,<start>)
                     #-
                     # setDBbool(<dbnumber>,<start>,<index>,<value>)
+                    # setDBbyte(<dbnumber>,<start>,<value>)
                     # setDBint(<dbnumber>,<start>,<value>)
                     # msetDBint(<dbnumber>,<start>,andMaks,orMask,value)
                     # setDBfloat(<dbnumber>,<start>,<value>)
@@ -10052,6 +10054,12 @@ class ApplicationWindow(QMainWindow):
                                 try:
                                     dbnr,s,v_str = cs[len('setDBint('):-1].split(',')
                                     self.s7.writeInt(5,int(dbnr),int(s),eval(v_str)) # pylint: disable=eval-used
+                                except Exception as e: # pylint: disable=broad-except
+                                    _log.exception(e)
+                            elif cs.startswith('setDBbyte(') and len(cs) > 15:
+                                try:
+                                    dbnr,s,v_str = cs[len('setDBbyte('):-1].split(',')
+                                    self.s7.writeByte(5,int(dbnr),int(s),int(eval(v_str))) # pylint: disable=eval-used
                                 except Exception as e: # pylint: disable=broad-except
                                     _log.exception(e)
                             elif cs.startswith('msetDBint(') and len(cs) > 16:
@@ -14089,6 +14097,50 @@ class ApplicationWindow(QMainWindow):
             except Exception as e: # pylint: disable=broad-except
                 _log.exception(e)
 
+    def fetchRemoteBackgroundProfile(self, UUID:str) -> str|None:
+        if not plus.config.remote_profile_fetch_enabled() or self.plus_account is None:
+            return None
+        try:
+            response = plus.connection.getData(plus.config.get_profile_data_url(UUID))
+            if response is None:
+                _log.warning('remote background fetch returned no response for %s', UUID)
+                return None
+            if response.status_code != 200:
+                _log.warning('remote background fetch failed for %s with status %s', UUID, response.status_code)
+                return None
+            content_type = response.headers.get('content-type', '').strip().lower()
+            if not content_type.startswith('application/json'):
+                _log.warning('remote background fetch failed for %s with content-type %s', UUID, content_type)
+                return None
+            payload = response.json()
+            profile:dict[str, Any]|None
+            if isinstance(payload, dict) and 'result' in payload and isinstance(payload['result'], dict):
+                profile = cast(dict[str, Any], payload['result'])
+            elif isinstance(payload, dict) and 'data' in payload and isinstance(payload['data'], dict):
+                profile = cast(dict[str, Any], payload['data'])
+            elif isinstance(payload, dict):
+                profile = cast(dict[str, Any], payload)
+            else:
+                profile = None
+            if profile is None:
+                _log.warning('remote background fetch returned invalid payload for %s', UUID)
+                return None
+            if not all(k in profile for k in ('timex', 'temp1', 'temp2')):
+                _log.warning('remote background fetch returned incomplete profile for %s', UUID)
+                return None
+            if plus.config.uuid_tag not in profile:
+                profile[plus.config.uuid_tag] = UUID
+            import tempfile
+            fd, temp_path = tempfile.mkstemp(prefix=f'roastartisan-background-{UUID[:12]}-', suffix=f'.{plus.config.profile_ext}')
+            os.close(fd)
+            serialize(temp_path, profile)
+            plus.register.addPath(UUID, temp_path)
+            _log.info('remote background profile cached for %s at %s', UUID, temp_path)
+            return temp_path
+        except Exception as e: # pylint: disable=broad-except
+            _log.exception(e)
+            return None
+
     # tries to load background from the given path, if that fails try to deref the given UUID
     # returns True on success, Fail otherwise
     def loadbackgroundUUID(self, filename:str|None = None, UUID:str|None = None, force_reload:bool=True) -> bool:
@@ -14103,14 +14155,24 @@ class ApplicationWindow(QMainWindow):
                 return False
         elif UUID is not None and (force_reload or self.qmc.backgroundUUID != UUID):
             filepath = plus.register.getPath(UUID)
-            if filepath is not None:
+            if filepath is not None and os.path.isfile(filepath):
+                try:
+                    self.loadbackground(filepath)
+                    return True
+                except Exception as e: # pylint: disable=broad-except
+                    _log.warning('loading cached background template failed for %s from %s: %s', UUID, filepath, e)
+            elif filepath is not None:
+                _log.warning('background template path missing on disk for %s: %s', UUID, filepath)
+            filepath = self.fetchRemoteBackgroundProfile(UUID)
+            if filepath is not None and os.path.isfile(filepath):
                 try:
                     self.loadbackground(filepath)
                     return True
                 except Exception: # pylint: disable=broad-except
+                    _log.exception('loading remote background profile failed for %s', UUID)
                     return False
-            else:
-                return False
+            _log.warning('background template lookup failed for %s: no local register path and remote fallback unavailable', UUID)
+            return False
         else:
             return False
 
@@ -14410,7 +14472,7 @@ class ApplicationWindow(QMainWindow):
                 message = QApplication.translate('Message', 'Background {0} loaded successfully {1}').format(filename, '')
                 self.sendmessage(message)
                 self.qmc.backgroundpath = str(filename)
-                self.qmc.backgroundUUID = profile.get('roastUUID', None)
+                self.qmc.backgroundUUID = plus.util.normalizeUUID(profile.get('roastUUID', None))
                 _log.info('background profile loaded: %s', filename)
             else:
                 self.sendmessage(QApplication.translate('Message', 'Invalid artisan format'))
@@ -18117,11 +18179,13 @@ class ApplicationWindow(QMainWindow):
                 # don't load fullscreen or artisan.plus account from external settings file
                 self.full_screen_mode_active = toBool(settings.value('fullscreen',self.full_screen_mode_active))
                 self.plus_account = settings.value('plus_account',self.plus_account)
+                self.plus_server_url = settings.value('plus_server_url',self.plus_server_url)
             self.plus_remember_credentials = toBool(settings.value('plus_remember_credentials',self.plus_remember_credentials))
             self.plus_email = settings.value('plus_email',self.plus_email)
             self.plus_language = settings.value('plus_language',self.plus_language)
             self.plus_user_id = settings.value('plus_user_id',self.plus_user_id)
             self.plus_account_id = settings.value('plus_account_id',self.plus_account_id)
+            plus.config.set_server_base_url(self.plus_server_url)
             plus.stock.coffee_label_normal_order = settings.value('standard_bean_labels',plus.stock.coffee_label_normal_order)
             #restore mode
             old_mode = self.qmc.mode
@@ -20178,6 +20242,7 @@ class ApplicationWindow(QMainWindow):
                         settings.remove('plus_account')
                     else:
                         settings.setValue('plus_account', self.plus_account)
+                    settings.setValue('plus_server_url', self.plus_server_url)
                 self.settingsSetValue(settings, default_settings, 'plus_remember_credentials', self.plus_remember_credentials, read_defaults)
                 self.settingsSetValue(settings, default_settings, 'plus_email', self.plus_email, read_defaults)
                 self.settingsSetValue(settings, default_settings, 'plus_language', self.plus_language, read_defaults)

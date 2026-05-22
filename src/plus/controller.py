@@ -136,6 +136,7 @@ def connect(clear_on_failure: bool =False, interactive: bool = True) -> None:
         try:
             connect_semaphore.acquire(1)
             if aw is not None:
+                config.set_server_base_url(getattr(aw, 'plus_server_url', None))
 
 #                if platform.system().startswith('Windows'):
 #                    import keyring.backends.Windows  # @UnusedImport
@@ -160,7 +161,7 @@ def connect(clear_on_failure: bool =False, interactive: bool = True) -> None:
                     try:
                         # try-catch as the keyring might not work
                         config.passwd = keyring.get_password(
-                            config.app_name, account
+                            config.get_keyring_service_name(), account
                         )  # @UndefinedVariable
                         if config.passwd is None:
                             _log.debug(
@@ -180,14 +181,17 @@ def connect(clear_on_failure: bool =False, interactive: bool = True) -> None:
                     # ask user for credentials
                     import plus.login
 
-                    login, passwd, remember, res = plus.login.plus_login(
+                    login, passwd, server_url, remember, res = plus.login.plus_login(
                         aw,
                         aw,
                         aw.plus_email,
                         config.passwd,
+                        getattr(aw, 'plus_server_url', None),
                         aw.plus_remember_credentials,
                     )  # @UndefinedVariable
                     if res:  # Login dialog not Canceled
+                        config.set_server_base_url(server_url)
+                        aw.plus_server_url = config.server_url
                         aw.plus_remember_credentials = remember
                         # store credentials
                         aw.plus_account = login
@@ -204,7 +208,7 @@ def connect(clear_on_failure: bool =False, interactive: bool = True) -> None:
                             try:
                                 # try-catch as the keyring might not work
                                 keyring.set_password(
-                                    config.app_name, login, passwd
+                                    config.get_keyring_service_name(), login, passwd
                                 )
                                 _log.debug('keyring set password (%s)', login)
                             # pylint: disable=broad-except

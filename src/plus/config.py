@@ -23,6 +23,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import Final, TYPE_CHECKING
+from urllib.parse import urlsplit, urlunsplit
 
 if TYPE_CHECKING:
     from artisanlib.main import ApplicationWindow # pylint: disable=unused-import
@@ -41,18 +42,24 @@ schedule_date_tag: Final[str] = 'scheduleDate' # send as 's_item_date' as part o
 #web_base_url         = 'https://localhost:8088'
 
 # # CLOUD SETUP
-api_base_url: Final[str] = 'https://artisan.plus/api/v1'
-web_base_url: Final[str] = 'https://artisan.plus'
+default_api_base_url: Final[str] = 'https://artisan.plus/api/v1'
+default_web_base_url: Final[str] = 'https://artisan.plus'
+default_shop_base_url: Final[str] = 'https://buy.artisan.plus/'
 
-shop_base_url: Final[str] = 'https://buy.artisan.plus/'
+api_base_url: str
+web_base_url: str
+shop_base_url: str
 
-register_url: Final[str] = web_base_url + '/register'
-reset_passwd_url: Final[str] = web_base_url + '/resetPassword'
-auth_url: Final[str] = api_base_url + '/accounts/users/authenticate'
-stock_url: Final[str] = api_base_url + '/acoffees'
-roast_url: Final[str] = api_base_url + '/aroast'
-lock_schedule_url: Final[str] = api_base_url + '/aschedule/lock'
-notifications_url: Final[str] = api_base_url + '/notifications'
+register_url: str
+reset_passwd_url: str
+auth_url: str
+stock_url: str
+roast_url: str
+lock_schedule_url: str
+notifications_url: str
+profile_upload_url_template: str
+profile_data_url_template: str
+references_url: str
 
 # Connection configurations
 
@@ -144,3 +151,86 @@ passwd: str|None = None
 token: str|None = None
 # login nickname assigned on login with session token
 nickname: str|None = None
+
+# configured server base URL persisted in app settings
+server_url: str = default_web_base_url
+
+
+def normalize_server_url(url: str|None) -> str:
+    candidate = (url or '').strip()
+    if candidate == '':
+        return default_web_base_url
+    if '://' not in candidate:
+        host = candidate.split('/', 1)[0].lower()
+        if host in {'localhost', '127.0.0.1', '::1'} or host.startswith(('localhost:', '127.0.0.1:', '[::1]:')):
+            candidate = f'http://{candidate}'
+        else:
+            candidate = f'https://{candidate}'
+    parsed = urlsplit(candidate)
+    netloc = parsed.netloc if parsed.netloc else parsed.path
+    path = parsed.path if parsed.netloc else ''
+    normalized = urlunsplit((parsed.scheme or 'https', netloc, path.rstrip('/'), '', ''))
+    return normalized.rstrip('/')
+
+
+def derive_service_base_urls(url: str|None) -> tuple[str, str]:
+    normalized = normalize_server_url(url)
+    parsed = urlsplit(normalized)
+    path = parsed.path.rstrip('/')
+    if path.endswith('/api/v1'):
+        web_path = path[:-len('/api/v1')]
+        api_path = path
+    else:
+        web_path = path
+        api_path = f'{path}/api/v1' if path else '/api/v1'
+    web = urlunsplit((parsed.scheme, parsed.netloc, web_path, '', '')).rstrip('/')
+    api = urlunsplit((parsed.scheme, parsed.netloc, api_path, '', '')).rstrip('/')
+    return web, api
+
+
+def set_server_base_url(url: str|None) -> None:
+    global server_url, web_base_url, api_base_url, shop_base_url
+    global register_url, reset_passwd_url, auth_url, stock_url, roast_url, lock_schedule_url, notifications_url, profile_upload_url_template, profile_data_url_template, references_url
+
+    web_base_url, api_base_url = derive_service_base_urls(url)
+    server_url = web_base_url
+    if web_base_url == default_web_base_url:
+        shop_base_url = default_shop_base_url
+    else:
+        shop_base_url = web_base_url
+
+    register_url = web_base_url + '/register'
+    reset_passwd_url = web_base_url + '/resetPassword'
+    auth_url = api_base_url + '/accounts/users/authenticate'
+    stock_url = api_base_url + '/acoffees'
+    roast_url = api_base_url + '/aroast'
+    lock_schedule_url = api_base_url + '/aschedule/lock'
+    notifications_url = api_base_url + '/notifications'
+    profile_upload_url_template = api_base_url + '/roasts/{roast_id}/upload-profile'
+    profile_data_url_template = api_base_url + '/roasts/{roast_id}/profile/data'
+    references_url = api_base_url + '/roasts/references'
+
+
+def get_keyring_service_name() -> str:
+    if server_url == default_web_base_url:
+        return app_name
+    return f'{app_name}@{server_url}'
+
+
+def profile_upload_enabled() -> bool:
+    return server_url != default_web_base_url
+
+
+def remote_profile_fetch_enabled() -> bool:
+    return server_url != default_web_base_url
+
+
+def get_profile_upload_url(roast_id: str) -> str:
+    return profile_upload_url_template.format(roast_id=roast_id)
+
+
+def get_profile_data_url(roast_id: str) -> str:
+    return profile_data_url_template.format(roast_id=roast_id)
+
+
+set_server_base_url(default_web_base_url)

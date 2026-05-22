@@ -53,7 +53,6 @@ except Exception:
 SUPPORTED_LANGUAGES = ['ar', 'cs', 'da', 'de','el','en','es','fa','fi','fr','gd', 'he','hu','id','it','ja','ko','lv', 'nl','no','pl','pt_BR','pt','sk', 'sv','th','tr','uk','vi','zh_CN','zh_TW']
 
 DATA_FILES = [
-        (r'Assets.car', '.'),
         (r'artisanProfile.icns', '.'),
         (r'artisanAlarms.icns', '.'),
         (r'artisanPalettes.icns', '.'),
@@ -150,7 +149,7 @@ exe = EXE(pyz,
             a.datas if onefile else [],
             options=[], # runtime python options
             exclude_binaries=not onefile,
-            name='Artisan',
+            name='RoastArtisan',
             debug=False,
             bootloader_ignore_signals=False,
             strip=True, # not recommended for Windows
@@ -160,7 +159,7 @@ exe = EXE(pyz,
             console=False,
             disable_windowed_traceback=False,
             argv_emulation=False, # False for GUI apps
-            target_arch='x86_64', #'arm64', #'universal2',
+            target_arch='arm64',
             codesign_identity=None,
             entitlements_file=None
             )
@@ -173,18 +172,17 @@ except Exception: # pylint: disable=broad-except
 plist = {}
 with open('Info.plist', 'rb') as infile:
     plist = plistlib.load(infile)
-    plist.update({ 'CFBundleDisplayName': 'Artisan',
-                    'CFBundleGetInfoString': 'Artisan, Roast Logger',
-                    'CFBundleIdentifier': 'org.artisan-scope.artisan',
+    plist.update({ 'CFBundleDisplayName': 'RoastArtisan',
+                    'CFBundleGetInfoString': 'RoastArtisan, Roast Logger',
+                    'CFBundleIdentifier': 'com.roastartisan.desktop',
                     'CFBundleShortVersionString': VERSION,
-                    'CFBundleVersion': 'Artisan ' + VERSION,
+                    'CFBundleVersion': 'RoastArtisan ' + VERSION,
                     'LSMinimumSystemVersion': minimumSystemVersion,
                     'LSMultipleInstancesProhibited': False,
-                    'LSArchitecturePriority': ['x86_64'],
+                    'LSArchitecturePriority': ['arm64'],
                     'NSHumanReadableCopyright': LICENSE,
                     'NSHighResolutionCapable': True,
 #                    'UIDesignRequiresCompatibility': True, # run in compatibility mode, keeping the existing look and metrics of pre v26 macOS releases
-                    'CFBundleIconName': 'artisan-liquid-glass'
                 })
 
 bundle_obj = exe
@@ -203,14 +201,14 @@ if not onefile:
     bundle_obj = coll
 
 app = BUNDLE(bundle_obj,
-          name='Artisan.app',
-          icon='artisan.icns',
-          bundle_identifier='org.artisan-scope.artisan',
+          name='RoastArtisan.app',
+          icon='roastartisan.icns',
+          bundle_identifier='com.roastartisan.desktop',
           info_plist=plist)
 
 #------
 
-subprocess.check_call(r'mv dist/Artisan.app/Contents/Resources/translations dist/Artisan.app/Contents/',shell = True)
+subprocess.check_call(r'mv dist/RoastArtisan.app/Contents/Resources/translations dist/RoastArtisan.app/Contents/',shell = True)
 subprocess.check_call(r'rm -rf dist/Test/_internal/babel/*',shell = True) # unclear: without this line, the next fails
 subprocess.check_call(r'rm -rf dist/Test',shell = True)
 subprocess.check_call(r'cp README.txt dist',shell = True)
@@ -223,7 +221,7 @@ subprocess.check_call(r'cp Wheels/Cupping/* dist/Wheels/Cupping',shell = True)
 subprocess.check_call(r'cp Wheels/Other/* dist/Wheels/Other',shell = True)
 subprocess.check_call(r'cp Wheels/Roasting/* dist/Wheels/Roasting',shell = True)
 try:
-    subprocess.check_call('rm -rf dist/Artisan.app/Contents/Resources/matplotlib/mpl-data/sample_data',shell = True)
+    subprocess.check_call('rm -rf dist/RoastArtisan.app/Contents/Resources/matplotlib/mpl-data/sample_data',shell = True)
 except Exception: # pylint: disable=broad-except
     pass
 
@@ -232,8 +230,8 @@ os.chdir('./dist')
 
 # add localization stubs to make macOS translate the systems menu item and native dialogs
 for lang in SUPPORTED_LANGUAGES:
-    loc_dir = r'Artisan.app/Contents/Resources/' + lang + r'.lproj'
-    subprocess.check_call(r'mkdir ' + loc_dir,shell = True)
+    loc_dir = r'RoastArtisan.app/Contents/Resources/' + lang + r'.lproj'
+    subprocess.check_call(r'mkdir -p ' + loc_dir,shell = True)
     subprocess.check_call(r'touch ' + loc_dir + r'/Localizable.string',shell = True)
 
 
@@ -298,7 +296,7 @@ qt_plugin_files = [
 ]
 
 ## remove unused Qt frameworks libs (not in Qt_modules_frameworks)
-for subdir, dirs, _files in os.walk('./Artisan.app/Contents/Frameworks/PyQt6/Qt6/lib'):
+for subdir, dirs, _files in os.walk('./RoastArtisan.app/Contents/Frameworks/PyQt6/Qt6/lib'):
     for di in dirs:
         if di.startswith('Qt') and di.endswith('.framework') and di not in Qt_frameworks:
             file_path = os.path.join(subdir, di)
@@ -307,7 +305,7 @@ for subdir, dirs, _files in os.walk('./Artisan.app/Contents/Frameworks/PyQt6/Qt6
 
 
 ## remove unused plugins
-for root, dirs, _ in os.walk('./Artisan.app/Contents/Frameworks/PyQt6/Qt6/plugins'):
+for root, dirs, _ in os.walk('./RoastArtisan.app/Contents/Frameworks/PyQt6/Qt6/plugins'):
     for d in dirs:
         if d not in qt_plugin_dirs:
             print(f'rm -rf {os.path.join(root,d)}')
@@ -320,11 +318,11 @@ for root, dirs, _ in os.walk('./Artisan.app/Contents/Frameworks/PyQt6/Qt6/plugin
                         print(f'rm -rf {file_path}')
                         subprocess.check_call(f'rm -rf {file_path}',shell = True)
 
-subprocess.check_call(r'rm -rf ./Artisan.app/Contents/Frameworks/PyQt6/Qt6/qml',shell = True)
+subprocess.check_call(r'rm -rf ./RoastArtisan.app/Contents/Frameworks/PyQt6/Qt6/qml',shell = True)
 
 
 
-rootdir = f'./Artisan.app/Contents/Resources'
+rootdir = f'./RoastArtisan.app/Contents/Resources'
 
 # remove Qt artefacts
 for qt_dir in [
@@ -423,7 +421,7 @@ for root, dirs, files in os.walk('.'):
 
 print('*** Removing unused language support from babel ***')
 
-for root, _, files in os.walk(f'./Artisan.app/Contents/Resources/babel/locale-data'):
+for root, _, files in os.walk(f'./RoastArtisan.app/Contents/Resources/babel/locale-data'):
     for file in files:
         if (file.endswith('.dat') and
             file != 'root.dat' and not (file.startswith('zh') and file.endswith('.dat')) and
@@ -435,14 +433,14 @@ for root, _, files in os.walk(f'./Artisan.app/Contents/Resources/babel/locale-da
 # NOT NEEDED for pyinstaller builds
 #print('*** Removing Phidget driver libs not for this platforms ***')
 #try:
-#    subprocess.check_call(f'rm -f ./Artisan.app/Contents/Frameworks/phidget22.dll',shell = True)
+#    subprocess.check_call(f'rm -f ./RoastArtisan.app/Contents/Frameworks/phidget22.dll',shell = True)
 #except Exception: # pylint: disable=broad-except
 #    pass
 
 
 print('*** Removing mypy completely ***')
 try:
-    subprocess.check_call(f'rm -rf ./Artisan.app/Contents/Frameworks/mypy',shell = True)
+    subprocess.check_call(f'rm -rf ./RoastArtisan.app/Contents/Frameworks/mypy',shell = True)
 except Exception: # pylint: disable=broad-except
     pass
 
@@ -462,4 +460,4 @@ for subdir, _dirs, files in os.walk('.', followlinks=False):
 dist_name = r'artisan-mac-' + VERSION + r'.dmg'
 os.chdir('..')
 os.system(r'rm ' + dist_name)
-os.system(r'hdiutil create ' + dist_name + r' -volname "Artisan" -fs HFS+ -srcfolder "dist"')
+os.system(r'hdiutil create ' + dist_name + r' -volname "RoastArtisan" -fs HFS+ -srcfolder "dist"')

@@ -30,6 +30,7 @@ import time
 import uuid
 import datetime
 import gzip
+import os
 import json
 import json.decoder
 import logging
@@ -128,7 +129,7 @@ def clearCredentials(remove_from_keychain: bool = True) -> None:
                 import keyring
 
                 keyring.delete_password(
-                    config.app_name, aw.plus_account
+                    config.get_keyring_service_name(), aw.plus_account
                 )  # @UndefinedVariable
             except Exception as e:  # pylint: disable=broad-except
                 _log.error(e)
@@ -163,7 +164,7 @@ def authentify() -> bool:
                     import keyring  # @Reimport # imported last to make py2app work
 
                     config.passwd = keyring.get_password(
-                        config.app_name, aw.plus_account
+                        config.get_keyring_service_name(), aw.plus_account
                     )  # @UndefinedVariable
                 except Exception as e:  # pylint: disable=broad-except
                     _log.exception(e)
@@ -422,6 +423,45 @@ def sendData(
                         verify=config.verify_ssl,
                         timeout=(config.connect_timeout, getReadTimeout()),
                     )
+                updateReadTimeoutOnSuccess()
+                _log.debug('on retry: -> status %s, time %s', r.status_code, r.elapsed.total_seconds())
+        return r
+    except requests.exceptions.Timeout as e:
+        _log.error(e)
+        updateReadTimeoutOnTimeout()
+        raise e
+
+
+def sendFile(
+    url: str,
+    file_path: str,
+    field_name: str = 'file',
+    authorized: bool = True,
+) -> requests.models.Response:
+    _log.debug('sendFile(%s,%s,%s)', url, file_path, authorized)
+    headers = getHeaders(authorized)
+
+    def post_file(request_headers: dict[str, str]) -> requests.models.Response:
+        with open(file_path, 'rb') as fh:
+            files = {field_name: (os.path.basename(file_path), fh)}
+            return requests.post(
+                url,
+                headers=request_headers,
+                files=files,
+                verify=config.verify_ssl,
+                timeout=(config.connect_timeout, getReadTimeout()),
+            )
+
+    try:
+        r = post_file(headers)
+        updateReadTimeoutOnSuccess()
+        _log.debug('-> status %s, time %s', r.status_code, r.elapsed.total_seconds())
+        if authorized and r.status_code == 401:
+            _log.debug('-> session token outdated (401)')
+            if authentify():
+                time.sleep(0.3)
+                headers = getHeaders(authorized)
+                r = post_file(headers)
                 updateReadTimeoutOnSuccess()
                 _log.debug('on retry: -> status %s, time %s', r.status_code, r.elapsed.total_seconds())
         return r
