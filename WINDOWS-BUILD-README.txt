@@ -17,7 +17,7 @@ Build portable Windows client
 2. Run build-windows-x64-local.bat.
 3. The portable executable will be created at:
 
-src\dist\artisan\artisan.exe
+src\dist\RoastArtisan\RoastArtisan.exe
 
 The script skips derived UI/help/translation regeneration by default because generated files are already included.
 To force regeneration, run it as:

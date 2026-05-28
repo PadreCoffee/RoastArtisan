@@ -68,7 +68,7 @@ if errorlevel 1 exit /b 1
 
 echo.
 echo Portable build finished:
-echo %SRC%\dist\artisan\artisan.exe
+echo %SRC%\dist\RoastArtisan\RoastArtisan.exe
 echo.
 
 if exist "%ProgramFiles%\NSIS\makensis.exe" (

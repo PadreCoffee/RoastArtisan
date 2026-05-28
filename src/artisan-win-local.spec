@@ -101,7 +101,7 @@ else:
     PYQT = os.environ.get('PYQT') or '6'
     QT_TRANSL = os.environ.get('QT_TRANSL') or os.path.join(PYTHON, 'Lib', 'site-packages', 'PyQt6', 'Qt6', 'translations')
 
-NAME = 'artisan'
+NAME = 'RoastArtisan'
 TARGET = 'dist\\' + NAME + '\\'
 PYTHON_PACKAGES = PYTHON + r'\Lib\site-packages'
 if os.environ.get('APPVEYOR'):

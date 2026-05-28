@@ -196,7 +196,7 @@ if not onefile:
             strip=True, # not recommended for Windows
             upx=False,  # brew install upx # UPX is currently used only on Windows
             upx_exclude=[],
-            name='Test',
+            name='RoastArtisan',
         )
     bundle_obj = coll
 
@@ -457,7 +457,7 @@ for subdir, _dirs, files in os.walk('.', followlinks=False):
 ####
 
 
-dist_name = r'artisan-mac-' + VERSION + r'.dmg'
+dist_name = r'RoastArtisan-mac-' + VERSION + r'.dmg'
 os.chdir('..')
 os.system(r'rm ' + dist_name)
 os.system(r'hdiutil create ' + dist_name + r' -volname "RoastArtisan" -fs HFS+ -srcfolder "dist"')
