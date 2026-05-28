@@ -409,10 +409,8 @@ def getRoast() -> dict[str, Any]:
         except Exception as e:  # pylint: disable=broad-except
             _log.exception(e)
 
-        if aw.qmc.backgroundprofile:
-            bp = aw.qmc.backgroundprofile
-            template = getTemplate(bp,background=True)
-            d['template'] = template
+        if aw.qmc.backgroundUUID:
+            d['template'] = {'id': aw.qmc.backgroundUUID}
 
         # if profile is already saved, that modification date is send along to
         # the server instead the timestamp

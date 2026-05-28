@@ -625,10 +625,12 @@ class editGraphDlg(ArtisanResizeablDialog):
         # propulated by selecting a recent roast from the popup via recentRoastActivated()
         self.template_file:str|None = None
         self.template_name:str|None = None
-        self.template_uuid:str|None = None
+        # seed from currently loaded background so dialog reflects existing reference selection
+        self.template_uuid:str|None = self.aw.qmc.backgroundUUID if self.aw.qmc.backgroundUUID else None
+        self.org_template_uuid:str|None = self.template_uuid  # snapshot for Cancel / clear-detection in accept()
         self.template_batchnr:int|None = None
         self.template_batchprefix:str|None = None
-        self.plus_templates:list[plus.stock.ScheduledItem] = []  # schedule items matching current coffee/blend + machine
+        self.plus_templates:list[dict] = []  # reference items matching current coffee/blend + machine (each: {uuid,label,_raw})
 
         # energy variables (explicitly define constructors)
         self.curvenames:list[str] = []
@@ -1441,9 +1443,22 @@ class editGraphDlg(ArtisanResizeablDialog):
             self.plus_templates_combo.setMinimumContentsLength(20)
             self.plus_templates_combo.currentIndexChanged.connect(self.templateSelectionChanged)
             self.referencesReady.connect(self._onReferencesFetched)
+            # explicit clear button next to the combo
+            self.plus_templates_clear_btn = QToolButton()
+            self.plus_templates_clear_btn.setText('×')
+            self.plus_templates_clear_btn.setToolTip(QApplication.translate('Tooltip', 'Clear reference selection'))
+            self.plus_templates_clear_btn.setAutoRaise(True)
+            self.plus_templates_clear_btn.clicked.connect(self._clearReferenceSelection)
+            referenceLine = QHBoxLayout()
+            referenceLine.setSpacing(2)
+            referenceLine.addWidget(self.plus_templates_combo, 1)
+            referenceLine.addWidget(self.plus_templates_clear_btn)
             textLayout.addWidget(self.plusReferencelabel,6,0)
-            textLayout.addWidget(self.plus_templates_combo,6,1)
-            textLayoutPlusOffset = 3 # to insert the plus widget rows, we move the remaining ones one step lower
+            textLayout.addLayout(referenceLine,6,1)
+            # snapshot block (Current / Reference / Δ × MC / AW / density)
+            self._buildSnapshotBlock()
+            textLayout.addWidget(self.snapshotGroup,7,0,1,2)
+            textLayoutPlusOffset = 4 # to insert the plus widget rows, we move the remaining ones one step lower
         else:
             textLayoutPlusOffset = 0
         textLayout.addWidget(self.template_line,2,1)
@@ -2450,19 +2465,22 @@ class editGraphDlg(ArtisanResizeablDialog):
     def populateTemplateCombo(self) -> None:
         if not hasattr(self, 'plus_templates_combo'):
             return
-        self.template_uuid = None
-        self.template_file = None
+        # NOTE: do not pre-clear template_uuid here — _applyTemplatesToCombo decides whether
+        # the current selection survives the refetch (preserved if its uuid is still in the list).
         coffee_hr_id:str|None = self.plus_coffee_selected
         blend_hr_id:str|None = (self.plus_blend_selected_spec.get('hr_id') if self.plus_blend_selected_spec is not None else None)
         _log.info('populateTemplateCombo: coffee=%s blend=%s remote=%s', coffee_hr_id, blend_hr_id, plus.config.remote_profile_fetch_enabled())
         if not (coffee_hr_id or blend_hr_id):
-            # nothing selected — show empty disabled combo
+            # nothing selected — show empty disabled combo and clear any prior template
+            self.template_uuid = None
+            self.template_file = None
             self.plus_templates = []
             self.plus_templates_combo.blockSignals(True)
             self.plus_templates_combo.clear()
-            self.plus_templates_combo.addItem('')
+            self.plus_templates_combo.addItem('Без эталона')
             self.plus_templates_combo.setEnabled(False)
             self.plus_templates_combo.blockSignals(False)
+            self._updateSnapshotBlock()
             return
         if plus.config.remote_profile_fetch_enabled():
             # fetch from dedicated references API in background thread
@@ -2483,6 +2501,9 @@ class editGraphDlg(ArtisanResizeablDialog):
             # fallback: use scheduler ScheduledItems
             templates = self._getTemplatesFromSchedule()
             self._applyTemplatesToCombo(templates)
+        # refresh current-snapshot column now (the reference-side columns refresh once
+        # the async fetch returns and _applyTemplatesToCombo runs)
+        self._updateSnapshotBlock()
 
     @pyqtSlot(int, list)
     def _onReferencesFetched(self, gen:int, items:list) -> None:
@@ -2500,12 +2521,27 @@ class editGraphDlg(ArtisanResizeablDialog):
         self.plus_templates = templates
         self.plus_templates_combo.blockSignals(True)
         self.plus_templates_combo.clear()
-        self.plus_templates_combo.addItem('')
+        self.plus_templates_combo.addItem('Без эталона')
         for t in templates:
             self.plus_templates_combo.addItem(t.get('label', ''))
-        self.plus_templates_combo.setCurrentIndex(0)
+        # preserve existing selection if its uuid is still in the list (e.g. async refetch
+        # after background load completes). Only drop the uuid if the user actively changed
+        # the coffee/blend — otherwise a fetch that happens to not include the saved
+        # reference (e.g. server-side filter mismatch) would silently unload the background.
+        selected_idx = 0
+        if self.template_uuid:
+            for i, t in enumerate(templates):
+                if t.get('uuid') == self.template_uuid:
+                    selected_idx = i + 1
+                    break
+            if selected_idx == 0 and self.user_updated_coffee_or_blend:
+                # coffee/blend changed by user — saved reference no longer applies
+                self.template_uuid = None
+                self.template_file = None
+        self.plus_templates_combo.setCurrentIndex(selected_idx)
         self.plus_templates_combo.setEnabled(len(templates) > 0)
         self.plus_templates_combo.blockSignals(False)
+        self._updateSnapshotBlock()
 
     @pyqtSlot(int)
     def templateSelectionChanged(self, n:int) -> None:
@@ -2521,6 +2557,134 @@ class editGraphDlg(ArtisanResizeablDialog):
         else:
             self.template_uuid = None
             self.template_file = None
+        self._updateSnapshotBlock()
+
+    def _clearReferenceSelection(self) -> None:
+        if not hasattr(self, 'plus_templates_combo'):
+            return
+        self.plus_templates_combo.setCurrentIndex(0)  # triggers templateSelectionChanged → clears state + updates snapshot
+
+    # --- Snapshot block (current bean / reference frozen / delta) ---
+
+    SNAPSHOT_TOLERANCES = {
+        # (green, yellow) thresholds for |delta|; beyond yellow → red
+        'mc':      (0.3, 0.6),
+        'aw':      (0.02, 0.05),
+        'density': (10.0, 25.0),
+    }
+
+    def _buildSnapshotBlock(self) -> None:
+        self.snapshotGroup = QGroupBox(QApplication.translate('Label', 'Зелёное зерно'))
+        grid = QGridLayout()
+        grid.setHorizontalSpacing(12)
+        grid.setVerticalSpacing(2)
+        grid.setContentsMargins(8, 4, 8, 4)
+        header_current = QLabel('<b>Текущий</b>')
+        header_reference = QLabel('<b>Эталон</b>')
+        header_delta = QLabel('<b>Δ</b>')
+        for c, w in enumerate((QLabel(''), header_current, header_reference, header_delta)):
+            w.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            grid.addWidget(w, 0, c)
+        # rows: MC, AW, density
+        self._snapshot_value_labels:dict[str, dict[str, QLabel]] = {}
+        rows = [
+            ('mc', 'Влажность (MC)', '%'),
+            ('aw', 'Водная активность (AW)', ''),
+            ('density', 'Плотность (г/л)', ''),
+        ]
+        for r, (key, label_text, _unit) in enumerate(rows, start=1):
+            grid.addWidget(QLabel(label_text), r, 0)
+            cur_lbl = QLabel('—'); cur_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            ref_lbl = QLabel('—'); ref_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            dlt_lbl = QLabel('—'); dlt_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            grid.addWidget(cur_lbl, r, 1)
+            grid.addWidget(ref_lbl, r, 2)
+            grid.addWidget(dlt_lbl, r, 3)
+            self._snapshot_value_labels[key] = {'current': cur_lbl, 'reference': ref_lbl, 'delta': dlt_lbl}
+        # incomplete-blend banner
+        self._snapshot_incomplete_label = QLabel('Данные неполные')
+        self._snapshot_incomplete_label.setStyleSheet('color: #b58900;')
+        self._snapshot_incomplete_label.setVisible(False)
+        grid.addWidget(self._snapshot_incomplete_label, len(rows) + 1, 0, 1, 4)
+        self.snapshotGroup.setLayout(grid)
+
+    def _getCurrentSnapshot(self) -> dict|None:
+        # returns the cloud-supplied {mc, aw, density, incomplete?} for the selected coffee or blend
+        try:
+            if self.plus_coffee_selected:
+                coffee_hr_id = self.plus_coffee_selected
+                if plus.stock.stock is not None and 'coffees' in plus.stock.stock:
+                    for c in plus.stock.stock['coffees']:
+                        if c.get('hr_id') == coffee_hr_id:
+                            snap = c.get('current_snapshot')
+                            return snap if isinstance(snap, dict) else None
+            elif self.plus_blend_selected_spec is not None:
+                blend_hr_id = self.plus_blend_selected_spec.get('hr_id')
+                if blend_hr_id and plus.stock.stock is not None and 'blends' in plus.stock.stock:
+                    for b in plus.stock.stock['blends']:
+                        if b.get('hr_id') == blend_hr_id:
+                            snap = b.get('current_snapshot')
+                            return snap if isinstance(snap, dict) else None
+        except Exception as e:  # pylint: disable=broad-except
+            _log.exception(e)
+        return None
+
+    def _getReferenceSnapshot(self) -> dict|None:
+        if not self.template_uuid:
+            return None
+        for t in self.plus_templates:
+            if t.get('uuid') == self.template_uuid:
+                raw = t.get('_raw') or {}
+                snap = raw.get('frozen_snapshot') if isinstance(raw, dict) else None
+                return snap if isinstance(snap, dict) else None
+        return None
+
+    @staticmethod
+    def _fmtSnapshotValue(key:str, val:float|None) -> str:
+        if val is None:
+            return '—'
+        if key == 'aw':
+            return f'{val:.3f}'
+        if key == 'density':
+            return f'{val:.0f}'
+        return f'{val:.2f}'
+
+    def _deltaColor(self, key:str, abs_delta:float) -> str:
+        green, yellow = self.SNAPSHOT_TOLERANCES.get(key, (0.0, 0.0))
+        if abs_delta <= green:
+            return '#268bd2' if self.aw.app.darkmode else '#2aa198'  # teal/green
+        if abs_delta <= yellow:
+            return '#b58900'  # amber
+        return '#dc322f'  # red
+
+    def _updateSnapshotBlock(self) -> None:
+        if not hasattr(self, '_snapshot_value_labels'):
+            return
+        cur = self._getCurrentSnapshot()
+        ref = self._getReferenceSnapshot()
+        incomplete = bool(cur and cur.get('incomplete'))
+        self._snapshot_incomplete_label.setVisible(incomplete)
+        has_reference = ref is not None
+        for key, labels in self._snapshot_value_labels.items():
+            cur_val = None if (cur is None or incomplete) else cur.get(key)
+            ref_val = None if ref is None else ref.get(key)
+            labels['current'].setText(self._fmtSnapshotValue(key, cur_val))
+            if has_reference:
+                labels['reference'].setText(self._fmtSnapshotValue(key, ref_val))
+                if cur_val is not None and ref_val is not None:
+                    d = cur_val - ref_val
+                    sign = '+' if d >= 0 else '−'
+                    labels['delta'].setText(f"{sign}{self._fmtSnapshotValue(key, abs(d))}")
+                    labels['delta'].setStyleSheet(f'color: {self._deltaColor(key, abs(d))}; font-weight: bold;')
+                else:
+                    labels['delta'].setText('—')
+                    labels['delta'].setStyleSheet('')
+                labels['reference'].setVisible(True)
+                labels['delta'].setVisible(True)
+            else:
+                labels['reference'].setText('—')
+                labels['delta'].setText('—')
+                labels['delta'].setStyleSheet('')
 
     # keeps the weightoutdefectsedit placeholder text set along the weightoutedit text
     def weightouteditSetText(self, txt:str) -> None:
@@ -5817,6 +5981,13 @@ class editGraphDlg(ArtisanResizeablDialog):
                 self.aw.qmc.timealign(redraw=False)
                 redraw = True
             except Exception: # pylint: disable=broad-except
+                pass
+        elif self.template_uuid is None and self.org_template_uuid is not None:
+            # reference was cleared explicitly — drop any previously loaded background
+            try:
+                self.aw.deleteBackground()
+                redraw = True
+            except Exception:  # pylint: disable=broad-except
                 pass
         elif ((not self.aw.qmc.flagon) or
             (self.aw.qmc.specialevents != self.org_specialevents) or
