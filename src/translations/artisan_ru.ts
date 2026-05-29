@@ -74,7 +74,7 @@
         <location filename="../artisanlib/canvas.py" line="11859" />
         <location filename="../artisanlib/statistics.py" line="198" />
         <source>Roast of the Day</source>
-        <translation>Жаркое дня</translation>
+        <translation>Обжарка дня</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="11936" />
@@ -85,36 +85,36 @@
     <message>
         <location filename="../artisanlib/statistics.py" line="204" />
         <source>Density Green</source>
-        <translation>Плотность зеленый</translation>
+        <translation>Плотность, зелёное</translation>
     </message>
     <message>
         <location filename="../artisanlib/statistics.py" line="205" />
         <source>Moisture Green</source>
-        <translation>Влажный зеленый</translation>
+        <translation>Влажность, зелёное</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="11954" />
         <location filename="../artisanlib/statistics.py" line="206" />
         <source>Batch Size</source>
-        <translation>Размер партии</translation>
+        <translation>Размер батча</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="11962" />
         <location filename="../artisanlib/statistics.py" line="207" />
         <source>Density Roasted</source>
-        <translation>Плотность жареный</translation>
+        <translation>Плотность, обжаренное</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="11966" />
         <location filename="../artisanlib/statistics.py" line="208" />
         <source>Moisture Roasted</source>
-        <translation>Жареный на влажной основе</translation>
+        <translation>Влажность, обжаренное</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="11970" />
         <location filename="../artisanlib/statistics.py" line="209" />
         <source>Ground Color</source>
-        <translation>Основной цвет</translation>
+        <translation>Цвет молотого</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="11974" />
@@ -126,13 +126,13 @@
         <location filename="../artisanlib/canvas.py" line="11980" />
         <location filename="../artisanlib/statistics.py" line="211" />
         <source>CO2</source>
-        <translation>СО2</translation>
+        <translation>CO2</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12012" />
         <location filename="../artisanlib/statistics.py" line="217" />
         <source>Weight Roasted</source>
-        <translation>Вес жареного</translation>
+        <translation>Вес обжаренного</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12016" />
@@ -153,7 +153,7 @@
     <message>
         <location filename="../artisanlib/canvas.py" line="11985" />
         <source>AUC</source>
-        <translation>АУК</translation>
+        <translation>AUC</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12073" />
@@ -163,17 +163,17 @@
     <message>
         <location filename="../artisanlib/canvas.py" line="12078" />
         <source>Defects Loss</source>
-        <translation>Дефекты Потеря</translation>
+        <translation>Потери на дефектах</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12083" />
         <source>Yield</source>
-        <translation>Урожай</translation>
+        <translation>Выход</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12089" />
         <source>Total Loss</source>
-        <translation>Полная потеря</translation>
+        <translation>Общие потери</translation>
     </message>
 </context><context>
     <name>Button</name>
@@ -186,7 +186,7 @@
         <location filename="../artisanlib/pid_dialogs.py" line="923" />
         <location filename="../plus/login.py" line="73" />
         <source>OK</source>
-        <translation>Ок</translation>
+        <translation>ОК</translation>
     </message>
     <message>
         <location filename="../artisanlib/dialogs.py" line="624" />
@@ -248,7 +248,7 @@
     <message>
         <location filename="../artisanlib/wheels.py" line="119" />
         <source>Save Img</source>
-        <translation type="unfinished">Сохранить Img</translation>
+        <translation type="unfinished">Сохранить изобр.</translation>
     </message>
     <message>
         <location filename="../artisanlib/wheels.py" line="136" />
@@ -331,7 +331,7 @@
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="1063" />
         <source>RS</source>
-        <translation>РС</translation>
+        <translation>RS</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="1931" />
@@ -488,37 +488,37 @@
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3079" />
         <source>pid 1</source>
-        <translation>идентификатор 1</translation>
+        <translation>PID 1</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3081" />
         <source>pid 2</source>
-        <translation>идентификатор 2</translation>
+        <translation>PID 2</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3083" />
         <source>pid 3</source>
-        <translation>идентификатор 3</translation>
+        <translation>PID 3</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3085" />
         <source>pid 4</source>
-        <translation>идентификатор 4</translation>
+        <translation>PID 4</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3087" />
         <source>pid 5</source>
-        <translation>идентификатор 5</translation>
+        <translation>PID 5</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3089" />
         <source>pid 6</source>
-        <translation>идентификатор 6</translation>
+        <translation>PID 6</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3091" />
         <source>pid 7</source>
-        <translation>идентификатор 7</translation>
+        <translation>PID 7</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3093" />
@@ -561,7 +561,7 @@
         <location filename="../artisanlib/autosave.py" line="102" />
         <location filename="../artisanlib/autosave.py" line="96" />
         <source>Path</source>
-        <translation>Дорожка</translation>
+        <translation>Путь</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="266" />
@@ -588,7 +588,7 @@
     <message>
         <location filename="../artisanlib/events.py" line="700" />
         <source>&lt;&lt; Store Palette</source>
-        <translation>&lt;&lt; Магазинная палитра</translation>
+        <translation>&lt;&lt; Сохранить палитру</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="702" />
@@ -606,7 +606,7 @@
         <location filename="../artisanlib/ports.py" line="275" />
         <location filename="../artisanlib/ports.py" line="99" />
         <source>Start</source>
-        <translation>Начинать</translation>
+        <translation>Старт</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1664" />
@@ -672,12 +672,12 @@
     <message>
         <location filename="../artisanlib/roast_properties.py" line="793" />
         <source>Create Alarms</source>
-        <translation type="unfinished">Создать аварийные сигналы</translation>
+        <translation type="unfinished">Создать сигналы</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="798" />
         <source>Order</source>
-        <translation>Заказ</translation>
+        <translation>Порядок</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1736" />
@@ -689,7 +689,7 @@
         <location filename="../artisanlib/roast_properties.py" line="1736" />
         <location filename="../artisanlib/roast_properties.py" line="1255" />
         <source>yield</source>
-        <translation>урожай</translation>
+        <translation>выход</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1267" />
@@ -786,12 +786,12 @@ Extra Device</source>
     <message>
         <location filename="../artisanlib/alarms.py" line="185" />
         <source>&lt;&lt; Store Alarm Set</source>
-        <translation>&lt;&lt; Сохранить набор сигналов тревоги</translation>
+        <translation>&lt;&lt; Сохранить набор сигналов</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="187" />
         <source>Activate Alarm Set &gt;&gt;</source>
-        <translation>Активировать будильник &gt;&gt;</translation>
+        <translation>Активировать набор сигналов &gt;&gt;</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="180" />
@@ -850,52 +850,52 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="3271" />
         <source>CHARGE</source>
-        <translation>Загрузить бобы</translation>
+        <translation>Загрузка</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3276" />
         <source>DROP</source>
-        <translation>Выбросить бобы</translation>
+        <translation>Выгрузка</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3281" />
         <source>CONTROL</source>
-        <translation>КОНТРОЛЬ</translation>
+        <translation>Управление</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3294" />
         <source>EVENT</source>
-        <translation>МЕРОПРИЯТИЕ</translation>
+        <translation>Событие</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3299" />
         <source>SV +5</source>
-        <translation>СВ +5</translation>
+        <translation>SV +5</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3308" />
         <source>SV +10</source>
-        <translation>СВ +10</translation>
+        <translation>SV +10</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3317" />
         <source>SV +20</source>
-        <translation>СВ +20</translation>
+        <translation>SV +20</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3326" />
         <source>SV -20</source>
-        <translation type="unfinished">СВ-20</translation>
+        <translation type="unfinished">SV -20</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3335" />
         <source>SV -10</source>
-        <translation>СВ-10</translation>
+        <translation>SV -10</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3344" />
         <source>SV -5</source>
-        <translation>СВ-5</translation>
+        <translation>SV -5</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3355" />
@@ -952,7 +952,7 @@ END</source>
         <location filename="../artisanlib/canvas.py" line="14244" />
         <location filename="../artisanlib/canvas.py" line="13458" />
         <source>OFF</source>
-        <translation>Выкл</translation>
+        <translation>ВЫКЛ</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="88" />
@@ -960,7 +960,7 @@ END</source>
         <location filename="../artisanlib/colors.py" line="67" />
         <location filename="../artisanlib/colors.py" line="57" />
         <source>ET</source>
-        <translation>восточноевропейское время</translation>
+        <translation>ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="93" />
@@ -968,7 +968,7 @@ END</source>
         <location filename="../artisanlib/colors.py" line="72" />
         <location filename="../artisanlib/colors.py" line="62" />
         <source>BT</source>
-        <translation>БТ</translation>
+        <translation>BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="99" />
@@ -993,12 +993,12 @@ END</source>
     <message>
         <location filename="../artisanlib/colors.py" line="140" />
         <source>Y Label</source>
-        <translation type="unfinished">Ось X</translation>
+        <translation type="unfinished">Подпись оси Y</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="145" />
         <source>X Label</source>
-        <translation type="unfinished">Ось Y</translation>
+        <translation type="unfinished">Подпись оси X</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="165" />
@@ -1008,7 +1008,7 @@ END</source>
     <message>
         <location filename="../artisanlib/colors.py" line="170" />
         <source>Bars Bkgnd</source>
-        <translation>Барс Бкгнд</translation>
+        <translation>Полосы (фон)</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="175" />
@@ -1023,12 +1023,12 @@ END</source>
     <message>
         <location filename="../artisanlib/colors.py" line="190" />
         <source>Time Guide</source>
-        <translation>Руководство по времени</translation>
+        <translation>Направляющая времени</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="195" />
         <source>AUC Guide</source>
-        <translation>Руководство AUC</translation>
+        <translation>Направляющая AUC</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="200" />
@@ -1038,7 +1038,7 @@ END</source>
     <message>
         <location filename="../artisanlib/colors.py" line="205" />
         <source>Legend bkgnd</source>
-        <translation>Легенда bkgnd</translation>
+        <translation>Фон легенды</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="222" />
@@ -1078,7 +1078,7 @@ END</source>
     <message>
         <location filename="../artisanlib/colors.py" line="262" />
         <source>MET Box</source>
-        <translation>МЕТ-бокс</translation>
+        <translation>Поле MET</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="267" />
@@ -1088,7 +1088,7 @@ END</source>
     <message>
         <location filename="../artisanlib/colors.py" line="284" />
         <source>Stats&amp;Analysis Bkgnd</source>
-        <translation>Статистика и анализ Bkgnd</translation>
+        <translation>Фон статистики и анализа</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="324" />
@@ -1167,14 +1167,14 @@ END</source>
         <location filename="../artisanlib/comm.py" line="193" />
         <location filename="../artisanlib/axis.py" line="266" />
         <source>ET</source>
-        <translation>восточноевропейское время</translation>
+        <translation>ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="89" />
         <location filename="../artisanlib/devices.py" line="83" />
         <location filename="../artisanlib/axis.py" line="268" />
         <source>BT</source>
-        <translation>БТ</translation>
+        <translation>BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="126" />
@@ -1187,17 +1187,17 @@ END</source>
         <location filename="../artisanlib/background.py" line="64" />
         <location filename="../artisanlib/comparator.py" line="1844" />
         <source>Events</source>
-        <translation type="unfinished">Событие</translation>
+        <translation type="unfinished">События</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="759" />
         <source>Start PID on CHARGE</source>
-        <translation>Запустить PID при ЗАРЯДКЕ</translation>
+        <translation>Запустить PID при загрузке</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="763" />
         <source>Stop PID on DROP</source>
-        <translation>Остановить PID при DROP</translation>
+        <translation>Остановить PID при выгрузке</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="767" />
@@ -1267,7 +1267,7 @@ END</source>
     <message>
         <location filename="../artisanlib/events.py" line="611" />
         <source>Time Guide</source>
-        <translation>Показать руководство по времени</translation>
+        <translation>Направляющая времени</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="647" />
@@ -1298,32 +1298,32 @@ END</source>
     <message>
         <location filename="../artisanlib/ports.py" line="91" />
         <source>Fct. 3</source>
-        <translation>Факт. 3</translation>
+        <translation>Функц. 3</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="94" />
         <source>Fct. 4</source>
-        <translation>Факт. 4</translation>
+        <translation>Функц. 4</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="267" />
         <source>Int</source>
-        <translation>Интерн.</translation>
+        <translation>Целое</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="270" />
         <source>Float</source>
-        <translation>Плавать</translation>
+        <translation>Дробное число</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="1361" />
         <source>START on CHARGE</source>
-        <translation>НАЧАТЬ НА ЗАРЯДКЕ</translation>
+        <translation>Старт по загрузке</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="1363" />
         <source>OFF on DROP</source>
-        <translation>ВЫКЛ при КАДРЕ</translation>
+        <translation>Выкл при выгрузке</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="404" />
@@ -1350,7 +1350,7 @@ END</source>
     <message>
         <location filename="../artisanlib/background.py" line="234" />
         <source>Playback DROP</source>
-        <translation>ПЕРЕПАД при воспроизведении</translation>
+        <translation>Выгрузка при воспроизведении</translation>
     </message>
     <message>
         <location filename="../artisanlib/background.py" line="248" />
@@ -1360,7 +1360,7 @@ END</source>
     <message>
         <location filename="../artisanlib/background.py" line="253" />
         <source>Set batch size</source>
-        <translation>Установить размер партии</translation>
+        <translation>Установить размер батча</translation>
     </message>
     <message>
         <location filename="../artisanlib/background.py" line="258" />
@@ -1370,17 +1370,17 @@ END</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="768" />
         <source>Delete roast properties on RESET</source>
-        <translation type="unfinished">Удалить настройки жарки на СБРОС</translation>
+        <translation type="unfinished">Удалить свойства обжарки при сбросе</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="771" />
         <source>Open on CHARGE</source>
-        <translation>Открыть за ЗАРЯДКУ</translation>
+        <translation>Открыть при загрузке</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="775" />
         <source>Open on DROP</source>
-        <translation>Открыть на DROP</translation>
+        <translation>Открыть при выгрузке</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="862" />
@@ -1391,25 +1391,25 @@ END</source>
         <location filename="../artisanlib/main.py" line="23931" />
         <location filename="../artisanlib/roast_properties.py" line="1189" />
         <source>Heavy FC</source>
-        <translation>Высокая FC</translation>
+        <translation>Сильный ПК</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23933" />
         <location filename="../artisanlib/roast_properties.py" line="1192" />
         <source>Low FC</source>
-        <translation>Низкая FC</translation>
+        <translation>Слабый ПК</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23935" />
         <location filename="../artisanlib/roast_properties.py" line="1195" />
         <source>Light Cut</source>
-        <translation>Легкая стрижка</translation>
+        <translation>Светлый срез</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23937" />
         <location filename="../artisanlib/roast_properties.py" line="1198" />
         <source>Dark Cut</source>
-        <translation>Темный разрез</translation>
+        <translation>Тёмный срез</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23939" />
@@ -1433,19 +1433,19 @@ END</source>
         <location filename="../artisanlib/main.py" line="23945" />
         <location filename="../artisanlib/roast_properties.py" line="1209" />
         <source>Tipping</source>
-        <translation>Чаевые</translation>
+        <translation>Типпинг</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23947" />
         <location filename="../artisanlib/roast_properties.py" line="1211" />
         <source>Scorching</source>
-        <translation>Палящий</translation>
+        <translation>Скорчинг</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23949" />
         <location filename="../artisanlib/roast_properties.py" line="1213" />
         <source>Divots</source>
-        <translation>Дивоты</translation>
+        <translation>Вмятины</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1418" />
@@ -1470,37 +1470,37 @@ END</source>
     <message>
         <location filename="../artisanlib/phases.py" line="101" />
         <source>Phases LCDs</source>
-        <translation type="unfinished">Фазы LCDs</translation>
+        <translation type="unfinished">ЖК-дисплеи фаз</translation>
     </message>
     <message>
         <location filename="../artisanlib/phases.py" line="103" />
         <source>Auto DRY</source>
-        <translation type="unfinished">Автосушка</translation>
+        <translation type="unfinished">Авто пожелтение</translation>
     </message>
     <message>
         <location filename="../artisanlib/phases.py" line="105" />
         <source>Auto FCs</source>
-        <translation type="unfinished">Авто FСs</translation>
+        <translation type="unfinished">Авто ПКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/logs.py" line="43" />
         <source>Serial Log ON/OFF</source>
-        <translation type="unfinished">Лог ВКЛ/ВЫКЛ</translation>
+        <translation type="unfinished">Журнал Serial вкл/выкл</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="359" />
         <source>Optimal Smoothing Post Roast</source>
-        <translation>Оптимальное разглаживание после обжарки</translation>
+        <translation>Оптимальное сглаживание после обжарки</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="365" />
         <source>Polyfit computation</source>
-        <translation>Расчет полифита</translation>
+        <translation>Расчёт полифита</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="380" />
         <source>Smooth Spikes</source>
-        <translation>Гладкие шипы</translation>
+        <translation>Сглаживать выбросы</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="386" />
@@ -1510,12 +1510,12 @@ END</source>
     <message>
         <location filename="../artisanlib/curves.py" line="411" />
         <source>Interpolate Drops</source>
-        <translation>Интерполировать выпадения</translation>
+        <translation>Интерполировать пропуски</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="418" />
         <source>Drop Spikes</source>
-        <translation>Падение шипов</translation>
+        <translation>Отбрасывать выбросы</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="647" />
@@ -1529,18 +1529,18 @@ END</source>
         <location filename="../artisanlib/curves.py" line="449" />
         <location filename="../artisanlib/curves.py" line="448" />
         <source>Projection</source>
-        <translation type="unfinished">Проекции</translation>
+        <translation type="unfinished">Проекция</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="92" />
         <location filename="../artisanlib/curves.py" line="511" />
         <source>Swap</source>
-        <translation>Менять</translation>
+        <translation>Поменять</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="1222" />
         <source>Glow</source>
-        <translation>Светиться</translation>
+        <translation>Свечение</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="1226" />
@@ -1555,12 +1555,12 @@ END</source>
     <message>
         <location filename="../artisanlib/curves.py" line="1308" />
         <source>Alarm Popups</source>
-        <translation type="unfinished">Сигнализационные всплывающие окна</translation>
+        <translation type="unfinished">Всплывающие окна сигналов</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="1368" />
         <source>Hide Image During Roast</source>
-        <translation>Скрыть изображение во время жарки</translation>
+        <translation>Скрывать изображение во время обжарки</translation>
     </message>
     <message>
         <location filename="../artisanlib/statistics.py" line="59" />
@@ -1611,12 +1611,12 @@ END</source>
     <message>
         <location filename="../artisanlib/dialogs.py" line="785" />
         <source>Use landmarks only</source>
-        <translation>Используйте только ориентиры</translation>
+        <translation>Только по ориентирам</translation>
     </message>
     <message>
         <location filename="../artisanlib/batches.py" line="42" />
         <source>Batch Counter</source>
-        <translation type="unfinished">Счетчик пакетов</translation>
+        <translation type="unfinished">Счётчик батчей</translation>
     </message>
     <message>
         <location filename="../artisanlib/batches.py" line="57" />
@@ -1645,35 +1645,35 @@ END</source>
     </message>
     <message>
         <source>CHARGE</source>
-        <translation type="vanished">Загрузить бобы</translation>
+        <translation type="vanished">Загрузка</translation>
     </message>
     <message>
         <source>DRY END</source>
-        <translation type="vanished">Закончить сушку</translation>
+        <translation type="vanished">Пожелтение</translation>
     </message>
     <message>
         <source>FC START</source>
-        <translation type="vanished">Cтарт FC</translation>
+        <translation type="vanished">ПКн</translation>
     </message>
     <message>
         <source>FC END</source>
-        <translation type="vanished">Закончить FC</translation>
+        <translation type="vanished">ПКк</translation>
     </message>
     <message>
         <source>SC START</source>
-        <translation type="vanished">Cтарт SC</translation>
+        <translation type="vanished">ВКн</translation>
     </message>
     <message>
         <source>SC END</source>
-        <translation type="vanished">Закончить SC</translation>
+        <translation type="vanished">ВКк</translation>
     </message>
     <message>
         <source>DROP</source>
-        <translation type="vanished">Выбрость бобы</translation>
+        <translation type="vanished">Выгрузка</translation>
     </message>
     <message>
         <source>COOL END</source>
-        <translation type="vanished">Закончить охлаждение</translation>
+        <translation type="vanished">Кон. охлаждения</translation>
     </message>
 </context><context>
     <name>ComboBox</name>
@@ -1690,12 +1690,12 @@ END</source>
     <message>
         <location filename="../artisanlib/axis.py" line="137" />
         <source>lower left</source>
-        <translation type="unfinished">Нижний левый</translation>
+        <translation type="unfinished">внизу слева</translation>
     </message>
     <message>
         <location filename="../artisanlib/axis.py" line="138" />
         <source>lower right</source>
-        <translation type="unfinished">Нижний правый</translation>
+        <translation type="unfinished">внизу справа</translation>
     </message>
     <message>
         <location filename="../artisanlib/axis.py" line="139" />
@@ -1705,45 +1705,45 @@ END</source>
     <message>
         <location filename="../artisanlib/axis.py" line="140" />
         <source>center left</source>
-        <translation type="unfinished">слева в центре</translation>
+        <translation type="unfinished">по центру слева</translation>
     </message>
     <message>
         <location filename="../artisanlib/axis.py" line="141" />
         <source>center right</source>
-        <translation type="unfinished">справа в центре</translation>
+        <translation type="unfinished">по центру справа</translation>
     </message>
     <message>
         <location filename="../artisanlib/axis.py" line="142" />
         <source>lower center</source>
-        <translation type="unfinished">нижний центр</translation>
+        <translation type="unfinished">внизу по центру</translation>
     </message>
     <message>
         <location filename="../artisanlib/axis.py" line="143" />
         <source>upper center</source>
-        <translation type="unfinished">верхний центр</translation>
+        <translation type="unfinished">вверху по центру</translation>
     </message>
     <message>
         <location filename="../artisanlib/axis.py" line="144" />
         <source>center</source>
-        <translation type="unfinished">центр</translation>
+        <translation type="unfinished">по центру</translation>
     </message>
     <message>
         <location filename="../artisanlib/comparator.py" line="993" />
         <location filename="../artisanlib/axis.py" line="193" />
         <source>Roast</source>
-        <translation type="unfinished">Жарить</translation>
+        <translation type="unfinished">Обжарка</translation>
     </message>
     <message>
         <location filename="../artisanlib/comparator.py" line="994" />
         <location filename="../artisanlib/axis.py" line="194" />
         <source>BBP+Roast</source>
-        <translation>BBP+Жаркое</translation>
+        <translation>BBP+Обжарка</translation>
     </message>
     <message>
         <location filename="../artisanlib/comparator.py" line="995" />
         <location filename="../artisanlib/axis.py" line="195" />
         <source>BBP</source>
-        <translation>ББП</translation>
+        <translation>BBP</translation>
     </message>
     <message>
         <location filename="../artisanlib/axis.py" line="210" />
@@ -1793,22 +1793,22 @@ END</source>
     <message>
         <location filename="../artisanlib/axis.py" line="282" />
         <source>solid</source>
-        <translation type="unfinished">твердый</translation>
+        <translation type="unfinished">сплошная</translation>
     </message>
     <message>
         <location filename="../artisanlib/axis.py" line="283" />
         <source>dashed</source>
-        <translation type="unfinished">пунктирная</translation>
+        <translation type="unfinished">штриховая</translation>
     </message>
     <message>
         <location filename="../artisanlib/axis.py" line="284" />
         <source>dashed-dot</source>
-        <translation type="unfinished">штрих-точка</translation>
+        <translation type="unfinished">штрихпунктирная</translation>
     </message>
     <message>
         <location filename="../artisanlib/axis.py" line="285" />
         <source>dotted</source>
-        <translation type="unfinished">пунктирной</translation>
+        <translation type="unfinished">пунктирная</translation>
     </message>
     <message>
         <location filename="../artisanlib/wheels.py" line="453" />
@@ -1829,7 +1829,7 @@ END</source>
         <location filename="../artisanlib/alarms.py" line="896" />
         <location filename="../artisanlib/pid_dialogs.py" line="825" />
         <source>Pop Up</source>
-        <translation type="unfinished">Всплывающие</translation>
+        <translation type="unfinished">Всплывающее окно</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="897" />
@@ -1845,7 +1845,7 @@ END</source>
         <location filename="../artisanlib/events.py" line="280" />
         <location filename="../artisanlib/pid_dialogs.py" line="827" />
         <source>Event Button</source>
-        <translation type="unfinished">Событие кнопки</translation>
+        <translation type="unfinished">Кнопка события</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="902" />
@@ -1877,7 +1877,7 @@ END</source>
         <location filename="../artisanlib/events.py" line="1348" />
         <location filename="../artisanlib/pid_dialogs.py" line="839" />
         <source>COOL END</source>
-        <translation type="unfinished">Закончить охлаждение</translation>
+        <translation type="unfinished">Кон. охлаждения</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="911" />
@@ -1914,7 +1914,7 @@ END</source>
         <location filename="../artisanlib/alarms.py" line="917" />
         <location filename="../artisanlib/pid_dialogs.py" line="846" />
         <source>SV</source>
-        <translation>СВ</translation>
+        <translation>SV</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="12314" />
@@ -1947,7 +1947,7 @@ END</source>
         <location filename="../artisanlib/events.py" line="761" />
         <location filename="../artisanlib/events.py" line="125" />
         <source>Serial Command</source>
-        <translation type="unfinished">Серийные команды</translation>
+        <translation type="unfinished">Команда Serial</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="1275" />
@@ -1960,21 +1960,21 @@ END</source>
         <location filename="../artisanlib/events.py" line="762" />
         <location filename="../artisanlib/events.py" line="128" />
         <source>Modbus Command</source>
-        <translation type="unfinished">Modbus команды</translation>
+        <translation type="unfinished">Команда Modbus</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="1259" />
         <location filename="../artisanlib/events.py" line="763" />
         <location filename="../artisanlib/events.py" line="129" />
         <source>DTA Command</source>
-        <translation type="unfinished">DTA Command</translation>
+        <translation type="unfinished">Команда DTA</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="1260" />
         <location filename="../artisanlib/events.py" line="771" />
         <location filename="../artisanlib/events.py" line="130" />
         <source>IO Command</source>
-        <translation type="unfinished">IO команды</translation>
+        <translation type="unfinished">Команда ввода-вывода</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="1261" />
@@ -2001,7 +2001,7 @@ END</source>
         <location filename="../artisanlib/events.py" line="1264" />
         <location filename="../artisanlib/events.py" line="134" />
         <source>p-i-d</source>
-        <translation>п-я-д</translation>
+        <translation>p-i-d</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="1265" />
@@ -2029,7 +2029,7 @@ END</source>
         <location filename="../artisanlib/events.py" line="772" />
         <location filename="../artisanlib/events.py" line="138" />
         <source>S7 Command</source>
-        <translation>S7 команда</translation>
+        <translation>Команда S7</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="1269" />
@@ -2063,14 +2063,14 @@ END</source>
         <location filename="../artisanlib/events.py" line="776" />
         <location filename="../artisanlib/events.py" line="143" />
         <source>Artisan Command</source>
-        <translation>Ремесленное командование</translation>
+        <translation>Команда Artisan</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="1274" />
         <location filename="../artisanlib/events.py" line="777" />
         <location filename="../artisanlib/events.py" line="144" />
         <source>RC Command</source>
-        <translation>RC команда</translation>
+        <translation>Команда RC</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="1276" />
@@ -2139,13 +2139,13 @@ END</source>
         <location filename="../artisanlib/curves.py" line="2247" />
         <location filename="../artisanlib/events.py" line="1097" />
         <source>ET</source>
-        <translation>восточноевропейское время</translation>
+        <translation>ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="2248" />
         <location filename="../artisanlib/events.py" line="1098" />
         <source>BT</source>
-        <translation>БТ</translation>
+        <translation>BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="844" />
@@ -2263,13 +2263,13 @@ END</source>
         <location filename="../artisanlib/curves.py" line="1000" />
         <location filename="../artisanlib/curves.py" line="968" />
         <source>120 secs before FCs</source>
-        <translation>120 секунд до FC</translation>
+        <translation>120 секунд до ПКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="1001" />
         <location filename="../artisanlib/curves.py" line="969" />
         <source>Custom</source>
-        <translation>Обычай</translation>
+        <translation>Свой</translation>
     </message>
     <message>
         <location filename="../artisanlib/statistics.py" line="195" />
@@ -2289,17 +2289,17 @@ END</source>
     <message>
         <location filename="../artisanlib/statistics.py" line="216" />
         <source>Weight Green</source>
-        <translation>Вес Зеленый</translation>
+        <translation>Вес зелёного</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="847" />
         <source>TP</source>
-        <translation>ТП</translation>
+        <translation>ТР</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="855" />
         <source>If Alarm</source>
-        <translation>Если тревога</translation>
+        <translation>Если сигнал</translation>
     </message>
     <message>
         <location filename="../artisanlib/transposer.py" line="145" />
@@ -2326,14 +2326,14 @@ END</source>
         <location filename="../artisanlib/canvas.py" line="1777" />
         <location filename="../artisanlib/canvas.py" line="1549" />
         <source>Damper</source>
-        <translation type="unfinished">Задвижка</translation>
+        <translation type="unfinished">Заслонка</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="1785" />
         <location filename="../artisanlib/canvas.py" line="1778" />
         <location filename="../artisanlib/canvas.py" line="1550" />
         <source>Burner</source>
-        <translation>горелка</translation>
+        <translation>Горелка</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="1577" />
@@ -2363,56 +2363,56 @@ END</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="1792" />
         <source>Heater</source>
-        <translation type="unfinished">Печь</translation>
+        <translation type="unfinished">Нагреватель</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="2420" />
         <source>Elec</source>
-        <translation>Элек</translation>
+        <translation>Электр.</translation>
     </message>
     <message>
         <source>CHARGE</source>
-        <translation type="vanished">Загрузить бобы</translation>
+        <translation type="vanished">Загрузка</translation>
     </message>
     <message>
         <source>DRY</source>
-        <translation type="vanished">Сухой</translation>
+        <translation type="vanished">Пожелтение</translation>
     </message>
     <message>
         <source>FCs</source>
-        <translation type="vanished">ФК</translation>
+        <translation type="vanished">ПКн</translation>
     </message>
     <message>
         <source>FCe</source>
-        <translation type="vanished">ФКе</translation>
+        <translation type="vanished">ПКк</translation>
     </message>
     <message>
         <source>SCs</source>
-        <translation type="vanished">СК</translation>
+        <translation type="vanished">ВКн</translation>
     </message>
     <message>
         <source>DROP</source>
-        <translation type="vanished">Выбросить бобы</translation>
+        <translation type="vanished">Выгрузка</translation>
     </message>
     <message>
         <source>DRY END</source>
-        <translation type="vanished">Закончить сушку</translation>
+        <translation type="vanished">Пожелтение</translation>
     </message>
     <message>
         <source>FC START</source>
-        <translation type="vanished">Старт FC</translation>
+        <translation type="vanished">ПКн</translation>
     </message>
     <message>
         <source>FC END</source>
-        <translation type="vanished">Закончить FC</translation>
+        <translation type="vanished">ПКк</translation>
     </message>
     <message>
         <source>SC START</source>
-        <translation type="vanished">Старт SC</translation>
+        <translation type="vanished">ВКн</translation>
     </message>
     <message>
         <source>SC END</source>
-        <translation type="vanished">Закончить SC</translation>
+        <translation type="vanished">ВКк</translation>
     </message>
     <message>
         <source>COOL</source>
@@ -2423,32 +2423,32 @@ END</source>
     <message>
         <location filename="../plus/schedule.py" line="1554" />
         <source>All batches prepared</source>
-        <translation>Все партии подготовлены</translation>
+        <translation>Все батчи подготовлены</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="1557" />
         <source>One more batch prepared</source>
-        <translation>Еще одна партия готова</translation>
+        <translation>Ещё один батч готов</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="1561" />
         <source>One less batch prepared</source>
-        <translation>На одну партию меньше приготовлено</translation>
+        <translation>На один батч меньше</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="1564" />
         <source>No batch prepared</source>
-        <translation>Не подготовлена ​​партия</translation>
+        <translation>Нет подготовленных батчей</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="1576" />
         <source>Register roast</source>
-        <translation>Регистрация жаркого</translation>
+        <translation>Регистрация обжарки</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="1584" />
         <source>Hide</source>
-        <translation>Скрывать</translation>
+        <translation>Скрыть</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="18421" />
@@ -2473,7 +2473,7 @@ END</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="18441" />
         <source>Reset Designer</source>
-        <translation>Сброс отрисовщика</translation>
+        <translation>Сброс проектировщика</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="18445" />
@@ -2483,12 +2483,12 @@ END</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="19222" />
         <source>Add to Cupping Notes</source>
-        <translation>Добавить в примечания к купированию</translation>
+        <translation>Добавить в заметки каппинга</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="19226" />
         <source>Add to Roasting Notes</source>
-        <translation>Добавить примечания к обжарке</translation>
+        <translation>Добавить в заметки обжарки</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="19232" />
@@ -2520,7 +2520,7 @@ END</source>
     <message>
         <location filename="../plus/countries.py" line="30" />
         <source>American Samoa</source>
-        <translation>американское Самоа</translation>
+        <translation>Американское Самоа</translation>
     </message>
     <message>
         <location filename="../plus/countries.py" line="31" />
@@ -3485,7 +3485,7 @@ END</source>
     <message>
         <location filename="../plus/countries.py" line="225" />
         <source>Saint Lucia</source>
-        <translation>Санкт-Люсия</translation>
+        <translation>Сент-Люсия</translation>
     </message>
     <message>
         <location filename="../plus/countries.py" line="226" />
@@ -3580,7 +3580,7 @@ END</source>
     <message>
         <location filename="../plus/countries.py" line="246" />
         <source>South Sudan</source>
-        <translation>южный Судан</translation>
+        <translation>Южный Судан</translation>
     </message>
     <message>
         <location filename="../plus/countries.py" line="247" />
@@ -3670,7 +3670,7 @@ END</source>
     <message>
         <location filename="../plus/countries.py" line="264" />
         <source>Togo</source>
-        <translation>Идти</translation>
+        <translation>Того</translation>
     </message>
     <message>
         <location filename="../plus/countries.py" line="265" />
@@ -3822,7 +3822,7 @@ END</source>
     <message>
         <location filename="../artisanlib/dialogs.py" line="769" />
         <source>Designer Spline Fit</source>
-        <translation>Дизайнерская сплайновая посадка</translation>
+        <translation>Сплайновая аппроксимация (проектировщик)</translation>
     </message>
 </context><context>
     <name>Error Message</name>
@@ -4404,7 +4404,7 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="19758" />
         <source>Could not start Task Green remote display. Selected port might be busy.</source>
-        <translation>Не удалось запустить задачу Зеленый удаленный дисплей. Выбранный порт может быть занят.</translation>
+        <translation>Не удалось запустить удалённый дисплей задачи (зелёное). Выбранный порт может быть занят.</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="19802" />
@@ -4414,7 +4414,7 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="19808" />
         <source>Could not start Task Roasted remote display. Selected port might be busy.</source>
-        <translation>Не удалось запустить задачу Roasted remote display. Выбранный порт может быть занят.</translation>
+        <translation>Не удалось запустить удалённый дисплей задачи (обжаренное). Возможно, выбранный порт занят.</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="21230" />
@@ -4471,13 +4471,13 @@ END</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="17569" />
         <source>Error in lnRegression:</source>
-        <translation>Ошибка в lnRegrade:</translation>
+        <translation>Ошибка в lnRegression:</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="18350" />
         <location filename="../artisanlib/canvas.py" line="18346" />
         <source>Exception: redrawdesigner() Roast events may be out of order. Resetting Designer.</source>
-        <translation>Исключение: redrawdesigner() События Roast могут быть не в порядке. Сброс дизайнера.</translation>
+        <translation>Исключение: redrawdesigner(): события обжарки могут быть не по порядку. Сброс проектировщика.</translation>
     </message>
 </context><context>
     <name>Form Caption</name>
@@ -4490,7 +4490,7 @@ END</source>
     <message>
         <location filename="../artisanlib/axis.py" line="70" />
         <source>Axes</source>
-        <translation>Топоры</translation>
+        <translation>Оси</translation>
     </message>
     <message>
         <location filename="../artisanlib/wheels.py" line="41" />
@@ -4545,7 +4545,7 @@ END</source>
     <message>
         <location filename="../artisanlib/comm.py" line="177" />
         <source>Manual Temperature Logger</source>
-        <translation type="unfinished">Ручная температура регистратора</translation>
+        <translation type="unfinished">Ручной регистратор температуры</translation>
     </message>
     <message>
         <location filename="../artisanlib/autosave.py" line="37" />
@@ -4560,12 +4560,12 @@ END</source>
     <message>
         <location filename="../artisanlib/autosave.py" line="191" />
         <source>AutoSave Path</source>
-        <translation type="unfinished">Автосохранение траектории</translation>
+        <translation type="unfinished">Путь автосохранения</translation>
     </message>
     <message>
         <location filename="../artisanlib/autosave.py" line="196" />
         <source>AutoSave Save Also Path</source>
-        <translation>Автосохранение Сохранить также путь</translation>
+        <translation>Путь для «Сохранить также»</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="151" />
@@ -4579,7 +4579,7 @@ END</source>
         <location filename="../artisanlib/events.py" line="888" />
         <location filename="../artisanlib/events.py" line="883" />
         <source>Slider Calculator</source>
-        <translation>Слайдер Калькулятор</translation>
+        <translation>Калькулятор слайдера</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="3724" />
@@ -4603,7 +4603,7 @@ END</source>
         <location filename="../artisanlib/calculator.py" line="58" />
         <location filename="../artisanlib/events.py" line="3881" />
         <source>Event</source>
-        <translation>Мероприятие</translation>
+        <translation>Событие</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="70" />
@@ -4618,7 +4618,7 @@ END</source>
     <message>
         <location filename="../artisanlib/ports.py" line="390" />
         <source>Ports Configuration</source>
-        <translation type="unfinished">Конфигурация Ports</translation>
+        <translation type="unfinished">Конфигурация портов</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="1705" />
@@ -4633,7 +4633,7 @@ END</source>
     <message>
         <location filename="../artisanlib/background.py" line="49" />
         <source>Profile Background</source>
-        <translation type="unfinished">Профиль Фона</translation>
+        <translation type="unfinished">Фоновый профиль</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="79" />
@@ -4648,7 +4648,7 @@ END</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="4224" />
         <source>Energy Help</source>
-        <translation>Энергетическая помощь</translation>
+        <translation>Справка по энергии</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="5918" />
@@ -4683,7 +4683,7 @@ END</source>
     <message>
         <location filename="../artisanlib/designer.py" line="40" />
         <source>Designer Config</source>
-        <translation type="unfinished">Конфиг Отрисовщика</translation>
+        <translation type="unfinished">Конфигурация проектировщика</translation>
     </message>
     <message>
         <location filename="../artisanlib/designer.py" line="713" />
@@ -4726,12 +4726,12 @@ END</source>
     <message>
         <location filename="../artisanlib/alarms.py" line="62" />
         <source>Alarms</source>
-        <translation type="unfinished">Сигналы тревоги</translation>
+        <translation type="unfinished">Сигналы</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="1160" />
         <source>Alarms Help</source>
-        <translation>Справка по сигналам тревоги</translation>
+        <translation>Справка по сигналам</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="13303" />
@@ -4741,7 +4741,7 @@ END</source>
     <message>
         <location filename="../artisanlib/batches.py" line="35" />
         <source>Batch</source>
-        <translation type="unfinished">Партия</translation>
+        <translation type="unfinished">Батч</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="54" />
@@ -4756,12 +4756,12 @@ END</source>
     <message>
         <location filename="../artisanlib/transposer.py" line="64" />
         <source>Profile Transposer</source>
-        <translation>Транспозитор профиля</translation>
+        <translation>Транспозер профиля</translation>
     </message>
     <message>
         <location filename="../artisanlib/transposer.py" line="620" />
         <source>Profile Transposer Help</source>
-        <translation>Справка по переносчику профилей</translation>
+        <translation>Справка по транспозеру профиля</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="41" />
@@ -4771,7 +4771,7 @@ END</source>
     <message>
         <location filename="../artisanlib/cup_profile.py" line="50" />
         <source>Cup Profile</source>
-        <translation type="unfinished">Cup профиль</translation>
+        <translation type="unfinished">Профиль чашки</translation>
     </message>
 </context><context>
     <name>GroupBox</name>
@@ -4811,7 +4811,7 @@ END</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="66" />
         <source>p-i-d</source>
-        <translation>п-я-д</translation>
+        <translation>p-i-d</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="418" />
@@ -4831,7 +4831,7 @@ END</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="621" />
         <source>Duty</source>
-        <translation>Долг</translation>
+        <translation>Скважность</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="1195" />
@@ -4841,7 +4841,7 @@ END</source>
     <message>
         <location filename="../artisanlib/events.py" line="1253" />
         <source>Event Types</source>
-        <translation type="unfinished">Типы Событий</translation>
+        <translation type="unfinished">Типы событий</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="1453" />
@@ -4877,7 +4877,7 @@ END</source>
         <location filename="../artisanlib/ports.py" line="1170" />
         <location filename="../artisanlib/ports.py" line="694" />
         <source>PID</source>
-        <translation>ПИД-регулятор</translation>
+        <translation>PID</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="836" />
@@ -4898,7 +4898,7 @@ END</source>
     <message>
         <location filename="../artisanlib/ports.py" line="1252" />
         <source>Machine</source>
-        <translation type="unfinished">Машина</translation>
+        <translation type="unfinished">Аппарат</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="1291" />
@@ -4942,7 +4942,7 @@ END</source>
         <location filename="../artisanlib/canvas.py" line="16114" />
         <location filename="../artisanlib/roast_properties.py" line="2927" />
         <source>CO2</source>
-        <translation type="unfinished">СО2</translation>
+        <translation type="unfinished">CO2</translation>
     </message>
     <message>
         <location filename="../artisanlib/designer.py" line="295" />
@@ -4957,37 +4957,37 @@ END</source>
     <message>
         <location filename="../artisanlib/calculator.py" line="181" />
         <source>Temperature Conversion</source>
-        <translation type="unfinished">Температура преобразования</translation>
+        <translation type="unfinished">Преобразование температуры</translation>
     </message>
     <message>
         <location filename="../artisanlib/calculator.py" line="183" />
         <source>Weight Conversion</source>
-        <translation type="unfinished">Вес преобразования</translation>
+        <translation type="unfinished">Преобразование веса</translation>
     </message>
     <message>
         <location filename="../artisanlib/calculator.py" line="185" />
         <source>Volume Conversion</source>
-        <translation type="unfinished">Объем преобразования</translation>
+        <translation type="unfinished">Преобразование объёма</translation>
     </message>
     <message>
         <location filename="../artisanlib/calculator.py" line="187" />
         <source>Extraction Yield</source>
-        <translation>Выход извлечения</translation>
+        <translation>Выход экстракции</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="572" />
         <source>Rate of Rise Curves</source>
-        <translation>Кривые скорости нарастания</translation>
+        <translation>Кривые RoR</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="574" />
         <source>Rate of Rise LCDs</source>
-        <translation>Скорость подъема ЖК-дисплеев</translation>
+        <translation>ЖК-дисплеи RoR</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="593" />
         <source>Rate of Rise Symbolic Assignments</source>
-        <translation>Скорость роста символических присвоений</translation>
+        <translation>Символьные назначения RoR</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="619" />
@@ -5007,7 +5007,7 @@ END</source>
     <message>
         <location filename="../artisanlib/curves.py" line="691" />
         <source>Rate of Rise Filter</source>
-        <translation>Скорость нарастания фильтра</translation>
+        <translation>Фильтр RoR</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="1080" />
@@ -5042,7 +5042,7 @@ END</source>
     <message>
         <location filename="../artisanlib/curves.py" line="1178" />
         <source>Interval of Interest Options</source>
-        <translation>Интервал процентных опционов</translation>
+        <translation>Параметры интересующего интервала</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="1192" />
@@ -5078,7 +5078,7 @@ END</source>
         <location filename="../artisanlib/statistics.py" line="212" />
         <location filename="../artisanlib/statistics.py" line="172" />
         <source>AUC</source>
-        <translation>АУК</translation>
+        <translation>AUC</translation>
     </message>
     <message>
         <location filename="../artisanlib/statistics.py" line="174" />
@@ -5093,12 +5093,12 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="19733" />
         <source>Task Green</source>
-        <translation>Задача Грин</translation>
+        <translation>Задача: зелёное</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="19783" />
         <source>Task Roasted</source>
-        <translation>Задача Жареная</translation>
+        <translation>Задача: обжаренное</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="101" />
@@ -5124,12 +5124,12 @@ END</source>
     <message>
         <location filename="../artisanlib/devices.py" line="1061" />
         <source>IR</source>
-        <translation>ИК</translation>
+        <translation>IR</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1438" />
         <source>Arduino TC4</source>
-        <translation>Ардуино TC4</translation>
+        <translation>Arduino TC4</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1450" />
@@ -5139,7 +5139,7 @@ END</source>
     <message>
         <location filename="../artisanlib/devices.py" line="1464" />
         <source>Symbolic Assignments</source>
-        <translation type="unfinished">Символические задания</translation>
+        <translation type="unfinished">Символьные назначения</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1819" />
@@ -5150,33 +5150,33 @@ END</source>
     <message>
         <location filename="../artisanlib/devices.py" line="1930" />
         <source>Container Green</source>
-        <translation>Контейнер зеленый</translation>
+        <translation>Контейнер: зелёное</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1933" />
         <source>Container Roasted</source>
-        <translation>Контейнер жареный</translation>
+        <translation>Контейнер: обжаренное</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1936" />
         <source>Task Display Green</source>
-        <translation>Дисплей задачи зеленый</translation>
+        <translation>Дисплей задачи: зелёное</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1938" />
         <source>Task Display Roasted</source>
-        <translation>Задача Дисплей Жареный</translation>
+        <translation>Дисплей задачи: обжаренное</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="497" />
         <source>Timer LCD</source>
-        <translation type="unfinished">Таймер LCD</translation>
+        <translation type="unfinished">ЖК-дисплей таймера</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="506" />
         <location filename="../artisanlib/colors.py" line="500" />
         <source>ET LCD</source>
-        <translation>ЖК-экран ET</translation>
+        <translation>ЖК-дисплей ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="509" />
@@ -5192,7 +5192,7 @@ END</source>
     <message>
         <location filename="../artisanlib/colors.py" line="515" />
         <source>Ramp/Soak Timer LCD</source>
-        <translation>ЖК-дисплей с таймером разгона / выдержки</translation>
+        <translation>ЖК-дисплей таймера рампы/выдержки</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="518" />
@@ -5206,7 +5206,7 @@ END</source>
         <location filename="../artisanlib/main.py" line="22426" />
         <location filename="../artisanlib/statistics.py" line="219" />
         <source>BBP Total Time</source>
-        <translation>Общее время ББП</translation>
+        <translation>Общее время BBP</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12022" />
@@ -5218,7 +5218,7 @@ END</source>
     <message>
         <location filename="../artisanlib/statistics.py" line="221" />
         <source>BBP Summary</source>
-        <translation>Сводка ББП</translation>
+        <translation>Сводка BBP</translation>
     </message>
     <message>
         <location filename="../artisanlib/statistics.py" line="223" />
@@ -5230,7 +5230,7 @@ END</source>
         <location filename="../artisanlib/main.py" line="22324" />
         <location filename="../artisanlib/statistics.py" line="227" />
         <source>Whole Color</source>
-        <translation type="unfinished">Весь цвет</translation>
+        <translation type="unfinished">Цвет зерна</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22305" />
@@ -5242,14 +5242,14 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="21854" />
         <source>Roast Batches</source>
-        <translation type="unfinished">Партии обжарки</translation>
+        <translation type="unfinished">Батчи обжарки</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22303" />
         <location filename="../artisanlib/main.py" line="22052" />
         <location filename="../artisanlib/main.py" line="21862" />
         <source>Batch</source>
-        <translation type="unfinished">Партия</translation>
+        <translation type="unfinished">Батч</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23207" />
@@ -5262,7 +5262,7 @@ END</source>
         <location filename="../artisanlib/main.py" line="22060" />
         <location filename="../artisanlib/main.py" line="21865" />
         <source>Beans</source>
-        <translation type="unfinished">Бобы</translation>
+        <translation type="unfinished">Зёрна</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23209" />
@@ -5298,7 +5298,7 @@ END</source>
         <location filename="../artisanlib/main.py" line="22118" />
         <location filename="../artisanlib/main.py" line="21871" />
         <source>SUM</source>
-        <translation>СУММА</translation>
+        <translation>Сумма</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22046" />
@@ -5319,43 +5319,43 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22071" />
         <source>Defects Loss</source>
-        <translation>Дефекты Потеря</translation>
+        <translation>Потери на дефектах</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22376" />
         <location filename="../artisanlib/main.py" line="22306" />
         <source>Weight In</source>
-        <translation>Вес</translation>
+        <translation>Вес (загрузка)</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22331" />
         <location filename="../artisanlib/main.py" line="22307" />
         <source>CHARGE BT</source>
-        <translation>ЗАРЯДКА БТ</translation>
+        <translation>Загрузка BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22338" />
         <location filename="../artisanlib/main.py" line="22308" />
         <source>FCs Time</source>
-        <translation>Время ФК</translation>
+        <translation>Время ПКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22340" />
         <location filename="../artisanlib/main.py" line="22309" />
         <source>FCs BT</source>
-        <translation>ФК БТ</translation>
+        <translation>ПКн BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22350" />
         <location filename="../artisanlib/main.py" line="22310" />
         <source>DROP Time</source>
-        <translation>Время сброса</translation>
+        <translation>Время выгрузки</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22352" />
         <location filename="../artisanlib/main.py" line="22311" />
         <source>DROP BT</source>
-        <translation>ОТКАЗАТЬ БТ</translation>
+        <translation>Выгрузка BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22312" />
@@ -5376,7 +5376,7 @@ END</source>
         <location filename="../artisanlib/main.py" line="22370" />
         <location filename="../artisanlib/main.py" line="22315" />
         <source>AUC</source>
-        <translation>АУК</translation>
+        <translation>AUC</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22378" />
@@ -5393,7 +5393,7 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22318" />
         <source>Cupping</source>
-        <translation>Банки</translation>
+        <translation>Каппинг</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22319" />
@@ -5408,7 +5408,7 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22321" />
         <source>Operator</source>
-        <translation>Оператор</translation>
+        <translation>Обжарщик</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22322" />
@@ -5423,7 +5423,7 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22325" />
         <source>Ground Color</source>
-        <translation type="unfinished">Основной цвет</translation>
+        <translation type="unfinished">Цвет молотого</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22326" />
@@ -5443,57 +5443,57 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22329" />
         <source>Bean Temp</source>
-        <translation>Температура бобов</translation>
+        <translation>Температура зерна</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22330" />
         <source>CHARGE ET</source>
-        <translation>ЗАРЯД ET</translation>
+        <translation>Загрузка ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22332" />
         <source>TP Time</source>
-        <translation>Время ТП</translation>
+        <translation>Время ТР</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22333" />
         <source>TP ET</source>
-        <translation>ТП ЕТ</translation>
+        <translation>ТР ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22334" />
         <source>TP BT</source>
-        <translation>ТП БТ</translation>
+        <translation>ТР BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22335" />
         <source>DRY Time</source>
-        <translation>Время высыхания</translation>
+        <translation>Время пожелтения</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22336" />
         <source>DRY ET</source>
-        <translation>СУХОЙ ЭТ.</translation>
+        <translation>Пожелтение ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22337" />
         <source>DRY BT</source>
-        <translation>СУХОЙ БТ</translation>
+        <translation>Пожелтение BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22339" />
         <source>FCs ET</source>
-        <translation>ФК ET</translation>
+        <translation>ПКн ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22341" />
         <source>FCe Time</source>
-        <translation>Время FCe</translation>
+        <translation>Время ПКк</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22342" />
         <source>FCe ET</source>
-        <translation type="unfinished" />
+        <translation>ПКк ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22343" />
@@ -5503,27 +5503,27 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22344" />
         <source>SCs Time</source>
-        <translation>СЦ Время</translation>
+        <translation>Время ВКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22345" />
         <source>SCs ET</source>
-        <translation>СЦ ЭТ</translation>
+        <translation>ВКн ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22346" />
         <source>SCs BT</source>
-        <translation>СЦ БТ</translation>
+        <translation>ВКн BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22347" />
         <source>SCe Time</source>
-        <translation>Время SCe</translation>
+        <translation>Время ВКк</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22348" />
         <source>SCe ET</source>
-        <translation type="unfinished" />
+        <translation>ВКк ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22349" />
@@ -5533,22 +5533,22 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22351" />
         <source>DROP ET</source>
-        <translation>ОТПРАВИТЬ ЭТ.</translation>
+        <translation>Выгрузка ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22353" />
         <source>COOL Time</source>
-        <translation>Классное время</translation>
+        <translation>Время охлаждения</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22354" />
         <source>COOL ET</source>
-        <translation>КРУТО ET</translation>
+        <translation>Охлаждение ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22355" />
         <source>COOL BT</source>
-        <translation>КРУТЫЙ БТ</translation>
+        <translation>Охлаждение BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22356" />
@@ -5608,27 +5608,27 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22367" />
         <source>Total RoR</source>
-        <translation>Общий рентабельность инвестиций</translation>
+        <translation>Общий RoR</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22368" />
         <source>FCs RoR</source>
-        <translation>ФК РоР</translation>
+        <translation>ПКн RoR</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22369" />
         <source>MET</source>
-        <translation type="unfinished">ВСТРЕТИЛИСЬ</translation>
+        <translation type="unfinished">MET</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22371" />
         <source>AUC Begin</source>
-        <translation>AUC Начало</translation>
+        <translation>Начало AUC</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22372" />
         <source>AUC Base</source>
-        <translation>База АУК</translation>
+        <translation>База AUC</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22373" />
@@ -5648,7 +5648,7 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22377" />
         <source>Weight Out</source>
-        <translation>Вес вне</translation>
+        <translation>Вес (выгрузка)</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22379" />
@@ -5663,12 +5663,12 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22381" />
         <source>Volume In</source>
-        <translation>Громкость входная</translation>
+        <translation>Объём (загрузка)</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22382" />
         <source>Volume Out</source>
-        <translation>Выход громкости</translation>
+        <translation>Объём (выгрузка)</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22383" />
@@ -5678,22 +5678,22 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22384" />
         <source>Green Density</source>
-        <translation>Зеленая плотность</translation>
+        <translation>Плотность зелёного</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22385" />
         <source>Roasted Density</source>
-        <translation>Плотность обжарки</translation>
+        <translation>Плотность обжаренного</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22386" />
         <source>Moisture Greens</source>
-        <translation type="unfinished">Влага зелени</translation>
+        <translation type="unfinished">Влажность, зелёное</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22387" />
         <source>Moisture Roasted</source>
-        <translation type="unfinished">Жареный на влажной основе</translation>
+        <translation type="unfinished">Влажность, обжаренное</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22388" />
@@ -5724,33 +5724,33 @@ END</source>
         <location filename="../artisanlib/main.py" line="23882" />
         <location filename="../artisanlib/main.py" line="22394" />
         <source>Roasting Notes</source>
-        <translation type="unfinished">Примечание по обжарке</translation>
+        <translation type="unfinished">Заметки об обжарке</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23891" />
         <location filename="../artisanlib/main.py" line="22395" />
         <source>Cupping Notes</source>
-        <translation type="unfinished">Примечания к банкам</translation>
+        <translation type="unfinished">Заметки каппинга</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22396" />
         <source>Heavy FC</source>
-        <translation type="unfinished">Высокая FC</translation>
+        <translation type="unfinished">Сильный ПК</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22397" />
         <source>Low FC</source>
-        <translation type="unfinished">Низкая FC</translation>
+        <translation type="unfinished">Слабый ПК</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22398" />
         <source>Light Cut</source>
-        <translation>Легкая стрижка</translation>
+        <translation>Светлый срез</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22399" />
         <source>Dark Cut</source>
-        <translation type="unfinished">Темный разрез</translation>
+        <translation type="unfinished">Тёмный срез</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22400" />
@@ -5770,17 +5770,17 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22403" />
         <source>Tipping</source>
-        <translation type="unfinished">Чаевые</translation>
+        <translation type="unfinished">Типпинг</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22404" />
         <source>Scorching</source>
-        <translation type="unfinished">Палящий</translation>
+        <translation type="unfinished">Скорчинг</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22405" />
         <source>Divots</source>
-        <translation type="unfinished">Дивоты</translation>
+        <translation type="unfinished">Вмятины</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22406" />
@@ -5790,22 +5790,22 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22407" />
         <source>BTU Batch</source>
-        <translation>БТУ партия</translation>
+        <translation>BTU, батч</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22408" />
         <source>BTU Batch per green kg</source>
-        <translation>БТЕ Партия на кг зеленого цвета</translation>
+        <translation>БТЕ Партия на кг зелёного</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22409" />
         <source>CO2 Batch</source>
-        <translation>Партия CO2</translation>
+        <translation>CO2, батч</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22410" />
         <source>BTU Preheat</source>
-        <translation>БТЕ Предварительный нагрев</translation>
+        <translation>BTU, прогрев</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22411" />
@@ -5815,17 +5815,17 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22412" />
         <source>BTU BBP</source>
-        <translation>БТУ ББП</translation>
+        <translation>BTU BBP</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22413" />
         <source>CO2 BBP</source>
-        <translation>CO2 ББП</translation>
+        <translation>CO2 BBP</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22414" />
         <source>BTU Cooling</source>
-        <translation>БТЕ Охлаждение</translation>
+        <translation>BTU, охлаждение</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22415" />
@@ -5835,12 +5835,12 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22416" />
         <source>BTU Roast</source>
-        <translation>БТЕ обжарки</translation>
+        <translation>BTU обжарки</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22417" />
         <source>BTU Roast per green kg</source>
-        <translation>БТЕ жареного мяса на кг зелени</translation>
+        <translation>BTU обжарки на кг зелёного</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22418" />
@@ -5850,27 +5850,27 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22419" />
         <source>CO2 Batch per green kg</source>
-        <translation>Партия CO2 на кг зеленого цвета</translation>
+        <translation>Партия CO2 на кг зелёного</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22420" />
         <source>BTU LPG</source>
-        <translation>БТЕ СУГ</translation>
+        <translation>BTU, СУГ</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22421" />
         <source>BTU NG</source>
-        <translation>БТЕ НГ</translation>
+        <translation>BTU, ПГ</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22422" />
         <source>BTU ELEC</source>
-        <translation>БТУ ЭЛЕКТРО</translation>
+        <translation>BTU, электр.</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22423" />
         <source>Efficiency Batch</source>
-        <translation>Пакетная эффективность</translation>
+        <translation>Эффективность батча</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22424" />
@@ -5880,7 +5880,7 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="22425" />
         <source>BBP Begin</source>
-        <translation>ББП Начало</translation>
+        <translation>Начало BBP</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="22428" />
@@ -5920,12 +5920,12 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="23459" />
         <source>AVG</source>
-        <translation>СРЕДНИЙ</translation>
+        <translation>Средн.</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23810" />
         <source>Roasting Report</source>
-        <translation type="unfinished">Доклад о обжарке</translation>
+        <translation type="unfinished">Отчёт об обжарке</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23811" />
@@ -5935,7 +5935,7 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="23813" />
         <source>Beans:</source>
-        <translation type="unfinished">Бобы:</translation>
+        <translation type="unfinished">Зёрна:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23815" />
@@ -5955,7 +5955,7 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="23823" />
         <source>Operator:</source>
-        <translation type="unfinished">Оператор:</translation>
+        <translation type="unfinished">Обжарщик:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23825" />
@@ -5966,7 +5966,7 @@ END</source>
         <location filename="../artisanlib/canvas.py" line="11993" />
         <location filename="../artisanlib/main.py" line="23827" />
         <source>Cupping:</source>
-        <translation>Банкирование:</translation>
+        <translation>Каппинг:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23829" />
@@ -5981,12 +5981,12 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="23833" />
         <source>CO2:</source>
-        <translation>СО2:</translation>
+        <translation>CO2:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23835" />
         <source>CHARGE:</source>
-        <translation type="unfinished">Загрузка бобов:</translation>
+        <translation type="unfinished">Загрузка:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23837" />
@@ -6011,52 +6011,52 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="23846" />
         <source>TP:</source>
-        <translation>ТП:</translation>
+        <translation>ТР:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23848" />
         <source>DRY:</source>
-        <translation type="unfinished">Сухой:</translation>
+        <translation type="unfinished">Пожелтение:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23850" />
         <source>FCs:</source>
-        <translation>ФК:</translation>
+        <translation>ПКн:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23852" />
         <source>FCe:</source>
-        <translation>ФКе:</translation>
+        <translation>ПКк:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23854" />
         <source>SCs:</source>
-        <translation>СЦ:</translation>
+        <translation>ВКн:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23856" />
         <source>SCe:</source>
-        <translation type="unfinished" />
+        <translation>ВКк:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23858" />
         <source>DROP:</source>
-        <translation type="unfinished">Выброс бобов:</translation>
+        <translation type="unfinished">Выгрузка:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23860" />
         <source>COOL:</source>
-        <translation type="unfinished">Охлаждение бобов:</translation>
+        <translation type="unfinished">Охлаждение:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23862" />
         <source>MET:</source>
-        <translation>ВСТРЕТИЛ:</translation>
+        <translation>MET:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23864" />
         <source>CM:</source>
-        <translation>СМ:</translation>
+        <translation>CM:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23866" />
@@ -6066,7 +6066,7 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="23868" />
         <source>Maillard:</source>
-        <translation type="unfinished">Майара:</translation>
+        <translation type="unfinished">Майяр:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23870" />
@@ -6086,17 +6086,17 @@ END</source>
     <message>
         <location filename="../artisanlib/main.py" line="23876" />
         <source>Alarms:</source>
-        <translation>Сигналы тревоги:</translation>
+        <translation>Сигналы:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23878" />
         <source>RoR:</source>
-        <translation>РоР:</translation>
+        <translation>RoR:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23880" />
         <source>AUC:</source>
-        <translation>АУК:</translation>
+        <translation>AUC:</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23888" />
@@ -6108,13 +6108,13 @@ END</source>
     <message>
         <location filename="../help/alarms_help.py" line="14" />
         <source>ALARMS</source>
-        <translation>БУДИЛЬНИКИ</translation>
+        <translation>Сигналы</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="18" />
         <source>Each alarm is only triggered once.
 Alarms are scanned in order from the top of the table to the bottom.</source>
-        <translation>Каждый сигнал тревоги срабатывает только один раз.
+        <translation>Каждый сигнал срабатывает только один раз.
 Аварийные сигналы сканируются в порядке от верха таблицы к низу.</translation>
     </message>
     <message>
@@ -6161,7 +6161,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="22" />
         <source>Alarm number for reference.</source>
-        <translation>Номер сигнала тревоги для справки.</translation>
+        <translation>Номер сигнала для справки.</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="23" />
@@ -6171,27 +6171,27 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="23" />
         <source>Activate or Deactivate the alarm.</source>
-        <translation>Активировать или деактивировать будильник.</translation>
+        <translation>Активировать или отключить сигнал.</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="24" />
         <source>If Alarm</source>
-        <translation type="unfinished">Если тревога</translation>
+        <translation type="unfinished">Если сигнал</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="24" />
         <source>Alarm triggered only if the alarm with the given number was triggered before. Use 0 for no guard.</source>
-        <translation>Тревога срабатывает только в том случае, если раньше срабатывала тревога с данным номером. Используйте 0 для отсутствия охраны.</translation>
+        <translation>Сигнал срабатывает, только если ранее сработал сигнал с указанным номером. 0 — без условия.</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="25" />
         <source>But Not</source>
-        <translation type="unfinished">Но Не</translation>
+        <translation type="unfinished">Но не</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="25" />
         <source>Alarm triggered only if the alarm with the given number was not triggered before. Use 0 for no guard.</source>
-        <translation>Тревога срабатывает только в том случае, если тревога с данным номером не срабатывала ранее. Используйте 0 для отсутствия охраны.</translation>
+        <translation>Сигнал срабатывает, только если сигнал с указанным номером ранее не срабатывал. 0 — без условия.</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="26" />
@@ -6201,7 +6201,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="26" />
         <source>Alarm only triggered after the given event.</source>
-        <translation>Тревога срабатывает только после данного события.</translation>
+        <translation>Сигнал срабатывает только после указанного события.</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="27" />
@@ -6211,7 +6211,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="27" />
         <source>If not 00:00, alarm is triggered mm:ss after the event "From" happens.</source>
-        <translation>Если не 00:00, тревога срабатывает мм:сс после наступления события "От".</translation>
+        <translation>Если не 00:00, сигнал срабатывает через мм:сс после наступления события «От».</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="30" />
@@ -6233,7 +6233,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="29" />
         <source>Alarm is triggered if source rises above or below the specified temperature.</source>
-        <translation>Тревога срабатывает, если источник поднимается выше или ниже заданной температуры.</translation>
+        <translation>Сигнал срабатывает, если источник поднимается выше или опускается ниже заданной температуры.</translation>
     </message>
     <message>
         <location filename="../help/eventsliders_help.py" line="26" />
@@ -6266,7 +6266,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="32" />
         <source>Commands for alarms with an action go here.  Anything after a &amp;#39;#&amp;#39; character is considered a comment and is ignored when processing the alarm.</source>
-        <translation>Здесь размещаются команды для оповещений с указанием действия. Все, что находится после символа "#", считается комментарием и игнорируется при обработке оповещения.</translation>
+        <translation>Команды для сигналов с действием указываются здесь. Всё после символа «#» считается комментарием и игнорируется при обработке сигнала.</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="35" />
@@ -6288,7 +6288,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="39" />
         <source>Adds a new alarm to the bottom of the table.</source>
-        <translation>Добавляет новый будильник в конец таблицы.</translation>
+        <translation>Добавляет новый сигнал в конец таблицы.</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="41" />
@@ -6299,7 +6299,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="40" />
         <source>Inserts a new alarm above the selected alarm.</source>
-        <translation>Вставляет новый будильник над выбранным будильником.</translation>
+        <translation>Вставляет новый сигнал над выбранным.</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="42" />
@@ -6310,7 +6310,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="41" />
         <source>Deletes the selected alarm.</source>
-        <translation>Удаляет выбранный будильник.</translation>
+        <translation>Удаляет выбранный сигнал.</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="43" />
@@ -6321,7 +6321,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="42" />
         <source>Copy the alarm table in tab separated format to the clipboard.  Option or ALT click to copy a tabular format to the clipboard.</source>
-        <translation>Скопируйте таблицу аварийных сигналов в формате, разделенном табуляцией, в буфер обмена. Щелкните Option или ALT, чтобы скопировать табличный формат в буфер обмена.</translation>
+        <translation>Скопировать таблицу сигналов в буфер обмена (поля через табуляцию). Щёлкните с Option или ALT, чтобы скопировать в табличном формате.</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="43" />
@@ -6331,7 +6331,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="43" />
         <source>Enables all alarms.</source>
-        <translation>Включает все тревоги.</translation>
+        <translation>Включает все сигналы.</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="44" />
@@ -6341,7 +6341,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="44" />
         <source>Disables all alarms.</source>
-        <translation>Отключает все тревоги.</translation>
+        <translation>Отключает все сигналы.</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="45" />
@@ -6351,7 +6351,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="45" />
         <source>Load alarm definition from a file.</source>
-        <translation>Загрузить определение тревоги из файла.</translation>
+        <translation>Загрузить определение сигнала из файла.</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="112" />
@@ -6362,7 +6362,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="46" />
         <source>Save the alarm definitions to a file.</source>
-        <translation>Сохраните определения тревог в файл.</translation>
+        <translation>Сохранить определения сигналов в файл.</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="47" />
@@ -6372,7 +6372,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="47" />
         <source>Clears all alarms from the table.</source>
-        <translation>Удаляет все тревоги из таблицы.</translation>
+        <translation>Удаляет все сигналы из таблицы.</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="44" />
@@ -6396,7 +6396,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="49" />
         <source>when ticked will replace the alarm table when loading a profile with the alarms stored in the profile.  If there are no alarms in the profile the alarm table will be cleared.</source>
-        <translation>при установленном флажке заменяет таблицу аварийных сигналов при загрузке профиля аварийными сигналами, хранящимися в профиле. Если в профиле нет тревог, таблица тревог будет очищена.</translation>
+        <translation>Если отмечено, при загрузке профиля таблица сигналов заменяется сигналами из профиля. Если в профиле нет сигналов, таблица очищается.</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="50" />
@@ -6406,7 +6406,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="50" />
         <source>when ticked will replace the alarm table when loading a background profile with the alarms stored in the profile.  If there are no alarms in the profile the alarm table will be cleared.</source>
-        <translation>при установленном флажке заменяет таблицу аварийных сигналов при загрузке фонового профиля аварийными сигналами, хранящимися в профиле. Если в профиле нет тревог, таблица тревог будет очищена.</translation>
+        <translation>Если отмечено, при загрузке фонового профиля таблица сигналов заменяется сигналами из профиля. Если в профиле нет сигналов, таблица очищается.</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="51" />
@@ -6421,12 +6421,12 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="54" />
         <source>Alarm Actions</source>
-        <translation>Действия по тревоге</translation>
+        <translation>Действия сигнала</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="58" />
         <source>Enter the Command into the Description field of the Alarm.</source>
-        <translation>Введите Команду в поле Описание Тревоги.</translation>
+        <translation>Введите команду в поле «Описание» сигнала.</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="97" />
@@ -6445,7 +6445,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="62" />
         <source>Pop Up</source>
-        <translation>Неожиданно возникнуть</translation>
+        <translation>Всплывающее окно</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="62" />
@@ -6553,7 +6553,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="70" />
         <source>DRY</source>
-        <translation type="unfinished">Сухость</translation>
+        <translation type="unfinished">Пожелтение</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="70" />
@@ -6563,7 +6563,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="71" />
         <source>FCs</source>
-        <translation>ФК</translation>
+        <translation>ПКн</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="71" />
@@ -6573,7 +6573,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="72" />
         <source>FCe</source>
-        <translation>ФКе</translation>
+        <translation>ПКк</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="72" />
@@ -6583,7 +6583,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="73" />
         <source>SCs</source>
-        <translation type="unfinished">СК</translation>
+        <translation type="unfinished">ВКн</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="73" />
@@ -6593,7 +6593,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="74" />
         <source>SCe</source>
-        <translation>СКе</translation>
+        <translation>ВКк</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="74" />
@@ -6603,7 +6603,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="75" />
         <source>DROP</source>
-        <translation type="unfinished">Выбросить бобы</translation>
+        <translation type="unfinished">Выгрузка</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="75" />
@@ -6613,7 +6613,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="76" />
         <source>COOL END</source>
-        <translation>ХОЛОДНЫЙ КОНЕЦ</translation>
+        <translation>Кон. охлаждения</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="76" />
@@ -6623,7 +6623,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="77" />
         <source>OFF</source>
-        <translation type="unfinished">Выкл</translation>
+        <translation type="unfinished">ВЫКЛ</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="77" />
@@ -6633,7 +6633,7 @@ Alarms are scanned in order from the top of the table to the bottom.</source>
     <message>
         <location filename="../help/alarms_help.py" line="78" />
         <source>CHARGE</source>
-        <translation>ЗАРЯЖАТЬ</translation>
+        <translation>Загрузка</translation>
     </message>
     <message>
         <location filename="../help/alarms_help.py" line="78" />
@@ -6824,7 +6824,7 @@ Artisan будет запускать программу каждый перио
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="20" />
         <source>Turns Artisan OFF</source>
-        <translation>Выключает ремесленника</translation>
+        <translation>Выключает Artisan</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="21" />
@@ -6944,7 +6944,7 @@ When Meter=NONE opens dialog to manually enter temperatures during roast</source
         <location filename="../help/keyboardshortcuts_help.py" line="43" />
         <source>Load alarms
 (Expert and Standard modes)</source>
-        <translation>Сигналы тревоги нагрузки
+        <translation>Сигналы нагрузки
 (Экспертный и Стандартный режимы)</translation>
     </message>
     <message>
@@ -6991,7 +6991,7 @@ When Meter=NONE opens dialog to manually enter temperatures during roast</source
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="53" />
         <source>ADDITIONAL SHORTCUTS</source>
-        <translation>ДОПОЛНИТЕЛЬНЫЕ КОРРЕКТЫ</translation>
+        <translation>Дополнительные сочетания</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="56" />
@@ -7027,7 +7027,7 @@ CTRL+F [Win]</source>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="58" />
         <source>Click on Roast Title</source>
-        <translation>Нажмите на заголовок "Жареное блюдо"</translation>
+        <translation>Нажмите на название обжарки</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="79" />
@@ -7062,7 +7062,7 @@ CTRL+F [Win]</source>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="59" />
         <source>Double click on Roast Title</source>
-        <translation>Двойной щелчок по заголовку жареного</translation>
+        <translation>Двойной щелчок по названию обжарки</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="59" />
@@ -7290,7 +7290,7 @@ CTRL нажмите кнопку &amp;#39;CONTROL&amp;#39; [Win]</translation>
         <location filename="../help/keyboardshortcuts_help.py" line="80" />
         <location filename="../help/keyboardshortcuts_help.py" line="77" />
         <source>PLUS, MINUS</source>
-        <translation>ПЛЮС, МИНУС</translation>
+        <translation>Плюс, минус</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="77" />
@@ -7413,7 +7413,7 @@ PAGEUP, PAGEDOWN [Победа]</translation>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="86" />
         <source>HOME,END</source>
-        <translation>ГЛАВНАЯ, КОНЕЦ</translation>
+        <translation>Home, End</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="86" />
@@ -7569,7 +7569,7 @@ CTRL+O [Победа]</translation>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="94" />
         <source>Adds scale weight to Roasted Weight field (same action as &amp;#39;out&amp;#39; button)</source>
-        <translation>Добавляет вес на весах в поле «Вес жареного мяса» (то же действие, что и при нажатии кнопки &amp;#39;out&amp;#39;)</translation>
+        <translation>Добавляет вес на весах в поле «Вес обжаренного» (то же действие, что и при нажатии кнопки &amp;#39;out&amp;#39;)</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="95" />
@@ -7587,14 +7587,14 @@ CTRL+P [Победа]</translation>
         <location filename="../help/keyboardshortcuts_help.py" line="97" />
         <location filename="../help/keyboardshortcuts_help.py" line="96" />
         <source>Enter</source>
-        <translation>Входить</translation>
+        <translation>Ввод</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="96" />
         <source>Roast Properties Roast Tab
 Volume Calculator Unit, Green Unit  Weight or Roasted Unit Weight field</source>
         <translation>Свойства обжарки Вкладка «Обжарка»
-Поле «Единица измерения объема», «Вес сырой единицы» или «Вес жареной единицы»</translation>
+Поле «Единица измерения объема», «Вес зелёной единицы» или «Вес обжаренной единицы»</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="96" />
@@ -7606,7 +7606,7 @@ Volume Calculator Unit, Green Unit  Weight or Roasted Unit Weight field</source>
         <source>Roast Properties Roast tab
 Green Weight  or Roasted Weight field</source>
         <translation>Свойства обжарки Вкладка «Обжарка»
-Поле «Вес сырого мяса» или «Вес жареного мяса»</translation>
+Поле «Вес зелёного» или «Вес обжаренного»</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="97" />
@@ -7623,7 +7623,7 @@ CTRL+C [Победа]</translation>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="98" />
         <source>Roast Properties Data tab</source>
-        <translation>Вкладка «Данные о свойствах жаркого»</translation>
+        <translation>Свойства обжарки, вкладка «Данные»</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="98" />
@@ -7643,7 +7643,7 @@ CTRL+C [Победа]</translation>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="99" />
         <source>Toggle &amp;#39;per kg green coffee&amp;#39; result for Batch or Roast</source>
-        <translation>Переключить результат «за кг зеленого кофе» для партии или обжарки</translation>
+        <translation>Переключить результат «за кг зелёного кофе» для батча или обжарки</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="100" />
@@ -7782,7 +7782,7 @@ Hold Shift+Alt [Win]</source>
         <location filename="../help/keyboardshortcuts_help.py" line="119" />
         <location filename="../help/keyboardshortcuts_help.py" line="118" />
         <source>Roast</source>
-        <translation type="unfinished">Жарить</translation>
+        <translation type="unfinished">Обжарка</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="118" />
@@ -7841,7 +7841,7 @@ Hold Shift+Alt [Win]</source>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="124" />
         <source>Open Alarms dialog</source>
-        <translation>Открыть диалоговое окно «Тревоги»</translation>
+        <translation>Открыть диалог сигналов</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="125" />
@@ -7890,7 +7890,7 @@ Hold Shift+Alt [Win]</source>
     <message>
         <location filename="../help/transposer_help.py" line="14" />
         <source>TRANSPOSER</source>
-        <translation>ТРАНСПОЗЕР</translation>
+        <translation>Транспозер</translation>
     </message>
     <message>
         <location filename="../help/transposer_help.py" line="18" />
@@ -7948,7 +7948,7 @@ Load the profile recorded on the smaller machine and open the Transposer. Select
         <location filename="../help/energy_help.py" line="48" />
         <location filename="../help/eventsliders_help.py" line="18" />
         <source>Event</source>
-        <translation type="unfinished">Мероприятие</translation>
+        <translation type="unfinished">Событие</translation>
     </message>
     <message>
         <location filename="../help/eventsliders_help.py" line="18" />
@@ -7978,7 +7978,7 @@ Load the profile recorded on the smaller machine and open the Transposer. Select
     <message>
         <location filename="../help/eventsliders_help.py" line="22" />
         <source>Factor</source>
-        <translation>Фактор</translation>
+        <translation>Коэффициент</translation>
     </message>
     <message>
         <location filename="../help/eventsliders_help.py" line="22" />
@@ -8035,7 +8035,7 @@ Load the profile recorded on the smaller machine and open the Transposer. Select
         <location filename="../help/eventbuttons_help.py" line="90" />
         <location filename="../help/eventsliders_help.py" line="30" />
         <source>COMMANDS</source>
-        <translation>КОМАНДЫ</translation>
+        <translation>Команды</translation>
     </message>
     <message>
         <location filename="../help/eventsliders_help.py" line="34" />
@@ -8049,7 +8049,7 @@ Load the profile recorded on the smaller machine and open the Transposer. Select
         <location filename="../help/eventsliders_help.py" line="34" />
         <source>Note: The placeholders {ET}, {BT}, {time}, {ETB}, {BTB}, and {WEIGHTin} will be substituted by the current ET, BT, time, ET background, BT background value, and batch size (in g) in Serial/Artisan/CallProgram/MODBUS/S7/WebSocket commands
 </source>
-        <translation>Примечание. Заполнители {ET}, {BT}, {time}, {ETB}, {BTB} и {WEIGHTin} будут заменены текущими ET, BT, временем, фоном ET, фоновым значением BT и размером пакета. (в g) в командах Serial/Artisan/CallProgram/MODBUS/S7/WebSocket
+        <translation>Примечание. Заполнители {ET}, {BT}, {time}, {ETB}, {BTB} и {WEIGHTin} будут заменены текущими ET, BT, временем, фоном ET, фоновым значением BT и размером батча. (в g) в командах Serial/Artisan/CallProgram/MODBUS/S7/WebSocket
 </translation>
     </message>
     <message>
@@ -8075,7 +8075,7 @@ Load the profile recorded on the smaller machine and open the Transposer. Select
         <location filename="../help/eventbuttons_help.py" line="98" />
         <location filename="../help/eventsliders_help.py" line="38" />
         <source>Serial Command</source>
-        <translation>Серийная команда</translation>
+        <translation>Команда Serial</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="98" />
@@ -8221,7 +8221,7 @@ Load the profile recorded on the smaller machine and open the Transposer. Select
         <location filename="../help/eventbuttons_help.py" line="123" />
         <location filename="../help/eventsliders_help.py" line="58" />
         <source>DTA Command</source>
-        <translation>Команда ДТА</translation>
+        <translation>Команда DTA</translation>
     </message>
     <message>
         <location filename="../help/eventsliders_help.py" line="58" />
@@ -8386,7 +8386,7 @@ Load the profile recorded on the smaller machine and open the Transposer. Select
         <location filename="../help/eventbuttons_help.py" line="124" />
         <location filename="../help/eventsliders_help.py" line="80" />
         <source>IO Command</source>
-        <translation>Команда ввода/вывода</translation>
+        <translation>Команда ввода-вывода</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="126" />
@@ -8531,7 +8531,7 @@ Load the profile recorded on the smaller machine and open the Transposer. Select
         <location filename="../help/eventbuttons_help.py" line="170" />
         <location filename="../help/eventsliders_help.py" line="103" />
         <source>S7 Command</source>
-        <translation type="unfinished">S7 команда</translation>
+        <translation type="unfinished">Команда S7</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="170" />
@@ -8610,19 +8610,19 @@ Load the profile recorded on the smaller machine and open the Transposer. Select
         <location filename="../help/eventbuttons_help.py" line="187" />
         <location filename="../help/eventsliders_help.py" line="115" />
         <source>Artisan Command</source>
-        <translation>Команда ремесленников</translation>
+        <translation>Команда Artisan</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="189" />
         <location filename="../help/eventsliders_help.py" line="115" />
         <source>enables/disables alarms</source>
-        <translation>включает/отключает будильник</translation>
+        <translation>включает/отключает сигналы</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="188" />
         <location filename="../help/eventsliders_help.py" line="116" />
         <source>enables/disables alarm number n</source>
-        <translation>включает/выключает будильник номер n</translation>
+        <translation>включает/отключает сигнал номер n</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="190" />
@@ -8813,7 +8813,7 @@ Load the profile recorded on the smaller machine and open the Transposer. Select
         <location filename="../help/eventbuttons_help.py" line="225" />
         <location filename="../help/eventsliders_help.py" line="149" />
         <source>set the batch size to the given value. If the value is negative, the batch size is taken from the background profile, if any is loaded</source>
-        <translation>установить размер партии на заданное значение. Если значение отрицательное, размер партии берется из фонового профиля, если таковой загружен</translation>
+        <translation>установить размер батча на заданное значение. Если значение отрицательное, размер батча берется из фонового профиля, если таковой загружен</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="226" />
@@ -8837,7 +8837,7 @@ Load the profile recorded on the smaller machine and open the Transposer. Select
         <location filename="../help/eventbuttons_help.py" line="229" />
         <location filename="../help/eventsliders_help.py" line="153" />
         <source>activates the alarmset with the given number or label</source>
-        <translation>активирует набор будильников с заданным номером или меткой</translation>
+        <translation>активирует набор сигналов с заданным номером или меткой</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="230" />
@@ -8885,7 +8885,7 @@ Load the profile recorded on the smaller machine and open the Transposer. Select
         <location filename="../help/eventbuttons_help.py" line="237" />
         <location filename="../help/eventsliders_help.py" line="161" />
         <source>RC Command</source>
-        <translation type="unfinished">RC команда</translation>
+        <translation type="unfinished">Команда RC</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="237" />
@@ -9009,7 +9009,7 @@ Load the profile recorded on the smaller machine and open the Transposer. Select
     <message>
         <location filename="../help/modbus_help.py" line="17" />
         <source>MODBUS SETTINGS</source>
-        <translation>НАСТРОЙКИ MODBUS</translation>
+        <translation>Настройки MODBUS</translation>
     </message>
     <message>
         <location filename="../help/modbus_help.py" line="18" />
@@ -9222,7 +9222,7 @@ Function 4 (Read Input Registers): registers 0 to 65535 corresponding to numbers
     <message>
         <location filename="../help/eventbuttons_help.py" line="47" />
         <source>LABELS</source>
-        <translation>ЭТИКЕТКИ</translation>
+        <translation>Метки</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="51" />
@@ -9234,7 +9234,7 @@ Function 4 (Read Input Registers): registers 0 to 65535 corresponding to numbers
     <message>
         <location filename="../help/eventbuttons_help.py" line="54" />
         <source>String</source>
-        <translation>Нить</translation>
+        <translation>Строка</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="54" />
@@ -9354,42 +9354,42 @@ Function 4 (Read Input Registers): registers 0 to 65535 corresponding to numbers
     <message>
         <location filename="../help/eventbuttons_help.py" line="77" />
         <source>STIRRER</source>
-        <translation>МЕШАЛКА</translation>
+        <translation>Мешалка</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="78" />
         <source>FILL</source>
-        <translation>НАПОЛНЯТЬ</translation>
+        <translation>Наполнить</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="79" />
         <source>DISCHARGE</source>
-        <translation>УВОЛЬНЯТЬ</translation>
+        <translation>Разгрузка</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="80" />
         <source>RELEASE</source>
-        <translation>ВЫПУСКАТЬ</translation>
+        <translation>Выпустить</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="81" />
         <source>HEATING</source>
-        <translation>ОБОГРЕВ</translation>
+        <translation>Нагрев</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="82" />
         <source>COOLING</source>
-        <translation>ОХЛАЖДЕНИЕ</translation>
+        <translation>Охлаждение</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="83" />
         <source>FLAP</source>
-        <translation>КЛАПАН</translation>
+        <translation>Заслонка</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="84" />
         <source>CONTROL</source>
-        <translation type="unfinished">КОНТРОЛЬ</translation>
+        <translation type="unfinished">Управление</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="85" />
@@ -9488,7 +9488,7 @@ Always multiply with 10 if value Unit: 0.1 / ex. 4719:0 stops heating</source>
     <message>
         <location filename="../help/eventbuttons_help.py" line="152" />
         <source>p-i-d</source>
-        <translation type="unfinished">п-я-д</translation>
+        <translation type="unfinished">p-i-d</translation>
     </message>
     <message>
         <location filename="../help/eventbuttons_help.py" line="152" />
@@ -9553,7 +9553,7 @@ Always multiply with 10 if value Unit: 0.1 / ex. 4719:0 stops heating</source>
     <message>
         <location filename="../help/s7_help.py" line="17" />
         <source>S7 SETTINGS</source>
-        <translation>НАСТРОЙКИ S7</translation>
+        <translation>Настройки S7</translation>
     </message>
     <message>
         <location filename="../help/s7_help.py" line="18" />
@@ -9765,7 +9765,7 @@ Field is hidden when the RoR value is not available.</source>
         <location filename="../help/autosave_help.py" line="123" />
         <location filename="../help/eventannotations_help.py" line="43" />
         <source>EXAMPLES</source>
-        <translation>ПРИМЕРЫ</translation>
+        <translation>Примеры</translation>
     </message>
     <message>
         <location filename="../help/eventannotations_help.py" line="47" />
@@ -9879,7 +9879,7 @@ Gas 50% @12% DTR</source>
     <message>
         <location filename="../help/eventannotations_help.py" line="60" />
         <source>NOTES:</source>
-        <translation>ПРИМЕЧАНИЯ:</translation>
+        <translation>Примечания:</translation>
     </message>
     <message>
         <location filename="../help/eventannotations_help.py" line="64" />
@@ -9952,9 +9952,9 @@ Note that if the event value  does not match any value in the Annotation definit
 Note that pre-heating and roaster cooling energy values are applied to the first roast of a roasting session.  Between batch energies are applied to every roast except the first.  Tick the "Between batches after Pre-Heating box to apply the between batch value to the first roast.
 
 Follow the steps below to set the energy inputs for the roast machine and afterburner.</source>
-        <translation>На вкладке «Энергия» отображается энергопотребление обжарки. Выбросы CO2 также рассчитываются для контроля воздействия операции обжига. Настройки должны быть выполнены для каждой энергетической нагрузки. Нагрузками являются основные горелки, двигатели и воздуходувки, а также камера дожигания, если она используется. Энергия, используемая для протоколов предварительного нагрева, между партиями и обжарки, включена в расчеты, и для них также доступны настройки.
+        <translation>На вкладке «Энергия» отображается энергопотребление обжарки. Выбросы CO2 также рассчитываются для контроля воздействия операции обжарки. Настройки должны быть выполнены для каждой энергетической нагрузки. Нагрузками являются основные горелки, двигатели и воздуходувки, а также камера дожигания, если она используется. Энергия, используемая для протоколов предварительного нагрева, между батчами и обжарки, включена в расчеты, и для них также доступны настройки.
 
-Обратите внимание, что значения энергии предварительного нагрева и охлаждения жаровни применяются к первой обжарке в сеансе обжарки. Между партиями энергия применяется ко всем обжаркам, кроме первой. Установите флажок «Между партиями после предварительного нагрева», чтобы применить значение между партиями к первой обжарке.
+Обратите внимание, что значения энергии предварительного нагрева и охлаждения ростера применяются к первой обжарке в сеансе обжарки. Между батчами энергия применяется ко всем обжаркам, кроме первой. Установите флажок «Между батчами после предварительного нагрева», чтобы применить значение между батчами к первой обжарке.
 
 Выполните следующие действия, чтобы установить энергопотребление для обжарочной машины и камеры дожигания.</translation>
     </message>
@@ -10011,7 +10011,7 @@ Follow the steps below to set the energy inputs for the roast machine and afterb
     <message>
         <location filename="../help/energy_help.py" line="40" />
         <source>Burner entries require knowing the power rating of the burner.  Roasting machine manufacturer&amp;#39;s typically provide this information.  If this information can not be found for your machine this table provides approximate values based on roaster capacities.  https://artisan-scope.org/ratings/</source>
-        <translation>Записи о горелке требуют знания номинальной мощности горелки. Обычно эту информацию предоставляют производители обжарочных машин. Если эта информация не может быть найдена для вашей машины, в этой таблице приведены приблизительные значения, основанные на производительности жаровни. https://artisan-scope.org/ratings/</translation>
+        <translation>Записи о горелке требуют знания номинальной мощности горелки. Обычно эту информацию предоставляют производители обжарочных машин. Если эта информация не может быть найдена для вашей машины, в этой таблице приведены приблизительные значения, основанные на производительности ростера. https://artisan-scope.org/ratings/</translation>
     </message>
     <message>
         <location filename="../help/energy_help.py" line="40" />
@@ -10021,7 +10021,7 @@ Follow the steps below to set the energy inputs for the roast machine and afterb
     <message>
         <location filename="../help/energy_help.py" line="40" />
         <source>Artisan allows the direct reading of 2 energy meters to support the use of measured energy consumption values in place of estimated values defined by the Loads. These energy meters could measure gas or electricity. As an energy meter the instantaneous power reading must be accumulated over a period of time.  Energy readings are typically in kWh or BTU, though other units are supported.  Artisan will use the Meter reading at the start of recording and end of recording to calculate energy consumption for the roast batch.  Intermediate reads at major roast events are also used in presenting phase energy consumption.</source>
-        <translation>Artisan позволяет напрямую считывать показания двух счетчиков энергии, что дает возможность использовать измеренные значения потребления энергии вместо расчетных значений, заданных нагрузками. Эти счетчики могут измерять потребление газа или электроэнергии. Как и в случае со счетчиками энергии, мгновенные показания мощности должны накапливаться в течение определенного периода времени. Показания энергии обычно указываются в кВт·ч или БТЕ, хотя поддерживаются и другие единицы измерения. Artisan будет использовать показания счетчика в начале и в конце записи для расчета потребления энергии для партии обжарки. Промежуточные показания на основных этапах обжарки также используются для представления потребления энергии на каждом этапе.</translation>
+        <translation>Artisan позволяет напрямую считывать показания двух счетчиков энергии, что дает возможность использовать измеренные значения потребления энергии вместо расчетных значений, заданных нагрузками. Эти счетчики могут измерять потребление газа или электроэнергии. Как и в случае со счетчиками энергии, мгновенные показания мощности должны накапливаться в течение определенного периода времени. Показания энергии обычно указываются в кВт·ч или БТЕ, хотя поддерживаются и другие единицы измерения. Artisan будет использовать показания счетчика в начале и в конце записи для расчета потребления энергии для батча обжарки. Промежуточные показания на основных этапах обжарки также используются для представления потребления энергии на каждом этапе.</translation>
     </message>
     <message>
         <location filename="../help/energy_help.py" line="40" />
@@ -10193,22 +10193,22 @@ When blank the load is assumed to be at a constant setting, which is the percent
     <message>
         <location filename="../help/energy_help.py" line="66" />
         <source>The Protocol settings allow including Pre-Heating, Between Batch (BBP) and Cooling protocol energy consumption.  There are two ways to specify these values.  The first assumes a constant load setting for a defined period of time.  An example for pre-heating is to set a Duration of 45:00 (45 minutes) at 30% Burner setting.  Percentages must be entered with the percent sign (30%).  When a percentage is entered  a corresponding Duration must be entered.</source>
-        <translation>Настройки протокола позволяют включать предварительный нагрев, между партиями (BBP) и протокол охлаждения. Есть два способа задать эти значения. Первый предполагает установку постоянной нагрузки в течение определенного периода времени. Например, для предварительного нагрева можно установить Продолжительность 45:00 (45 минут) при 30% мощности горелки. Проценты необходимо вводить со знаком процента (30%). При вводе процента необходимо ввести соответствующую продолжительность.</translation>
+        <translation>Настройки протокола позволяют включать предварительный нагрев, между батчами (BBP) и протокол охлаждения. Есть два способа задать эти значения. Первый предполагает установку постоянной нагрузки в течение определенного периода времени. Например, для предварительного нагрева можно установить Продолжительность 45:00 (45 минут) при 30% мощности горелки. Проценты необходимо вводить со знаком процента (30%). При вводе процента необходимо ввести соответствующую продолжительность.</translation>
     </message>
     <message>
         <location filename="../help/energy_help.py" line="66" />
         <source>The second type of entry is a "measured" energy value.  This can be any value greater than 1.0.  Artisan can inspect the open profile to determine energy values for each Load that is associated with an Event on the Loads sub-tab.  Click the [...] button for each Protocol to auto fill the Measured Energy fields.   The Artisan measurements for Pre-Heating and Between Batches are made from the start of the profile until CHARGE.  If there is no CHARGE event the measurement is from the start to the end of profile.  The values measured for Pre-Heating and Between Batches are the same.  Be sure you do not use the same profile to enter both values.  The Cooling energy is measured from DROP to the end of the profile.  If there is no DROP event the measurement begins at CHARGE.  If there is no CHARGE event the measurement is from the start to the end of the profile.</source>
-        <translation>Второй тип ввода – это «измеренное» значение энергии. Это может быть любое значение больше 1,0. Мастер может просмотреть открытый профиль, чтобы определить значения энергии для каждой нагрузки, связанной с событием, на подвкладке «Нагрузки». Нажмите кнопку [...] для каждого протокола, чтобы автоматически заполнить поля «Измеренная энергия». Измерения Artisan для предварительного нагрева и между партиями выполняются с начала профиля до ЗАРЯДКИ. Если нет события CHARGE, измерение производится от начала до конца профиля. Значения, измеренные для предварительного нагрева и между партиями, одинаковы. Убедитесь, что вы не используете один и тот же профиль для ввода обоих значений. Энергия охлаждения измеряется от ПАДЕНИЯ до конца профиля. Если событие DROP отсутствует, измерение начинается с CHARGE. Если нет события ЗАРЯД, измерение производится от начала до конца профиля.</translation>
+        <translation>Второй тип ввода – это «измеренное» значение энергии. Это может быть любое значение больше 1,0. Мастер может просмотреть открытый профиль, чтобы определить значения энергии для каждой нагрузки, связанной с событием, на подвкладке «Нагрузки». Нажмите кнопку [...] для каждого протокола, чтобы автоматически заполнить поля «Измеренная энергия». Измерения Artisan для предварительного нагрева и между батчами выполняются с начала профиля до ЗАРЯДКИ. Если нет события CHARGE, измерение производится от начала до конца профиля. Значения, измеренные для предварительного нагрева и между батчами, одинаковы. Убедитесь, что вы не используете один и тот же профиль для ввода обоих значений. Энергия охлаждения измеряется от ПАДЕНИЯ до конца профиля. Если событие DROP отсутствует, измерение начинается с CHARGE. Если нет события ЗАРЯД, измерение производится от начала до конца профиля.</translation>
     </message>
     <message>
         <location filename="../help/energy_help.py" line="66" />
         <source>To use the Artisan energy measurement feature you will need to record one or more profiles that include the protocol of interest.  For example, to measure the Pre-Heating energy, START recording when the roaster is turned on.  Let Artisan record the entire pre-heating procedure.  At the end of the pre-heating you can either STOP recording the profile or go forward with the roast.  The CHARGE event will mark the end of pre-heating when Artisan measures the pre-heat energy.  Similarly a Between Batches protocol can be recorded with START followed by a normal roast.  A Cooling protocol would be captured by not turning the Artisan recording OFF until the roaster is fully cooled.</source>
-        <translation>Чтобы использовать функцию измерения энергии Artisan, вам необходимо записать один или несколько профилей, которые включают интересующий протокол. Например, чтобы измерить энергию предварительного нагрева, НАЧНИТЕ запись, когда жаровня включена. Позвольте Artisan записать всю процедуру предварительного нагрева. В конце предварительного нагрева вы можете либо ОСТАНОВИТЬ запись профиля, либо продолжить обжарку. Событие CHARGE будет означать окончание предварительного нагрева, когда Artisan измерит энергию предварительного нагрева. Точно так же протокол между партиями может быть записан с СТАРТОМ, за которым следует обычная обжарка. Протокол охлаждения будет записан, если не выключать запись Artisan до тех пор, пока жаровня полностью не остынет.</translation>
+        <translation>Чтобы использовать функцию измерения энергии Artisan, вам необходимо записать один или несколько профилей, которые включают интересующий протокол. Например, чтобы измерить энергию предварительного нагрева, НАЧНИТЕ запись, когда ростер включена. Позвольте Artisan записать всю процедуру предварительного нагрева. В конце предварительного нагрева вы можете либо ОСТАНОВИТЬ запись профиля, либо продолжить обжарку. Событие CHARGE будет означать окончание предварительного нагрева, когда Artisan измерит энергию предварительного нагрева. Точно так же протокол между батчами может быть записан с СТАРТОМ, за которым следует обычная обжарка. Протокол охлаждения будет записан, если не выключать запись Artisan до тех пор, пока ростер полностью не остынет.</translation>
     </message>
     <message>
         <location filename="../help/energy_help.py" line="66" />
         <source>The Artisan measurements for Pre-Heating and Between Batches are made from the start of the profile until CHARGE.  If there is no CHARGE event the measurement is from the start to the end of profile.  The values measured for Pre-Heating and Between Batches are the same.  Be sure you do not use the same profile to enter both values.  The Cooling energy is measured from DROP to the end of the profile.  If there is no DROP event the measurement begins at CHARGE.  If there is no CHARGE event the measurement is from the start to the end of the profile.</source>
-        <translation>Измерения Artisan для предварительного нагрева и между партиями выполняются с начала профиля до ЗАРЯДКИ. Если нет события CHARGE, измерение производится от начала до конца профиля. Значения, измеренные для предварительного нагрева и между партиями, одинаковы. Убедитесь, что вы не используете один и тот же профиль для ввода обоих значений. Энергия охлаждения измеряется от ПАДЕНИЯ до конца профиля. Если событие DROP отсутствует, измерение начинается с CHARGE. Если нет события ЗАРЯД, измерение производится от начала до конца профиля.</translation>
+        <translation>Измерения Artisan для предварительного нагрева и между батчами выполняются с начала профиля до ЗАРЯДКИ. Если нет события CHARGE, измерение производится от начала до конца профиля. Значения, измеренные для предварительного нагрева и между батчами, одинаковы. Убедитесь, что вы не используете один и тот же профиль для ввода обоих значений. Энергия охлаждения измеряется от ПАДЕНИЯ до конца профиля. Если событие DROP отсутствует, измерение начинается с CHARGE. Если нет события ЗАРЯД, измерение производится от начала до конца профиля.</translation>
     </message>
     <message>
         <location filename="../help/energy_help.py" line="70" />
@@ -10222,21 +10222,21 @@ When blank the load is assumed to be at a constant setting, which is the percent
 Pre-Heating energy is applied only to the first batch of a roasting session.</source>
         <translation>В этой строке задаются значения энергии предварительного нагрева. Для каждой горелки можно ввести процентное или измеренное значение. Если используется процентное значение, необходимо установить поле «Длительность».
 
-Энергия предварительного нагрева применяется только к первой партии обжарки.</translation>
+Энергия предварительного нагрева применяется только к первой батча обжарки.</translation>
     </message>
     <message>
         <location filename="../help/energy_help.py" line="71" />
         <source>Between Batches</source>
-        <translation type="unfinished">Между партиями</translation>
+        <translation type="unfinished">Между батчами</translation>
     </message>
     <message>
         <location filename="../help/energy_help.py" line="71" />
         <source>This row sets the values for between batches protocol for the roasting session.  Percentage or measured values may be entered for each burner.  When a percentage is used the Duration field must be set.
 
 Between Batches energy is applied to each batch of the roasting session, except the first batch.  Tick the &amp;#39;Between Batches after Pre-Heating&amp;#39; box to apply Between Batches energies to the first batch of the session too.</source>
-        <translation>В этой строке задаются значения протокола между партиями для сеанса обжарки. Для каждой горелки можно ввести процентное или измеренное значение. Если используется процентное значение, необходимо установить поле «Длительность».
+        <translation>В этой строке задаются значения протокола между батчами для сеанса обжарки. Для каждой горелки можно ввести процентное или измеренное значение. Если используется процентное значение, необходимо установить поле «Длительность».
 
-Между партиями энергия применяется к каждой партии сеанса обжарки, кроме первой партии. Установите флажок «Между партиями после предварительного нагрева». поле, чтобы применить энергии между пакетами также к первому пакету сеанса.</translation>
+Между батчами энергия применяется к каждому батчу сеанса обжарки, кроме первого батча. Установите флажок «Между батчами после предварительного нагрева». поле, чтобы применить энергию между батчами также к первому батчу сеанса.</translation>
     </message>
     <message>
         <location filename="../help/energy_help.py" line="72" />
@@ -10248,9 +10248,9 @@ Between Batches energy is applied to each batch of the roasting session, except 
         <source>This row sets the values for the energy used for cooling.  Most common loads are motors and blowers that consume energy during the roaster cool down period.  Percentage or measured values may be entered for each burner.  When a percentage is used the Duration field must be set.
 
 Pre-Heating energy is applied only to the first batch of a roasting session.</source>
-        <translation>В этой строке задаются значения энергии, используемой для охлаждения. Наиболее распространенными нагрузками являются двигатели и воздуходувки, которые потребляют энергию в период охлаждения жаровни. Для каждой горелки можно ввести процентное или измеренное значение. Если используется процентное значение, необходимо установить поле «Длительность».
+        <translation>В этой строке задаются значения энергии, используемой для охлаждения. Наиболее распространенными нагрузками являются двигатели и воздуходувки, которые потребляют энергию в период охлаждения ростера. Для каждой горелки можно ввести процентное или измеренное значение. Если используется процентное значение, необходимо установить поле «Длительность».
 
-Энергия предварительного нагрева применяется только к первой партии обжарки.</translation>
+Энергия предварительного нагрева применяется только к первой батча обжарки.</translation>
     </message>
     <message>
         <location filename="../help/energy_help.py" line="73" />
@@ -10265,7 +10265,7 @@ Pre-Heating energy is applied only to the first batch of a roasting session.</so
     <message>
         <location filename="../help/energy_help.py" line="74" />
         <source>Measured Energy or Output %</source>
-        <translation type="unfinished">Измеренная энергия или выход%</translation>
+        <translation type="unfinished">Измеренная энергия или мощность, %</translation>
     </message>
     <message>
         <location filename="../help/energy_help.py" line="74" />
@@ -10285,12 +10285,12 @@ Pre-Heating energy is applied only to the first batch of a roasting session.</so
     <message>
         <location filename="../help/energy_help.py" line="76" />
         <source>Between Batches after Pre-Heating</source>
-        <translation type="unfinished">Между партиями после предварительного нагрева</translation>
+        <translation type="unfinished">Между батчами после предварительного нагрева</translation>
     </message>
     <message>
         <location filename="../help/energy_help.py" line="76" />
         <source>This box should be ticked when a Between Batches protocol run is done after the Pre-heating and before the roast.</source>
-        <translation>Этот флажок должен быть установлен, если протокол между партиями выполняется после предварительного нагрева и перед обжаркой.</translation>
+        <translation>Этот флажок должен быть установлен, если протокол между батчами выполняется после предварительного нагрева и перед обжаркой.</translation>
     </message>
     <message>
         <location filename="../help/energy_help.py" line="77" />
@@ -10300,7 +10300,7 @@ Pre-Heating energy is applied only to the first batch of a roasting session.</so
     <message>
         <location filename="../help/autosave_help.py" line="14" />
         <source>AUTOSAVE DIALOG</source>
-        <translation>ДИАЛОГ АВТОСОХРАНЕНИЯ</translation>
+        <translation>Диалог автосохранения</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="17" />
@@ -10355,7 +10355,7 @@ A &amp;#39;Во время записи:&amp;#39; пример также буд
         <location filename="../help/autosave_help.py" line="24" />
         <location filename="../help/autosave_help.py" line="22" />
         <source>Path</source>
-        <translation type="unfinished">Дорожка</translation>
+        <translation type="unfinished">Путь</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="22" />
@@ -10380,17 +10380,17 @@ A &amp;#39;Во время записи:&amp;#39; пример также буд
     <message>
         <location filename="../help/autosave_help.py" line="27" />
         <source>AUTOSAVE FIELDS</source>
-        <translation>АВТОСОХРАНЕНИЕ ПОЛЕЙ</translation>
+        <translation>Поля автосохранения</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="31" />
         <source>The batch prefix set in Config&gt;Batch&gt;Prefix</source>
-        <translation>Префикс пакета, установленный в Config&gt;Batch&gt;Prefix</translation>
+        <translation>Префикс батча, заданный в Config &gt; Batch &gt; Prefix</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="32" />
         <source>The current batch number</source>
-        <translation>Текущий номер партии</translation>
+        <translation>Текущий номер батча</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="33" />
@@ -10400,19 +10400,19 @@ A &amp;#39;Во время записи:&amp;#39; пример также буд
     <message>
         <location filename="../help/autosave_help.py" line="34" />
         <source>The current batch position, or "Roast of the Day"</source>
-        <translation>Текущая позиция партии, или «Обжарка дня»</translation>
+        <translation>Текущая позиция батча или «Обжарка дня»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="35" />
         <source>Same as Batch field in Roast Properties
 "~batchprefix~batchnum (~batchposition)"</source>
-        <translation>То же, что и поле «Пакетная обработка» в свойствах жареного мяса.
-"~префикс партии~номер партии (~позиция партии)"</translation>
+        <translation>То же, что и поле «Батч» в свойствах обжарки.
+"~префикс батча~номер батча (~позиция батча)"</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="36" />
         <source>From Roast&gt;Properties&gt;Title</source>
-        <translation>Из Roast&gt;Свойства&gt;Заголовок</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Название»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="37" />
@@ -10424,7 +10424,7 @@ From Roast&gt;Properties&gt;Beans</source>
     <message>
         <location filename="../help/autosave_help.py" line="38" />
         <source>The entire first line From Roast&gt;Properties&gt;Beans</source>
-        <translation>Вся первая строка От обжарки&gt;Свойства&gt;Бобы</translation>
+        <translation>Вся первая строка из «Обжарка &gt; Свойства &gt; Зёрна»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="39" />
@@ -10499,32 +10499,32 @@ From Roast&gt;Properties&gt;Beans</source>
     <message>
         <location filename="../help/autosave_help.py" line="53" />
         <source>From Roast&gt;Properties&gt;Operator</source>
-        <translation>Из Roast&gt;Свойства&gt;Оператор</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Обжарщик»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="54" />
         <source>From Roast&gt;Properties&gt;Organization</source>
-        <translation>Из Roast&gt;Свойства&gt;Организация</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Организация»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="55" />
         <source>From Roast&gt;Properties&gt;Machine</source>
-        <translation>Из Roast&gt;Свойства&gt;Машина</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Аппарат»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="56" />
         <source>From Roast&gt;Properties&gt;Weight Green</source>
-        <translation>Из «Обжарка»&gt; «Свойства»&gt; «Вес зеленого»</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Вес зелёного»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="57" />
         <source>From Roast&gt;Properties&gt;Weight Roasted</source>
-        <translation>Из Обжарка&gt;Свойства&gt;Вес обжарки</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Вес обжаренного»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="58" />
         <source>From Roast&gt;Properties&gt;Weight</source>
-        <translation>Из Обжарки&gt;Свойства&gt;Вес</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Вес»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="59" />
@@ -10534,17 +10534,17 @@ From Roast&gt;Properties&gt;Beans</source>
     <message>
         <location filename="../help/autosave_help.py" line="60" />
         <source>From Roast&gt;Properties&gt;Volume Green</source>
-        <translation>Из Roast&gt;Properties&gt;Volume Green</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Объём зелёного»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="61" />
         <source>From Roast&gt;Properties&gt;Volume Roasted</source>
-        <translation>Из Обжарка&gt;Свойства&gt;Объем обжарки</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Объём обжаренного»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="62" />
         <source>From Roast&gt;Properties&gt;Volume</source>
-        <translation>Из Roast&gt;Properties&gt;Volume</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Объём»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="63" />
@@ -10554,17 +10554,17 @@ From Roast&gt;Properties&gt;Beans</source>
     <message>
         <location filename="../help/autosave_help.py" line="64" />
         <source>From Roast&gt;Properties&gt;Density Green</source>
-        <translation>Из Обжарки&gt;Свойства&gt;Плотность зеленого</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Плотность зелёного»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="65" />
         <source>From Roast&gt;Properties&gt;Density Roasted</source>
-        <translation>Из Обжарки&gt;Свойства&gt;Плотность обжарки</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Плотность обжаренного»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="66" />
         <source>From Roast&gt;Properties&gt;Density</source>
-        <translation>Из Обжарки&gt;Свойства&gt;Плотность</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Плотность»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="67" />
@@ -10574,17 +10574,17 @@ From Roast&gt;Properties&gt;Beans</source>
     <message>
         <location filename="../help/autosave_help.py" line="68" />
         <source>From Roast&gt;Properties&gt;Moisture Green</source>
-        <translation>Из Обжарки&gt;Свойства&gt;Влажность зеленого цвета</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Влажность зелёного»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="69" />
         <source>From Roast&gt;Properties&gt;Defects</source>
-        <translation>Из Жареного&gt;Свойства&gt;Дефекты</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Дефекты»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="70" />
         <source>From Roast&gt;Properties&gt;Yield</source>
-        <translation>Из Жареного&gt;Свойства&gt;Выход</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Выход»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="71" />
@@ -10599,7 +10599,7 @@ From Roast&gt;Properties&gt;Beans</source>
     <message>
         <location filename="../help/autosave_help.py" line="73" />
         <source>From Roast&gt;Properties&gt;Moisture Roasted</source>
-        <translation>Из Обжарка&gt;Свойства&gt;Влажность обжарки</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Влажность обжаренного»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="74" />
@@ -10609,52 +10609,52 @@ From Roast&gt;Properties&gt;Beans</source>
     <message>
         <location filename="../help/autosave_help.py" line="75" />
         <source>From Roast&gt;Properties&gt;Drum Speed</source>
-        <translation>Из Обжарка&gt;Свойства&gt;Скорость барабана</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Скорость барабана»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="76" />
         <source>From Roast&gt;Properties&gt;Color Whole</source>
-        <translation>Из «Обжарка»&gt; «Свойства»&gt; «Цвет целиком»</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Цвет зерна»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="77" />
         <source>From Roast&gt;Properties&gt;Color Ground</source>
-        <translation>Из «Обжарка»&gt; «Свойства»&gt; «Цвет земли».</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Цвет молотого»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="78" />
         <source>From Roast&gt;Properties&gt;Color System</source>
-        <translation>Из Roast&gt;Properties&gt;Color System</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Цветовая система»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="79" />
         <source>From Roast&gt;Properties&gt;Screen Min</source>
-        <translation>Из Roast&gt;Properties&gt;Screen Min</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Сито мин.»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="80" />
         <source>From Roast&gt;Properties&gt;Screen Max</source>
-        <translation>Из Roast&gt;Properties&gt;Screen Max</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Сито макс.»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="81" />
         <source>From Roast&gt;Properties&gt;(Green) Beans Temperature</source>
-        <translation>Из Обжарка&gt;Свойства&gt;Температура (зеленых) зерен</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Температура зёрен (зелёное)»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="82" />
         <source>From Roast&gt;Properties&gt;Ambient Temperature</source>
-        <translation>Из «Обжарка»&gt; «Свойства»&gt; «Температура окружающей среды»</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Температура окружающей среды»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="83" />
         <source>From Roast&gt;Properties&gt;Ambient Humidity</source>
-        <translation>Из Обжарка&gt;Свойства&gt;Влажность окружающего воздуха</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Влажность воздуха»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="84" />
         <source>From Roast&gt;Properties&gt;Ambient Pressure</source>
-        <translation>Из «Обжарка»&gt; «Свойства»&gt; «Давление окружающей среды»</translation>
+        <translation>«Обжарка &gt; Свойства &gt; Атмосферное давление»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="85" />
@@ -10761,7 +10761,7 @@ From Roast&gt;Properties&gt;Roasting Notes</source>
     <message>
         <location filename="../help/autosave_help.py" line="105" />
         <source>The entire first line From Roast&gt;Properties&gt;Roasting Notes</source>
-        <translation>Вся первая строка От Обжарка&gt;Свойства&gt;Примечания об обжаривании</translation>
+        <translation>Вся первая строка из «Обжарка &gt; Свойства &gt; Заметки об обжарке»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="106" />
@@ -10773,17 +10773,17 @@ From Roast&gt;Properties&gt;Cupping Notes</source>
     <message>
         <location filename="../help/autosave_help.py" line="107" />
         <source>The entire first line From Roast&gt;Properties&gt;Cupping Notes</source>
-        <translation>Вся первая строка From Roast&gt;Properties&gt;Cupping Notes</translation>
+        <translation>Вся первая строка из «Обжарка &gt; Свойства &gt; Заметки каппинга»</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="108" />
         <source>From the Profile Energy Use - Total energy used by the batch in BTU</source>
-        <translation>Из профиля «Энергопотребление» — общее количество энергии, использованной партией в БТЕ.</translation>
+        <translation>Из профиля «Энергопотребление» — общее количество энергии, использованной батчем в БТЕ.</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="109" />
         <source>From the Profile Energy Use - CO2 produced by the batch in g</source>
-        <translation>Из профиля энергопотребления - CO2, произведенный партией в г</translation>
+        <translation>Из профиля энергопотребления - CO2, произведённый батчем в г</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="110" />
@@ -10798,12 +10798,12 @@ From Roast&gt;Properties&gt;Cupping Notes</source>
     <message>
         <location filename="../help/autosave_help.py" line="112" />
         <source>From the Profile Energy Use - Energy used during Between Batch Protocol in BTU</source>
-        <translation>Из профиля Energy Use — Энергия, используемая во время межпакетного протокола в БТЕ</translation>
+        <translation>Из профиля Energy Use — Энергия, используемая во время протокола между батчами в БТЕ</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="113" />
         <source>From the Profile Energy Use - CO2 produced during Between Batch Protocol in g</source>
-        <translation>Из профиля энергопотребления — CO2, произведенный во время протокола между партиями в г</translation>
+        <translation>Из профиля энергопотребления — CO2, произведенный во время протокола между батчами в г</translation>
     </message>
     <message>
         <location filename="../help/autosave_help.py" line="114" />
@@ -10934,12 +10934,12 @@ From Roast&gt;Properties&gt;Cupping Notes</source>
     <message>
         <location filename="../help/symbolic_help.py" line="32" />
         <source>ET background</source>
-        <translation>инопланетный фон</translation>
+        <translation>Фон ET</translation>
     </message>
     <message>
         <location filename="../help/symbolic_help.py" line="33" />
         <source>BT background</source>
-        <translation>БТ фон</translation>
+        <translation>Фон BT</translation>
     </message>
     <message>
         <location filename="../help/symbolic_help.py" line="34" />
@@ -11096,7 +11096,7 @@ For example, while "Y2" returns the current bean temperature (BT), "Y2[-1]" retu
     <message>
         <location filename="../help/symbolic_help.py" line="83" />
         <source>AXIS MAPPING</source>
-        <translation>ОТОБРАЖЕНИЕ ОСЕЙ</translation>
+        <translation>Сопоставление осей</translation>
     </message>
     <message>
         <location filename="../help/symbolic_help.py" line="87" />
@@ -11136,7 +11136,7 @@ For example, while "Y2" returns the current bean temperature (BT), "Y2[-1]" retu
     <message>
         <location filename="../help/symbolic_help.py" line="105" />
         <source>AREA UNDER THE CURVE (AUC)</source>
-        <translation>ПЛОЩАДЬ ПОД КРИВОЙ (AUC)</translation>
+        <translation>Площадь под кривой (AUC)</translation>
     </message>
     <message>
         <location filename="../help/symbolic_help.py" line="109" />
@@ -11156,7 +11156,7 @@ For example, while "Y2" returns the current bean temperature (BT), "Y2[-1]" retu
     <message>
         <location filename="../help/symbolic_help.py" line="114" />
         <source>PREDICTIONS</source>
-        <translation>ПРЕДСКАЗАНИЯ</translation>
+        <translation>Прогнозы</translation>
     </message>
     <message>
         <location filename="../help/symbolic_help.py" line="118" />
@@ -11204,7 +11204,7 @@ The prediction value is the calculated time in seconds to reach the DRY or FCs t
     <message>
         <location filename="../help/symbolic_help.py" line="126" />
         <source>AMBIENT</source>
-        <translation>ОКРУЖАЮЩИЙ</translation>
+        <translation>Окружающее</translation>
     </message>
     <message>
         <location filename="../help/symbolic_help.py" line="130" />
@@ -11229,17 +11229,17 @@ The prediction value is the calculated time in seconds to reach the DRY or FCs t
     <message>
         <location filename="../help/symbolic_help.py" line="139" />
         <source>ROAST PROPERTIES</source>
-        <translation>СВОЙСТВА ОБЖАРКИ</translation>
+        <translation>Свойства обжарки</translation>
     </message>
     <message>
         <location filename="../help/symbolic_help.py" line="143" />
         <source>batch size (g)</source>
-        <translation>размер партии (г)</translation>
+        <translation>размер батча (г)</translation>
     </message>
     <message>
         <location filename="../help/symbolic_help.py" line="144" />
         <source>green moisture (%)</source>
-        <translation>зеленая влажность (%)</translation>
+        <translation>влажность зелёного (%)</translation>
     </message>
     <message>
         <location filename="../help/symbolic_help.py" line="145" />
@@ -11249,7 +11249,7 @@ The prediction value is the calculated time in seconds to reach the DRY or FCs t
     <message>
         <location filename="../help/symbolic_help.py" line="148" />
         <source>EXPRESSIONS</source>
-        <translation>ВЫРАЖЕНИЯ</translation>
+        <translation>Выражения</translation>
     </message>
     <message>
         <location filename="../help/symbolic_help.py" line="151" />
@@ -11399,7 +11399,7 @@ Using math formulas in the plotter also allows to use the symbolic variables P a
     </message>
     <message>
         <source>Data used to replace the fields in the Autosave File Name Prefix are pulled from the current Roast Properties.  </source>
-        <translation type="vanished">Данные, используемые для замены полей в префиксе имени файла автосохранения, извлекаются из текущих свойств жареного мяса.</translation>
+        <translation type="vanished">Данные, используемые для замены полей в префиксе имени файла автосохранения, извлекаются из текущих свойств обжарки.</translation>
     </message>
     <message>
         <source>Scaling factor from RoR to Temp axis. The range of the temperature scale divided by the range of the delta scale. </source>
@@ -11411,7 +11411,7 @@ Using math formulas in the plotter also allows to use the symbolic variables P a
     </message>
     <message>
         <source>Commands for alarms with an action go here.  Anything after a &amp;#39;#&amp;#39; character is considered a comment and is ignored when processing the alarm.  </source>
-        <translation type="vanished">Здесь находятся команды для тревог с действием. Что-нибудь после &amp;#39;#&amp;#39; считается комментарием и игнорируется при обработке тревоги.</translation>
+        <translation type="vanished">Здесь находятся команды для сигналов с действием. Что-нибудь после &amp;#39;#&amp;#39; считается комментарием и игнорируется при обработке сигналови.</translation>
     </message>
     <message>
         <source>write 16bit BCD encoded value to register of device with DeviceID </source>
@@ -11425,7 +11425,7 @@ For a sensory milestone (see notes above) the value 50 corresponds to the "Hay" 
     </message>
     <message>
         <source>Artisan allows the direct reading of 2 energy meters to support the use of measured energy consumption values in place of estimated values defined by the Loads. These energy meters could measure gas or electricity. As an energy meter the instantaneous power reading must be accumulated over a period of time.  Energy readings are typically in kWh or BTU, though other units are supported.  Artisan will use the Meter reading at the start of recording and end of recording to calculate energy consumption for the roast batch.  Intermediate reads at major roast events are also used in presenting phase energy consumption.  </source>
-        <translation type="vanished">Artisan позволяет производить прямое считывание показаний 2 счетчиков энергии для поддержки использования измеренных значений потребления энергии вместо расчетных значений, определенных нагрузками. Эти счетчики энергии могут измерять газ или электричество. Как счетчик энергии, мгновенные показания мощности должны накапливаться в течение определенного периода времени. Показания энергии обычно указываются в кВт·ч или БТЕ, хотя поддерживаются и другие единицы. Artisan будет использовать показания счетчика в начале и в конце записи для расчета потребления энергии для партии обжарки. Промежуточные показания при основных событиях обжарки также используются для представления потребления энергии на этапе.</translation>
+        <translation type="vanished">Artisan позволяет производить прямое считывание показаний 2 счетчиков энергии для поддержки использования измеренных значений потребления энергии вместо расчетных значений, определенных нагрузками. Эти счетчики энергии могут измерять газ или электричество. Как счетчик энергии, мгновенные показания мощности должны накапливаться в течение определенного периода времени. Показания энергии обычно указываются в кВт·ч или БТЕ, хотя поддерживаются и другие единицы. Artisan будет использовать показания счетчика в начале и в конце записи для расчета потребления энергии для батча обжарки. Промежуточные показания при основных событиях обжарки также используются для представления потребления энергии на этапе.</translation>
     </message>
     <message>
         <source>Energy meter data must be recorded in an Extra Device (Config&gt;&gt; Devices&gt;&gt; Extra devices tab).  The Extra Device is then used as the Source for the meter in the Energy tab.  Connectivity to the meter is typically via MODBUS. Some devices, like the YoctoWatt, have direct connection support in Artisan.  The data recorded in the Extra Device must be scaled to one of the units supported in the Energy tab such as kWh, BTU, kJ, kCal or therms (thm).  For instance, an electricity meter that returns energy readings in Wh that must be scaled to kWh buy using the symbolic equation "x/1000". </source>
@@ -11449,7 +11449,7 @@ For a sensory milestone (see notes above) the value 50 corresponds to the "Hay" 
     </message>
     <message>
         <source>Load alarms</source>
-        <translation type="vanished">Загрузить тревоги</translation>
+        <translation type="vanished">Загрузить сигналы</translation>
     </message>
     <message>
         <source>Changes Event Button Palettes</source>
@@ -11574,14 +11574,14 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/roast_properties.py" line="897" />
         <location filename="../plus/blend.py" line="343" />
         <source>Beans</source>
-        <translation type="unfinished">Кофейные бобы</translation>
+        <translation type="unfinished">Зёрна</translation>
     </message>
     <message>
         <location filename="../artisanlib/statistics.py" line="231" />
         <location filename="../artisanlib/roast_properties.py" line="1735" />
         <location filename="../plus/schedule.py" line="2071" />
         <source>Yield</source>
-        <translation>Урожай</translation>
+        <translation>Выход</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23817" />
@@ -11609,7 +11609,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/roast_properties.py" line="1106" />
         <location filename="../plus/schedule.py" line="2111" />
         <source>Moisture</source>
-        <translation>Влага</translation>
+        <translation>Влажность</translation>
     </message>
     <message>
         <location filename="../artisanlib/statistics.py" line="213" />
@@ -11617,18 +11617,18 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../plus/schedule.py" line="2122" />
         <location filename="../plus/schedule.py" line="2121" />
         <source>Roasting Notes</source>
-        <translation type="unfinished">Заметки по обжарке</translation>
+        <translation type="unfinished">Заметки об обжарке</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="2126" />
         <source>Score</source>
-        <translation>Счет</translation>
+        <translation>Оценка</translation>
     </message>
     <message>
         <location filename="../artisanlib/statistics.py" line="214" />
         <location filename="../plus/schedule.py" line="2127" />
         <source>Cupping Score</source>
-        <translation>Рейтинг чашек</translation>
+        <translation>Оценка каппинга</translation>
     </message>
     <message>
         <location filename="../artisanlib/statistics.py" line="215" />
@@ -11636,7 +11636,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../plus/schedule.py" line="2134" />
         <location filename="../plus/schedule.py" line="2133" />
         <source>Cupping Notes</source>
-        <translation>Примечания к банкам</translation>
+        <translation>Заметки каппинга</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="905" />
@@ -11644,7 +11644,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../plus/schedule.py" line="4068" />
         <location filename="../plus/schedule.py" line="2222" />
         <source>Roasted</source>
-        <translation>Жареный</translation>
+        <translation>Обжаренное</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12001" />
@@ -11654,7 +11654,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/roast_properties.py" line="206" />
         <location filename="../plus/schedule.py" line="4066" />
         <source>Green</source>
-        <translation>Зеленый</translation>
+        <translation>Зелёное</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="3811" />
@@ -11692,7 +11692,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/axis.py" line="157" />
         <source>RECORD</source>
-        <translation>ЗАПИСЫВАТЬ</translation>
+        <translation>Запись</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="1012" />
@@ -11748,7 +11748,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/wheels.py" line="95" />
         <source>Color pattern</source>
-        <translation type="unfinished">Цветной узор</translation>
+        <translation type="unfinished">Цветовой узор</translation>
     </message>
     <message>
         <location filename="../artisanlib/wheels.py" line="447" />
@@ -11786,7 +11786,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/comm.py" line="188" />
         <location filename="../artisanlib/comparator.py" line="845" />
         <source>BT</source>
-        <translation>БТ</translation>
+        <translation>BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="18269" />
@@ -11816,7 +11816,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/events.py" line="293" />
         <location filename="../artisanlib/comparator.py" line="861" />
         <source>ET</source>
-        <translation>восточноевропейское время</translation>
+        <translation>ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/comparator.py" line="893" />
@@ -11862,7 +11862,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/pid_dialogs.py" line="841" />
         <location filename="../artisanlib/comparator.py" line="1010" />
         <source>CHARGE</source>
-        <translation type="unfinished">Загрузить бобы</translation>
+        <translation type="unfinished">Загрузка</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="8268" />
@@ -11875,7 +11875,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/events.py" line="598" />
         <location filename="../artisanlib/comparator.py" line="1011" />
         <source>TP</source>
-        <translation>ТП</translation>
+        <translation>ТР</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="1320" />
@@ -11890,7 +11890,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/ports.py" line="1416" />
         <location filename="../artisanlib/comparator.py" line="1012" />
         <source>DRY</source>
-        <translation type="unfinished">Сухость</translation>
+        <translation type="unfinished">Пожелтение</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="1321" />
@@ -11908,7 +11908,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/ports.py" line="1418" />
         <location filename="../artisanlib/comparator.py" line="1013" />
         <source>FCs</source>
-        <translation>ФК</translation>
+        <translation>ПКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="1322" />
@@ -11917,7 +11917,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/ports.py" line="1420" />
         <location filename="../artisanlib/comparator.py" line="1014" />
         <source>FCe</source>
-        <translation>ФКе</translation>
+        <translation>ПКк</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="1323" />
@@ -11926,7 +11926,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/ports.py" line="1422" />
         <location filename="../artisanlib/comparator.py" line="1015" />
         <source>SCs</source>
-        <translation>СК</translation>
+        <translation>ВКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="1324" />
@@ -11935,7 +11935,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/ports.py" line="1424" />
         <location filename="../artisanlib/comparator.py" line="1016" />
         <source>SCe</source>
-        <translation>СКе</translation>
+        <translation>ВКк</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="18643" />
@@ -11963,7 +11963,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/pid_dialogs.py" line="838" />
         <location filename="../artisanlib/comparator.py" line="1017" />
         <source>DROP</source>
-        <translation type="unfinished">Выбрость быбы</translation>
+        <translation type="unfinished">Выгрузка</translation>
     </message>
     <message>
         <location filename="../artisanlib/comparator.py" line="1322" />
@@ -12000,7 +12000,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="165" />
         <source>PV</source>
-        <translation>ПВ</translation>
+        <translation>PV</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="8495" />
@@ -12012,7 +12012,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/pid_dialogs.py" line="437" />
         <location filename="../artisanlib/pid_dialogs.py" line="168" />
         <source>SV</source>
-        <translation>СВ</translation>
+        <translation>SV</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="233" />
@@ -12078,12 +12078,12 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="456" />
         <source>Manual</source>
-        <translation>Руководство по эксплуатации</translation>
+        <translation>Ручной</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="457" />
         <source>Ramp/Soak</source>
-        <translation>Рампа / впитывание</translation>
+        <translation>Рампа/выдержка</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="2643" />
@@ -12161,7 +12161,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="659" />
         <source>DoE</source>
-        <translation>Министерство энергетики США</translation>
+        <translation>DoE</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="661" />
@@ -12219,7 +12219,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/events.py" line="1288" />
         <location filename="../artisanlib/pid_dialogs.py" line="833" />
         <source>DRY END</source>
-        <translation type="unfinished">Конец сушки</translation>
+        <translation type="unfinished">Пожелтение</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="18631" />
@@ -12239,7 +12239,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/events.py" line="1298" />
         <location filename="../artisanlib/pid_dialogs.py" line="834" />
         <source>FC START</source>
-        <translation type="unfinished">Старт FC</translation>
+        <translation type="unfinished">ПКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="18634" />
@@ -12256,7 +12256,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/events.py" line="1308" />
         <location filename="../artisanlib/pid_dialogs.py" line="835" />
         <source>FC END</source>
-        <translation type="unfinished">Закончить FC</translation>
+        <translation type="unfinished">ПКк</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="18637" />
@@ -12275,7 +12275,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/events.py" line="1318" />
         <location filename="../artisanlib/pid_dialogs.py" line="836" />
         <source>SC START</source>
-        <translation type="unfinished">Старт SC</translation>
+        <translation type="unfinished">ВКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="18640" />
@@ -12292,22 +12292,22 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/events.py" line="1328" />
         <location filename="../artisanlib/pid_dialogs.py" line="837" />
         <source>SC END</source>
-        <translation type="unfinished">Закончить SC</translation>
+        <translation type="unfinished">ВКк</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="1911" />
         <source>Ramp Soak HH:MM&lt;BR&gt;(1-4)</source>
-        <translation>Замачивание на рампе ЧЧ: ММ &lt;BR&gt; (1-4)</translation>
+        <translation>Рампа/выдержка ЧЧ:ММ&lt;BR&gt;(1-4)</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="1915" />
         <source>Ramp Soak HH:MM&lt;BR&gt;(5-8)</source>
-        <translation>Замачивание на рампе ЧЧ: ММ &lt;BR&gt; (5-8)</translation>
+        <translation>Рампа/выдержка ЧЧ:ММ&lt;BR&gt;(5-8)</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="1916" />
         <source>Ramp/Soak Pattern</source>
-        <translation>Схема наклона / выдержки</translation>
+        <translation>Схема рампы/выдержки</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="2948" />
@@ -12319,7 +12319,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/pid_dialogs.py" line="2951" />
         <location filename="../artisanlib/pid_dialogs.py" line="1959" />
         <source>SV Slider</source>
-        <translation>SV слайдер</translation>
+        <translation>Ползунок SV</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="1973" />
@@ -12335,7 +12335,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="1971" />
         <source>&lt;u&gt;Max life&lt;/u&gt; 10,000 writes</source>
-        <translation>&lt;u&gt; Максимальное количество записей &lt;/u&gt; 10 000 записей</translation>
+        <translation>&lt;u&gt;Макс. ресурс&lt;/u&gt; 10 000 записей</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="1972" />
@@ -12379,12 +12379,12 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="2747" />
         <source>Ramp Soak (MM:SS)&lt;br&gt;(1-7)</source>
-        <translation>Замачивание на рампе (MM: SS) &lt;br&gt; (1-7)</translation>
+        <translation>Рампа/выдержка (ММ:СС)&lt;br&gt;(1-7)</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="2753" />
         <source>Ramp Soak (MM:SS)&lt;br&gt;(8-16)</source>
-        <translation>Замачивание на рампе (MM: SS) &lt;br&gt; (8-16)</translation>
+        <translation>Рампа/выдержка (ММ:СС)&lt;br&gt;(8-16)</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="2803" />
@@ -12394,7 +12394,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="2875" />
         <source>SV (7-0)</source>
-        <translation>СВ (7-0)</translation>
+        <translation>SV (7-0)</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3010" />
@@ -12417,14 +12417,14 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/ports.py" line="618" />
         <location filename="../artisanlib/pid_dialogs.py" line="2992" />
         <source>P</source>
-        <translation>п</translation>
+        <translation>P</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="1088" />
         <location filename="../artisanlib/ports.py" line="624" />
         <location filename="../artisanlib/pid_dialogs.py" line="2998" />
         <source>I</source>
-        <translation>я</translation>
+        <translation>I</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="1094" />
@@ -12441,7 +12441,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3175" />
         <source>Artisan Fuji PXF uses MINUTES:SECONDS units in Ramp/Soaks</source>
-        <translation>Artisan Fuji PXF использует МИНУТЫ: СЕКУНДЫ единиц в рампе / замачивании</translation>
+        <translation>Artisan Fuji PXF использует единицы МИНУТЫ:СЕКУНДЫ в рампе/выдержке</translation>
     </message>
     <message>
         <location filename="../artisanlib/autosave.py" line="50" />
@@ -12466,17 +12466,17 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/events.py" line="167" />
         <source>Annotation</source>
-        <translation>Аннотации</translation>
+        <translation>Аннотация</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="172" />
         <source>Example before FCs</source>
-        <translation>Пример перед FC</translation>
+        <translation>Пример до ПКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="176" />
         <source>Example after FCs</source>
-        <translation>Пример после FC</translation>
+        <translation>Пример после ПКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="250" />
@@ -12526,14 +12526,14 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/events.py" line="569" />
         <location filename="../artisanlib/events.py" line="558" />
         <source>START</source>
-        <translation type="unfinished">СТАРТ</translation>
+        <translation type="unfinished">Старт</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="16057" />
         <location filename="../artisanlib/canvas.py" line="16048" />
         <location filename="../artisanlib/events.py" line="603" />
         <source>MET</source>
-        <translation>ВСТРЕТИЛИСЬ</translation>
+        <translation>MET</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="631" />
@@ -12589,7 +12589,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/events.py" line="3814" />
         <location filename="../artisanlib/events.py" line="740" />
         <source>Factor</source>
-        <translation type="unfinished">Фактор</translation>
+        <translation type="unfinished">Коэффициент</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="746" />
@@ -12656,7 +12656,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/events.py" line="3812" />
         <source>Slider Value</source>
-        <translation>Ползунок Значение</translation>
+        <translation>Значение ползунка</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="3813" />
@@ -12688,7 +12688,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/ports.py" line="962" />
         <location filename="../artisanlib/ports.py" line="247" />
         <source>DB#</source>
-        <translation>БД №</translation>
+        <translation>DB#</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="7460" />
@@ -12708,19 +12708,19 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/ports.py" line="443" />
         <location filename="../artisanlib/ports.py" line="398" />
         <source>Baud Rate</source>
-        <translation type="unfinished">Скорость передачи информации</translation>
+        <translation type="unfinished">Скорость передачи</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="452" />
         <location filename="../artisanlib/ports.py" line="404" />
         <source>Byte Size</source>
-        <translation type="unfinished">Размер в байтах</translation>
+        <translation type="unfinished">Размер байта</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="458" />
         <location filename="../artisanlib/ports.py" line="410" />
         <source>Parity</source>
-        <translation type="unfinished">Равенство</translation>
+        <translation type="unfinished">Чётность</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="465" />
@@ -12785,7 +12785,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/ports.py" line="923" />
         <location filename="../artisanlib/ports.py" line="570" />
         <source>Host</source>
-        <translation type="unfinished">сеть</translation>
+        <translation type="unfinished">Хост</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1782" />
@@ -12805,13 +12805,13 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/ports.py" line="1068" />
         <location filename="../artisanlib/ports.py" line="604" />
         <source>SV Factor</source>
-        <translation>Фактор SV</translation>
+        <translation>Коэффициент SV</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="1075" />
         <location filename="../artisanlib/ports.py" line="611" />
         <source>pid Factor</source>
-        <translation>pid-фактор</translation>
+        <translation>Коэффициент pid</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="700" />
@@ -12837,17 +12837,17 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/ports.py" line="1225" />
         <source>Path</source>
-        <translation>Дорожка</translation>
+        <translation>Путь</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="1231" />
         <source>ID</source>
-        <translation>Я БЫ</translation>
+        <translation>ID</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="1280" />
         <source>Connect</source>
-        <translation>Соединять</translation>
+        <translation>Подключить</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="1283" />
@@ -12895,7 +12895,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/canvas.py" line="1326" />
         <location filename="../artisanlib/background.py" line="103" />
         <source>ALL</source>
-        <translation>ВСЕ</translation>
+        <translation>Все</translation>
     </message>
     <message>
         <location filename="../artisanlib/background.py" line="136" />
@@ -12923,7 +12923,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/background.py" line="213" />
         <location filename="../artisanlib/background.py" line="200" />
         <source>by ET</source>
-        <translation>автор: ET</translation>
+        <translation>по ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/background.py" line="201" />
@@ -12959,7 +12959,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/roast_properties.py" line="214" />
         <location filename="../artisanlib/roast_properties.py" line="141" />
         <source>Unit Weight</source>
-        <translation>Единица измерения</translation>
+        <translation>Вес единицы</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="219" />
@@ -12972,7 +12972,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/roast_properties.py" line="236" />
         <location filename="../artisanlib/roast_properties.py" line="163" />
         <source>Volume</source>
-        <translation type="unfinished">Объем</translation>
+        <translation type="unfinished">Объём</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="866" />
@@ -12983,7 +12983,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/roast_properties.py" line="3186" />
         <location filename="../artisanlib/roast_properties.py" line="871" />
         <source>Batch</source>
-        <translation type="unfinished">Партия</translation>
+        <translation type="unfinished">Батч</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1051" />
@@ -12993,12 +12993,12 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1070" />
         <source>Whole</source>
-        <translation>Весь</translation>
+        <translation>Целое</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1077" />
         <source>Ground</source>
-        <translation>Земля</translation>
+        <translation>Молотый</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1134" />
@@ -13014,17 +13014,17 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1362" />
         <source>Stock</source>
-        <translation>Склад</translation>
+        <translation>Запас</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1364" />
         <source>Store</source>
-        <translation>Магазин</translation>
+        <translation>Хранилище</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1366" />
         <source>Blend</source>
-        <translation>Смешивать</translation>
+        <translation>Смесь</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1945" />
@@ -13034,7 +13034,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1973" />
         <source>Choose beans</source>
-        <translation>Выберите бобы</translation>
+        <translation>Выберите зёрна</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="2381" />
@@ -13061,13 +13061,13 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="2977" />
         <source>Electric Energy Mix:</source>
-        <translation>Смесь электрической энергии:</translation>
+        <translation>Состав электроэнергии:</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="2983" />
         <location filename="../artisanlib/roast_properties.py" line="2979" />
         <source>Gas Energy Mix:</source>
-        <translation>Газоэнергетический микс:</translation>
+        <translation>Состав газовой энергии:</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="2982" />
@@ -13078,12 +13078,12 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="2984" />
         <source>Meter 1</source>
-        <translation>Счетчик 1</translation>
+        <translation>Счётчик 1</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="2985" />
         <source>Meter 2</source>
-        <translation>Метр 2</translation>
+        <translation>Счётчик 2</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="5794" />
@@ -13095,7 +13095,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/roast_properties.py" line="5804" />
         <location filename="../artisanlib/roast_properties.py" line="3000" />
         <source>Between Batches</source>
-        <translation>Между партиями</translation>
+        <translation>Между батчами</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="5814" />
@@ -13106,7 +13106,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="3002" />
         <source>Between Batches after Pre-Heating</source>
-        <translation>Между партиями после предварительного нагрева</translation>
+        <translation>Между батчами после предварительного нагрева</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="3007" />
@@ -13122,7 +13122,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="3013" />
         <source>Measured Energy or Output %</source>
-        <translation>Измеренная энергия или выход%</translation>
+        <translation>Измеренная энергия или мощность, %</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="3614" />
@@ -13134,7 +13134,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/roast_properties.py" line="3616" />
         <location filename="../artisanlib/roast_properties.py" line="3587" />
         <source>BBP</source>
-        <translation>ББП</translation>
+        <translation>BBP</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="16181" />
@@ -13143,13 +13143,13 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/roast_properties.py" line="3594" />
         <location filename="../artisanlib/roast_properties.py" line="3589" />
         <source>Roast</source>
-        <translation>Жарить</translation>
+        <translation>Обжарка</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="3632" />
         <location filename="../artisanlib/roast_properties.py" line="3603" />
         <source>per kg green coffee</source>
-        <translation>за кг зеленого кофе</translation>
+        <translation>за кг зелёного кофе</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="3663" />
@@ -13164,12 +13164,12 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="4174" />
         <source>Operator</source>
-        <translation type="unfinished">Оператор</translation>
+        <translation type="unfinished">Обжарщик</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="4175" />
         <source>Machine</source>
-        <translation type="unfinished">Машина</translation>
+        <translation type="unfinished">Аппарат</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1655" />
@@ -13182,7 +13182,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/main.py" line="6029" />
         <location filename="../artisanlib/roast_properties.py" line="4177" />
         <source>Heating</source>
-        <translation>Обогрев</translation>
+        <translation>Нагрев</translation>
     </message>
     <message>
         <location filename="../artisanlib/statistics.py" line="201" />
@@ -13207,14 +13207,14 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/statistics.py" line="225" />
         <location filename="../artisanlib/phases.py" line="47" />
         <source>Maillard</source>
-        <translation type="unfinished">Майара</translation>
+        <translation type="unfinished">Майяр</translation>
     </message>
     <message>
         <location filename="../artisanlib/transposer.py" line="1029" />
         <location filename="../artisanlib/statistics.py" line="224" />
         <location filename="../artisanlib/phases.py" line="48" />
         <source>Finishing</source>
-        <translation>Отделка</translation>
+        <translation>Завершение</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="651" />
@@ -13259,7 +13259,7 @@ LCDs All</source>
     <message>
         <location filename="../artisanlib/designer.py" line="217" />
         <source>Curviness</source>
-        <translation>Соблазнительность</translation>
+        <translation>Кривизна</translation>
     </message>
     <message>
         <location filename="../artisanlib/designer.py" line="718" />
@@ -13299,17 +13299,17 @@ LCDs All</source>
     <message>
         <location filename="../artisanlib/calculator.py" line="123" />
         <source>Yield (%)</source>
-        <translation>Урожай (%)</translation>
+        <translation>Выход (%)</translation>
     </message>
     <message>
         <location filename="../artisanlib/calculator.py" line="124" />
         <source>Grounds (g)</source>
-        <translation>Основания (г)</translation>
+        <translation>Молотый (г)</translation>
     </message>
     <message>
         <location filename="../artisanlib/calculator.py" line="125" />
         <source>TDS (%)</source>
-        <translation>ОСД (%)</translation>
+        <translation>TDS (%)</translation>
     </message>
     <message>
         <location filename="../artisanlib/calculator.py" line="126" />
@@ -13329,7 +13329,7 @@ LCDs All</source>
     <message>
         <location filename="../artisanlib/calculator.py" line="251" />
         <source>&lt;b&gt;{0}&lt;/b&gt; {1}/sec, &lt;b&gt;{2}&lt;/b&gt; {3}/min</source>
-        <translation>&lt;b&gt; {0} &lt;/b&gt; {1} / сек, &lt;b&gt; {2} &lt;/b&gt; {3} / мин</translation>
+        <translation>&lt;b&gt;{0}&lt;/b&gt; {1}/сек, &lt;b&gt;{2}&lt;/b&gt; {3}/мин</translation>
     </message>
     <message>
         <location filename="../artisanlib/calculator.py" line="255" />
@@ -13344,7 +13344,7 @@ LCDs All</source>
     <message>
         <location filename="../artisanlib/sampling.py" line="40" />
         <source>Keep ON</source>
-        <translation>Продолжать</translation>
+        <translation>Держать включённым</translation>
     </message>
     <message>
         <location filename="../artisanlib/sampling.py" line="44" />
@@ -13374,19 +13374,19 @@ LCDs All</source>
     <message>
         <location filename="../artisanlib/curves.py" line="470" />
         <source>Delta Span</source>
-        <translation>Дельта-пролет</translation>
+        <translation>Дельта-диапазон</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="252" />
         <location filename="../artisanlib/curves.py" line="578" />
         <source>ET Y(x)</source>
-        <translation>ET Y (x)</translation>
+        <translation>ET Y(x)</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="253" />
         <location filename="../artisanlib/curves.py" line="579" />
         <source>BT Y(x)</source>
-        <translation>BT Y (х)</translation>
+        <translation>BT Y(x)</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="699" />
@@ -13401,47 +13401,47 @@ LCDs All</source>
     <message>
         <location filename="../artisanlib/curves.py" line="762" />
         <source>P1</source>
-        <translation>Р1</translation>
+        <translation>P1</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="763" />
         <source>P2</source>
-        <translation>Р2</translation>
+        <translation>P2</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="764" />
         <source>P3</source>
-        <translation>Р3</translation>
+        <translation>P3</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="765" />
         <source>P4</source>
-        <translation>Р4</translation>
+        <translation>P4</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="766" />
         <source>P5</source>
-        <translation>Р5</translation>
+        <translation>P5</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="767" />
         <source>P6</source>
-        <translation>Р6</translation>
+        <translation>P6</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="768" />
         <source>P7</source>
-        <translation>Р7</translation>
+        <translation>P7</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="769" />
         <source>P8</source>
-        <translation>Р8</translation>
+        <translation>P8</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="770" />
         <source>P9</source>
-        <translation>Р9</translation>
+        <translation>P9</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="961" />
@@ -13519,7 +13519,7 @@ LCDs All</source>
     <message>
         <location filename="../artisanlib/statistics.py" line="228" />
         <source>Cupping Correction</source>
-        <translation>Коррекция вакуумной деформации</translation>
+        <translation>Коррекция каппинга</translation>
     </message>
     <message>
         <location filename="../artisanlib/statistics.py" line="229" />
@@ -13529,12 +13529,12 @@ LCDs All</source>
     <message>
         <location filename="../artisanlib/statistics.py" line="230" />
         <source>Defects Loss</source>
-        <translation>Дефекты Потеря</translation>
+        <translation>Потери на дефектах</translation>
     </message>
     <message>
         <location filename="../artisanlib/statistics.py" line="232" />
         <source>Total Loss</source>
-        <translation>Полная потеря</translation>
+        <translation>Общие потери</translation>
     </message>
     <message>
         <location filename="../artisanlib/statistics.py" line="253" />
@@ -13581,12 +13581,12 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/alarms.py" line="184" />
         <source>Alarm Sets</source>
-        <translation>Наборы будильников</translation>
+        <translation>Наборы сигналов</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="189" />
         <source>Current Alarm Set</source>
-        <translation>Текущий набор будильника</translation>
+        <translation>Текущий набор сигналов</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="938" />
@@ -13598,7 +13598,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/main.py" line="3442" />
         <location filename="../artisanlib/large_lcds.py" line="579" />
         <source>PID SV</source>
-        <translation>ПИД-СВ</translation>
+        <translation>PID SV</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3446" />
@@ -13645,7 +13645,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/main.py" line="23729" />
         <location filename="../artisanlib/main.py" line="1241" />
         <source>roasted</source>
-        <translation>жареные</translation>
+        <translation>обжаренное</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="16058" />
@@ -13655,12 +13655,12 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/main.py" line="7067" />
         <location filename="../artisanlib/main.py" line="3898" />
         <source>AUC</source>
-        <translation>АУК</translation>
+        <translation>AUC</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="6172" />
         <source>Time Guide</source>
-        <translation>Руководство по времени</translation>
+        <translation>Направляющая времени</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="6175" />
@@ -13680,7 +13680,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="6190" />
         <source>X Label</source>
-        <translation type="unfinished">Ось Y</translation>
+        <translation type="unfinished">Подпись оси X</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="6197" />
@@ -13692,17 +13692,17 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="6193" />
         <source>Y Label</source>
-        <translation type="unfinished">Ось X</translation>
+        <translation type="unfinished">Подпись оси Y</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="6199" />
         <source>SpecialEventText</source>
-        <translation>СпециальноеСобытиеТекст</translation>
+        <translation>Текст спецсобытия</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="6200" />
         <source>SpecialEventBox</source>
-        <translation>СпециальныйEventBox</translation>
+        <translation>Поле спецсобытия</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="6202" />
@@ -13725,7 +13725,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/main.py" line="6209" />
         <location filename="../artisanlib/main.py" line="6206" />
         <source>Legend bkgnd</source>
-        <translation>Легенда bkgnd</translation>
+        <translation>Фон легенды</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="6217" />
@@ -13736,7 +13736,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/main.py" line="6220" />
         <location filename="../artisanlib/main.py" line="6218" />
         <source>MET Box</source>
-        <translation>Коробка МЕТ</translation>
+        <translation>Поле MET</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="6224" />
@@ -13764,7 +13764,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/main.py" line="6236" />
         <location filename="../artisanlib/main.py" line="6230" />
         <source>BT LCD Digits</source>
-        <translation>BT LCD цифры</translation>
+        <translation>Цифры ЖК-дисплея BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="6237" />
@@ -13785,7 +13785,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="7071" />
         <source>AUC FCs</source>
-        <translation>AUC FC</translation>
+        <translation>AUC ПКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="17575" />
@@ -13800,28 +13800,28 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/main.py" line="7441" />
         <location filename="../artisanlib/main.py" line="7440" />
         <source>x</source>
-        <translation>Икс</translation>
+        <translation>x</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="27375" />
         <location filename="../artisanlib/main.py" line="27326" />
         <location filename="../artisanlib/main.py" line="7442" />
         <source>Bkgnd</source>
-        <translation>БКНД</translation>
+        <translation>Фон</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="7453" />
         <location filename="../artisanlib/main.py" line="7449" />
         <location filename="../artisanlib/main.py" line="7445" />
         <source>On</source>
-        <translation>На</translation>
+        <translation>Вкл</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="7455" />
         <location filename="../artisanlib/main.py" line="7451" />
         <location filename="../artisanlib/main.py" line="7447" />
         <source>Off</source>
-        <translation>Выключенный</translation>
+        <translation>Выкл</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="7462" />
@@ -13831,7 +13831,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="7463" />
         <source>Swing</source>
-        <translation>Качать</translation>
+        <translation>Колебание</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="7464" />
@@ -13871,7 +13871,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="7496" />
         <source>Smooth Curves/Spikes</source>
-        <translation>Гладкие кривые / шипы</translation>
+        <translation>Сглаживание кривых/выбросов</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="7497" />
@@ -13891,24 +13891,24 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="7498" />
         <source>Actual RoR at FCs</source>
-        <translation>Фактическая RoR в FC</translation>
+        <translation>Фактическая RoR на ПКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="8030" />
         <source>ALL FINISHING MODE</source>
-        <translation>ВСЕ РЕЖИМ ЗАВЕРШЕНИЯ</translation>
+        <translation>Режим завершения для всех</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="8195" />
         <location filename="../artisanlib/main.py" line="8049" />
         <source>DEV%</source>
-        <translation>ДЕВ%</translation>
+        <translation>Развитие%</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="8265" />
         <location filename="../artisanlib/main.py" line="8081" />
         <source>DRY%</source>
-        <translation>СУХОЙ%</translation>
+        <translation>Сушка%</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="8224" />
@@ -13917,7 +13917,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/main.py" line="8188" />
         <location filename="../artisanlib/main.py" line="8119" />
         <source>TIME MODE</source>
-        <translation>РЕЖИМ ВРЕМЕНИ</translation>
+        <translation>Режим времени</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="8228" />
@@ -13926,12 +13926,12 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/main.py" line="8193" />
         <location filename="../artisanlib/main.py" line="8123" />
         <source>PERCENTAGE MODE</source>
-        <translation>ПРОЦЕНТНЫЙ РЕЖИМ</translation>
+        <translation>Процентный режим</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="8132" />
         <source>RAMP%</source>
-        <translation>РАМП%</translation>
+        <translation>RAMP%</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="8232" />
@@ -13940,7 +13940,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/main.py" line="8204" />
         <location filename="../artisanlib/main.py" line="8135" />
         <source>TEMP MODE</source>
-        <translation>РЕЖИМ ТЕМП.</translation>
+        <translation>Режим температуры</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23709" />
@@ -13950,82 +13950,82 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="23725" />
         <source>greens</source>
-        <translation>зеленые</translation>
+        <translation>зелёное</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="26601" />
         <location filename="../artisanlib/main.py" line="26588" />
         <location filename="../artisanlib/main.py" line="26587" />
         <source>AUTO</source>
-        <translation>АВТО</translation>
+        <translation>Авто</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="26601" />
         <location filename="../artisanlib/main.py" line="26600" />
         <location filename="../artisanlib/main.py" line="26588" />
         <source>MANUAL</source>
-        <translation>РУКОВОДСТВО</translation>
+        <translation>Ручной</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="26589" />
         <source>FLAP</source>
-        <translation>КЛАПАН</translation>
+        <translation>Заслонка</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="26603" />
         <location filename="../artisanlib/main.py" line="26591" />
         <location filename="../artisanlib/main.py" line="26590" />
         <source>CLOSE</source>
-        <translation>ЗАКРЫВАТЬ</translation>
+        <translation>Закрыть</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="26603" />
         <location filename="../artisanlib/main.py" line="26602" />
         <location filename="../artisanlib/main.py" line="26591" />
         <source>OPEN</source>
-        <translation>ОТКРЫТЬ</translation>
+        <translation>Открыть</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="26592" />
         <source>CONTROL</source>
-        <translation type="unfinished">КОНТРОЛЬ</translation>
+        <translation type="unfinished">Управление</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="26593" />
         <source>DISCHARGE</source>
-        <translation>УВОЛЬНЯТЬ</translation>
+        <translation>Разгрузка</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="26595" />
         <source>HEATING</source>
-        <translation>ОБОГРЕВ</translation>
+        <translation>Нагрев</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="26596" />
         <source>STIRRER</source>
-        <translation>МЕШАЛКА</translation>
+        <translation>Мешалка</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="26597" />
         <source>FILL</source>
-        <translation>НАПОЛНЯТЬ</translation>
+        <translation>Наполнить</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="26599" />
         <source>COOLING</source>
-        <translation>ОХЛАЖДЕНИЕ</translation>
+        <translation>Охлаждение</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="26610" />
         <location filename="../artisanlib/main.py" line="26605" />
         <location filename="../artisanlib/main.py" line="26604" />
         <source>STOP</source>
-        <translation>ОСТАНАВЛИВАТЬСЯ</translation>
+        <translation>Стоп</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="26608" />
         <source>RELEASE</source>
-        <translation>ВЫПУСКАТЬ</translation>
+        <translation>Выпустить</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="27368" />
@@ -14041,19 +14041,19 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="27370" />
         <source>MSE BT</source>
-        <translation>МСЭ БТ</translation>
+        <translation>MSE BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="16058" />
         <location filename="../artisanlib/canvas.py" line="16047" />
         <location filename="../artisanlib/main.py" line="27371" />
         <source>RoR</source>
-        <translation>РоР</translation>
+        <translation>RoR</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="27371" />
         <source>@FCs</source>
-        <translation>@ФК</translation>
+        <translation>@ПКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="27372" />
@@ -14078,17 +14078,17 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/devices.py" line="114" />
         <source>Logging</source>
-        <translation>логирование</translation>
+        <translation>Ведение журнала</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="117" />
         <source>Control</source>
-        <translation>Контроль</translation>
+        <translation>Управление</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="166" />
         <source>Control ET</source>
-        <translation>Контроль ET</translation>
+        <translation>Управление ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="173" />
@@ -14137,7 +14137,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/devices.py" line="432" />
         <location filename="../artisanlib/devices.py" line="384" />
         <source>Change</source>
-        <translation>Изменять</translation>
+        <translation>Изменить</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="921" />
@@ -14158,7 +14158,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/devices.py" line="555" />
         <source>Gain</source>
-        <translation type="unfinished">Получить</translation>
+        <translation type="unfinished">Усиление</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="715" />
@@ -14185,12 +14185,12 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/devices.py" line="955" />
         <source>Remote Only</source>
-        <translation>Только удаленный</translation>
+        <translation>Только удалённо</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1004" />
         <source>VirtualHub</source>
-        <translation>Виртуальный концентратор</translation>
+        <translation>VirtualHub</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1073" />
@@ -14200,7 +14200,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/devices.py" line="1123" />
         <source>MASL</source>
-        <translation>МАСЛ</translation>
+        <translation>MASL</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1124" />
@@ -14262,7 +14262,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/transposer.py" line="143" />
         <source>Mapping</source>
-        <translation>Картография</translation>
+        <translation>Сопоставление</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="2453" />
@@ -14302,27 +14302,27 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="2460" />
         <source>Roast Event</source>
-        <translation>Жаркое событие</translation>
+        <translation>Событие обжарки</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="2461" />
         <source>Meter Batch</source>
-        <translation>Партия счетчиков</translation>
+        <translation>Счётчик, батч</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="2462" />
         <source>PID Duty %</source>
-        <translation>Процентная ставка ПИД-регулятора</translation>
+        <translation>Мощность PID, %</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="2463" />
         <source>Meter Preheat</source>
-        <translation>Предварительный подогрев счетчика</translation>
+        <translation>Счётчик, прогрев</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="2464" />
         <source>Meter BBP</source>
-        <translation>Счетчик BBP</translation>
+        <translation>Счётчик, BBP</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="2465" />
@@ -14347,7 +14347,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="2469" />
         <source>PID Duty % Cooling</source>
-        <translation>ПИД-регулирование, процент загрузки, охлаждение</translation>
+        <translation>Мощность PID, % (охлаждение)</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="2470" />
@@ -14357,7 +14357,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="2471" />
         <source>BBP Event</source>
-        <translation>Мероприятие BBP</translation>
+        <translation>Событие BBP</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="2472" />
@@ -14367,12 +14367,12 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="2473" />
         <source>PID Duty % Preheat</source>
-        <translation>ПИД-регулятор, режим работы (%), предварительный нагрев</translation>
+        <translation>Мощность PID, % (прогрев)</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="2474" />
         <source>Continuous Batch</source>
-        <translation>Непрерывная пакетная обработка</translation>
+        <translation>Непрерывный батч</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="2475" />
@@ -14382,7 +14382,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="2476" />
         <source>Continuous BBP</source>
-        <translation>Непрерывное кроветворение</translation>
+        <translation>Непрерывный BBP</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="2477" />
@@ -14392,7 +14392,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="2478" />
         <source>Event Batch</source>
-        <translation>Пакет событий</translation>
+        <translation>Батч событий</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="4161" />
@@ -14440,7 +14440,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="11402" />
         <source>ETprojection</source>
-        <translation>ETпроекция</translation>
+        <translation>Проекция ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="11410" />
@@ -14450,7 +14450,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="11416" />
         <source>BTprojection</source>
-        <translation>BTпроекция</translation>
+        <translation>Проекция BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="11424" />
@@ -14460,12 +14460,12 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="11428" />
         <source>TIMEguide</source>
-        <translation>ВРЕМЯ</translation>
+        <translation>Направляющая времени</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="11433" />
         <source>AUCguide</source>
-        <translation>руководство AUC</translation>
+        <translation>направляющая AUC</translation>
     </message>
     <message>
         <location filename="../artisanlib/cup_profile.py" line="81" />
@@ -14484,18 +14484,18 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/canvas.py" line="16060" />
         <location filename="../artisanlib/canvas.py" line="16051" />
         <source>CM</source>
-        <translation>СМ</translation>
+        <translation>CM</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="16062" />
         <location filename="../artisanlib/canvas.py" line="16053" />
         <source>FC</source>
-        <translation>ФК</translation>
+        <translation>ПК</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="18208" />
         <source>Designer</source>
-        <translation>Отрисовщик</translation>
+        <translation>Проектировщик</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="19021" />
@@ -14533,7 +14533,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     </message>
     <message>
         <source>Charge the beans</source>
-        <translation type="vanished">Загрузить бобы</translation>
+        <translation type="vanished">Загрузите зёрна</translation>
     </message>
     <message>
         <source>Continuous</source>
@@ -14593,7 +14593,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/events.py" line="405" />
         <source>Square</source>
-        <translation type="unfinished">Площадь</translation>
+        <translation type="unfinished">Квадрат</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="406" />
@@ -14603,7 +14603,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/events.py" line="407" />
         <source>Diamond</source>
-        <translation type="unfinished">Алмаз</translation>
+        <translation type="unfinished">Ромб</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="408" />
@@ -14628,12 +14628,12 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/events.py" line="412" />
         <source>x</source>
-        <translation type="unfinished">Икс</translation>
+        <translation type="unfinished">x</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="413" />
         <source>None</source>
-        <translation type="unfinished">Никто</translation>
+        <translation type="unfinished">Нет</translation>
     </message>
 </context><context>
     <name>Menu</name>
@@ -14641,7 +14641,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/main.py" line="2707" />
         <location filename="../plus/schedule.py" line="2427" />
         <source>Schedule</source>
-        <translation>План</translation>
+        <translation>Расписание</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="4397" />
@@ -14677,7 +14677,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/main.py" line="2735" />
         <location filename="../artisanlib/large_lcds.py" line="742" />
         <source>Phases LCDs</source>
-        <translation type="unfinished">Фазы LCDs</translation>
+        <translation type="unfinished">ЖК-дисплеи фаз</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2740" />
@@ -14867,12 +14867,12 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/main.py" line="2394" />
         <location filename="../artisanlib/main.py" line="2382" />
         <source>Web...</source>
-        <translation>Интернет ...</translation>
+        <translation>Веб...</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2387" />
         <source>Batches</source>
-        <translation type="unfinished">Партии</translation>
+        <translation type="unfinished">Батчи</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2414" />
@@ -14883,7 +14883,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="2404" />
         <source>Ranking</source>
-        <translation type="unfinished">Ранжирование</translation>
+        <translation type="unfinished">Рейтинг</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2429" />
@@ -14923,17 +14923,17 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="2468" />
         <source>Switch Profiles</source>
-        <translation type="unfinished">Переключатель профилей</translation>
+        <translation type="unfinished">Переключить профили</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2472" />
         <source>Switch ET&lt;-&gt;BT</source>
-        <translation type="unfinished">Переключатель ET&lt;-&gt;BT</translation>
+        <translation type="unfinished">Переключить ET&lt;-&gt;BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2478" />
         <source>Machine</source>
-        <translation type="unfinished">Машина</translation>
+        <translation type="unfinished">Аппарат</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2483" />
@@ -14963,7 +14963,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="2501" />
         <source>Alarms...</source>
-        <translation type="unfinished">Сигналы тревоги...</translation>
+        <translation type="unfinished">Сигналы...</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2509" />
@@ -14978,7 +14978,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="2515" />
         <source>Axes...</source>
-        <translation>Топоры ...</translation>
+        <translation>Оси...</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2519" />
@@ -14998,7 +14998,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="2531" />
         <source>Batch...</source>
-        <translation type="unfinished">Партия...</translation>
+        <translation type="unfinished">Батч...</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2534" />
@@ -15052,19 +15052,19 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="2610" />
         <source>Auto All</source>
-        <translation>Авто Все</translation>
+        <translation>Авто: всё</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2621" />
         <location filename="../artisanlib/main.py" line="2618" />
         <location filename="../artisanlib/main.py" line="2615" />
         <source>Fit BT to</source>
-        <translation>Установите BT на</translation>
+        <translation>Подогнать BT к</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2625" />
         <source>Fit BT to Bkgnd</source>
-        <translation>Установите BT в Bkgnd</translation>
+        <translation>Подогнать BT к фону</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2629" />
@@ -15094,12 +15094,12 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="2654" />
         <source>Transposer</source>
-        <translation>Транспозитор</translation>
+        <translation>Транспозер</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2657" />
         <source>Convert Profile Temperature</source>
-        <translation>Преобразование температуры профиля</translation>
+        <translation>Преобразовать температуру профиля</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2658" />
@@ -15149,7 +15149,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../artisanlib/main.py" line="2764" />
         <source>About Qt</source>
-        <translation type="unfinished">О QT</translation>
+        <translation type="unfinished">О Qt</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="2768" />
@@ -15267,7 +15267,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../plus/schedule.py" line="1537" />
         <location filename="../plus/schedule.py" line="1528" />
         <source>Register Roast</source>
-        <translation>Регистрация Жаркое</translation>
+        <translation>Зарегистрировать обжарку</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="2481" />
@@ -15277,7 +15277,7 @@ Fewer nodes: simpler curve but may lose detail</source>
     <message>
         <location filename="../plus/schedule.py" line="2792" />
         <source>Roasts will not adjust the schedule&lt;br&gt;while the schedule window is closed</source>
-        <translation>Roasts не будет корректировать расписание, пока окно расписания закрыто</translation>
+        <translation>Обжарки не корректируют расписание,&lt;br&gt;пока окно расписания закрыто</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="2806" />
@@ -15300,7 +15300,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../plus/schedule.py" line="3750" />
         <location filename="../plus/schedule.py" line="3289" />
         <source>1 batch</source>
-        <translation>1 партия</translation>
+        <translation>1 батч</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="3765" />
@@ -15308,7 +15308,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../plus/schedule.py" line="3297" />
         <location filename="../plus/schedule.py" line="3291" />
         <source>{} batches</source>
-        <translation>{} пакетов</translation>
+        <translation>{} батчей</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="3644" />
@@ -15334,7 +15334,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/canvas.py" line="19163" />
         <location filename="../artisanlib/wheels.py" line="648" />
         <source>Open Wheel Graph</source>
-        <translation>График открытого колеса</translation>
+        <translation>Открыть колёсную диаграмму</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="13420" />
@@ -15350,7 +15350,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/comm.py" line="1075" />
         <location filename="../artisanlib/wsport.py" line="282" />
         <source>{} connected</source>
-        <translation>{} связанный</translation>
+        <translation>{} подключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="13421" />
@@ -15368,7 +15368,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/wsport.py" line="318" />
         <location filename="../artisanlib/wsport.py" line="311" />
         <source>{} disconnected</source>
-        <translation>{} отключен</translation>
+        <translation>{} отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="1355" />
@@ -15450,7 +15450,7 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/pid_dialogs.py" line="2384" />
         <location filename="../artisanlib/pid_dialogs.py" line="2383" />
         <source>CONTINUOUS CONTROL</source>
-        <translation>НЕПРЕРЫВНЫЙ КОНТРОЛЬ</translation>
+        <translation>Непрерывное управление</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="4402" />
@@ -15522,17 +15522,17 @@ Fewer nodes: simpler curve but may lose detail</source>
         <location filename="../artisanlib/pid_dialogs.py" line="2402" />
         <location filename="../artisanlib/pid_dialogs.py" line="2396" />
         <source>STANDBY MODE</source>
-        <translation>РЕЖИМ ОЖИДАНИЯ</translation>
+        <translation>Режим ожидания</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="2478" />
         <source>The rampsoak-mode tells how to start and end the ramp/soak</source>
-        <translation>В rampsoak-режиме рассказывает о том, как начать и закончить ramp/soak</translation>
+        <translation>Режим rampsoak определяет, как начинать и заканчивать рампу/выдержку</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="2479" />
         <source>Your rampsoak mode in this pid is:</source>
-        <translation>Ваш rampsoak в этом режиме PID-это:</translation>
+        <translation>Текущий режим rampsoak в этом PID:</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="2480" />
@@ -15569,7 +15569,7 @@ Repeat Operation at the end: {0}</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="2488" />
         <source>If you need to change it, change it now and come back later</source>
-        <translation>Если вам нужно изменить его, изменить его и вернуться к нему позже</translation>
+        <translation>Если нужно изменить — измените сейчас и вернитесь позже</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="2489" />
@@ -15610,18 +15610,18 @@ Repeat Operation at the end: {0}</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3682" />
         <source>Current sv = {0}. Change now to sv = {1}?</source>
-        <translation>Текущая св = {0}. Изменить сейчас на sv = {1}?</translation>
+        <translation>Текущее sv = {0}. Изменить на sv = {1}?</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3765" />
         <location filename="../artisanlib/pid_dialogs.py" line="3683" />
         <source>Change svN</source>
-        <translation>Изменить СВН</translation>
+        <translation>Изменить svN</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3764" />
         <source>Current pid = {0}. Change now to pid ={1}?</source>
-        <translation>Текущий идентификатор = {0}. Изменить сейчас на pid = {1}?</translation>
+        <translation>Текущий pid = {0}. Изменить на pid = {1}?</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="3869" />
@@ -15631,7 +15631,7 @@ Repeat Operation at the end: {0}</source>
     <message>
         <location filename="../artisanlib/comm.py" line="3872" />
         <source>Phidget Temperature Sensor 1-input attached</source>
-        <translation>Датчик температуры Phidget 1-вход подключен</translation>
+        <translation>Датчик температуры Phidget 1 вход подключен</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="3875" />
@@ -15641,27 +15641,27 @@ Repeat Operation at the end: {0}</source>
     <message>
         <location filename="../artisanlib/comm.py" line="3881" />
         <source>Phidget VINT RTD 1-input attached</source>
-        <translation>Phidget VINT RTD 1-вход прилагается</translation>
+        <translation>Phidget VINT RTD 1 вход подключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="3893" />
         <source>Phidget Temperature Sensor IR detached</source>
-        <translation>Датчик температуры Phidget ИК отсоединен</translation>
+        <translation>Датчик температуры Phidget ИК отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="3895" />
         <source>Phidget Temperature Sensor 1-input detached</source>
-        <translation>Датчик температуры Phidget, 1 вход, отдельный</translation>
+        <translation>Датчик температуры Phidget, 1 входотключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="3897" />
         <source>Phidget Isolated Thermocouple 1-input detached</source>
-        <translation>Phidget Изолированная термопара 1-вход отдельно</translation>
+        <translation>Phidget Изолированная термопара 1 входотключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="3899" />
         <source>Phidget VINT RTD 1-input detached</source>
-        <translation>Фиджет ВИНТ РДТ 1-вход отдельно стоящий</translation>
+        <translation>Phidget ВИНТ РДТ 1 вход отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="4186" />
@@ -15671,12 +15671,12 @@ Repeat Operation at the end: {0}</source>
     <message>
         <location filename="../artisanlib/comm.py" line="4197" />
         <source>Phidget Temperature Sensor 4-input detached</source>
-        <translation>Датчик температуры Phidget, 4 входа, отдельный</translation>
+        <translation>Датчик температуры Phidget, 4 входаотключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="4496" />
         <source>Phidget 1046 attached</source>
-        <translation>Фиджет 1046 прилагается</translation>
+        <translation>Phidget 1046 подключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="4498" />
@@ -15686,27 +15686,27 @@ Repeat Operation at the end: {0}</source>
     <message>
         <location filename="../artisanlib/comm.py" line="4510" />
         <source>Phidget 1046 detached</source>
-        <translation>Phidget 1046 отдельностоящий</translation>
+        <translation>Phidget 1046 отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="4512" />
         <source>Phidget DAQ1500 detached</source>
-        <translation>Phidget DAQ1500 отдельный</translation>
+        <translation>Phidget DAQ1500 отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6191" />
         <source>Phidget IO 2/2/2 attached</source>
-        <translation>Phidget IO 2/2/2 прилагается</translation>
+        <translation>Phidget IO 2/2/2 подключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6193" />
         <source>Phidget IO 6/6/6 attached</source>
-        <translation>Phidget IO 6/6/6 прилагается</translation>
+        <translation>Phidget IO 6/6/6 подключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6195" />
         <source>Phidget IO 8/8/8 attached</source>
-        <translation>Phidget IO 8/8/8 прилагается</translation>
+        <translation>Phidget IO 8/8/8 подключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6197" />
@@ -15716,17 +15716,17 @@ Repeat Operation at the end: {0}</source>
     <message>
         <location filename="../artisanlib/comm.py" line="6199" />
         <source>Phidget DAQ1200 attached</source>
-        <translation>Фиджет DAQ1200 прилагается</translation>
+        <translation>Phidget DAQ1200 подключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6201" />
         <source>Phidget DAQ1300 attached</source>
-        <translation>Фиджет DAQ1300 прилагается</translation>
+        <translation>Phidget DAQ1300 подключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6203" />
         <source>Phidget DAQ1301 attached</source>
-        <translation>Фиджет DAQ1301 прилагается.</translation>
+        <translation>Phidget DAQ1301 подключён.</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6205" />
@@ -15736,17 +15736,17 @@ Repeat Operation at the end: {0}</source>
     <message>
         <location filename="../artisanlib/comm.py" line="6207" />
         <source>Phidget VCP1000 attached</source>
-        <translation>Фиджет VCP1000 подключен</translation>
+        <translation>Phidget VCP1000 подключен</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6209" />
         <source>Phidget VCP1001 attached</source>
-        <translation>Фиджет VCP1001 прилагается</translation>
+        <translation>Phidget VCP1001 подключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6211" />
         <source>Phidget VCP1002 attached</source>
-        <translation>Фиджет VCP1002 прилагается</translation>
+        <translation>Phidget VCP1002 подключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6213" />
@@ -15756,62 +15756,62 @@ Repeat Operation at the end: {0}</source>
     <message>
         <location filename="../artisanlib/comm.py" line="6225" />
         <source>Phidget IO 2/2/2 detached</source>
-        <translation>Phidget IO 2/2/2 отдельно стоящий</translation>
+        <translation>Phidget IO 2/2/2 отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6227" />
         <source>Phidget IO 6/6/6 detached</source>
-        <translation>Phidget IO 6/6/6 отдельно стоящий</translation>
+        <translation>Phidget IO 6/6/6 отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6229" />
         <source>Phidget IO 8/8/8 detached</source>
-        <translation>Phidget IO 8/8/8 отдельностоящий</translation>
+        <translation>Phidget IO 8/8/8 отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6231" />
         <source>Phidget DAQ1000 detached</source>
-        <translation>Phidget DAQ1000 отдельно</translation>
+        <translation>Phidget DAQ1000отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6233" />
         <source>Phidget DAQ1200 detached</source>
-        <translation>Фиджет DAQ1200 отсоединен</translation>
+        <translation>Phidget DAQ1200 отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6235" />
         <source>Phidget DAQ1300 detached</source>
-        <translation>Фиджет DAQ1300 отсоединен</translation>
+        <translation>Phidget DAQ1300 отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6237" />
         <source>Phidget DAQ1301 detached</source>
-        <translation>Фиджет DAQ1301 отключен</translation>
+        <translation>Phidget DAQ1301 отключен</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6239" />
         <source>Phidget DAQ1400 detached</source>
-        <translation>Phidget DAQ1400 отдельно</translation>
+        <translation>Phidget DAQ1400отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6241" />
         <source>Phidget VCP1000 detached</source>
-        <translation>Phidget VCP1000 отдельно стоящий</translation>
+        <translation>Phidget VCP1000 отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6243" />
         <source>Phidget VCP1001 detached</source>
-        <translation>Фиджет VCP1001 отдельно</translation>
+        <translation>Phidget VCP1001отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6245" />
         <source>Phidget VCP1002 detached</source>
-        <translation>Фиджет VCP1002 отдельно</translation>
+        <translation>Phidget VCP1002отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6247" />
         <source>Phidget IO detached</source>
-        <translation>Phidget IO отсоединен</translation>
+        <translation>Phidget IO отключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6550" />
@@ -15852,7 +15852,7 @@ Repeat Operation at the end: {0}</source>
     <message>
         <location filename="../artisanlib/comm.py" line="6694" />
         <source>Yocto Watt Current attached</source>
-        <translation>Yocto Watt Current прилагается</translation>
+        <translation>Yocto Watt Current подключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/comm.py" line="6979" />
@@ -15968,13 +15968,13 @@ ATTENTION: Recorded data will get cleared without confirmation</source>
         <location filename="../artisanlib/roast_properties.py" line="4811" />
         <location filename="../artisanlib/roast_properties.py" line="4807" />
         <source>Alarms from events #{0} created</source>
-        <translation>Тревоги из событий #{0} созданы</translation>
+        <translation>Сигналы из событий #{0} созданы</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="4888" />
         <location filename="../artisanlib/roast_properties.py" line="4814" />
         <source>No events found</source>
-        <translation>Нет найдено событие</translation>
+        <translation>События не найдены</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="4854" />
@@ -16028,7 +16028,7 @@ ATTENTION: Recorded data will get cleared without confirmation</source>
         <location filename="../artisanlib/designer.py" line="335" />
         <location filename="../artisanlib/designer.py" line="328" />
         <source>Designer Config</source>
-        <translation>Конфигурация дизайнера</translation>
+        <translation>Конфигурация проектировщика</translation>
     </message>
     <message>
         <location filename="../artisanlib/designer.py" line="334" />
@@ -16107,17 +16107,17 @@ ATTENTION: Recorded data will get cleared without confirmation</source>
     <message>
         <location filename="../artisanlib/pid_control.py" line="1505" />
         <source>PID turned on</source>
-        <translation>ПИД включен</translation>
+        <translation>PID включён</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_control.py" line="1530" />
         <source>PID OFF</source>
-        <translation>ПИД ВЫКЛ.</translation>
+        <translation>PID ВЫКЛ</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_control.py" line="1556" />
         <source>PID turned off</source>
-        <translation>ПИД выключен</translation>
+        <translation>PID выключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_control.py" line="1632" />
@@ -16209,22 +16209,22 @@ ATTENTION: Recorded data will get cleared without confirmation</source>
         <location filename="../artisanlib/main.py" line="12446" />
         <location filename="../artisanlib/alarms.py" line="634" />
         <source>Load Alarms</source>
-        <translation>Загрузить сигнализации</translation>
+        <translation>Загрузить сигналы</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="676" />
         <source>Error loading alarm file</source>
-        <translation>Ошибка при загрузке файла будильника</translation>
+        <translation>Ошибка загрузки файла сигналов</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="681" />
         <source>Save Alarms</source>
-        <translation>Сохранить сигнализации</translation>
+        <translation>Сохранить сигналы</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="1152" />
         <source>Alarm table copied to clipboard</source>
-        <translation>Таблица тревог скопирована в буфер обмена</translation>
+        <translation>Таблица сигналов скопирована в буфер обмена</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="386" />
@@ -16262,12 +16262,12 @@ ATTENTION: Recorded data will get cleared without confirmation</source>
     <message>
         <location filename="../artisanlib/main.py" line="1037" />
         <source>follow on</source>
-        <translation>Следуй</translation>
+        <translation>Следование включено</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="1039" />
         <source>follow off</source>
-        <translation>следовать</translation>
+        <translation>Следование выключено</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="21954" />
@@ -16354,7 +16354,7 @@ ATTENTION: Recorded data will get cleared without confirmation</source>
     <message>
         <location filename="../artisanlib/main.py" line="4267" />
         <source>The Artisan Team</source>
-        <translation>Команда ремесленников</translation>
+        <translation>Команда Artisan</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="4268" />
@@ -16383,7 +16383,7 @@ To keep it free and current please support us with your donation and subscribe t
     <message>
         <location filename="../artisanlib/main.py" line="5901" />
         <source>Ambient</source>
-        <translation>Окружающий</translation>
+        <translation>Окружающая среда</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="5902" />
@@ -16406,7 +16406,7 @@ To keep it free and current please support us with your donation and subscribe t
         <location filename="../artisanlib/main.py" line="5934" />
         <location filename="../artisanlib/main.py" line="5923" />
         <source>Machine</source>
-        <translation>Машина</translation>
+        <translation>Аппарат</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="5968" />
@@ -16471,12 +16471,12 @@ To keep it free and current please support us with your donation and subscribe t
     <message>
         <location filename="../artisanlib/main.py" line="7052" />
         <source>super on</source>
-        <translation>супер на</translation>
+        <translation>Суперрежим включён</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="7055" />
         <source>super off</source>
-        <translation>супер выключен</translation>
+        <translation>Суперрежим выключен</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="9413" />
@@ -16496,64 +16496,64 @@ To keep it free and current please support us with your donation and subscribe t
     <message>
         <location filename="../artisanlib/main.py" line="10206" />
         <source>Alarms on</source>
-        <translation>Будильники включены</translation>
+        <translation>Сигналы включены</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="10209" />
         <source>Alarms off</source>
-        <translation>Будильники выключены</translation>
+        <translation>Сигналы выключены</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="10218" />
         <source>autoCHARGE on</source>
-        <translation>автоЗАРЯДКА включена</translation>
+        <translation>автозагрузка вкл.</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="10221" />
         <source>autoCHARGE off</source>
-        <translation>автоЗАРЯДКА выключена</translation>
+        <translation>автозагрузка выкл.</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="10230" />
         <source>autoDROP on</source>
-        <translation>autoDROP вкл.</translation>
+        <translation>автовыгрузка вкл.</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="10233" />
         <source>autoDROP off</source>
-        <translation>автоDROP выкл.</translation>
+        <translation>автовыгрузка выкл.</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="24890" />
         <location filename="../artisanlib/main.py" line="10281" />
         <location filename="../artisanlib/main.py" line="10259" />
         <source>PID set to OFF</source>
-        <translation>ПИД-регулятор выключен</translation>
+        <translation>PID выключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="24894" />
         <location filename="../artisanlib/main.py" line="10278" />
         <location filename="../artisanlib/main.py" line="10268" />
         <source>PID set to ON</source>
-        <translation>ПИД-регулятор включен</translation>
+        <translation>PID включён</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="10306" />
         <location filename="../artisanlib/main.py" line="10294" />
         <source>PID mode manual</source>
-        <translation>Ручной режим PID</translation>
+        <translation>Режим PID: ручной</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="10309" />
         <location filename="../artisanlib/main.py" line="10298" />
         <source>PID mode Ramp/Soak</source>
-        <translation>ПИД-режим Линейное/выдерживание</translation>
+        <translation>Режим PID: рампа/выдержка</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="10312" />
         <location filename="../artisanlib/main.py" line="10302" />
         <source>PID mode background</source>
-        <translation>Фон режима PID</translation>
+        <translation>Режим PID: фон</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="10322" />
@@ -16568,7 +16568,7 @@ To keep it free and current please support us with your donation and subscribe t
     <message>
         <location filename="../artisanlib/main.py" line="10330" />
         <source>playback by BT</source>
-        <translation>воспроизведение по БТ</translation>
+        <translation>воспроизведение по BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="10334" />
@@ -16603,12 +16603,12 @@ To keep it free and current please support us with your donation and subscribe t
     <message>
         <location filename="../artisanlib/main.py" line="10366" />
         <source>playback DROP by ET</source>
-        <translation>воспроизведение DROP от ET</translation>
+        <translation>воспроизведение DROP по ET</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="10430" />
         <source>Notifications on</source>
-        <translation>Уведомления о</translation>
+        <translation>Уведомления включены</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="10433" />
@@ -16643,12 +16643,12 @@ To keep it free and current please support us with your donation and subscribe t
     <message>
         <location filename="../artisanlib/main.py" line="10896" />
         <source>Keep ON enabled</source>
-        <translation>Оставить включенным</translation>
+        <translation>«Держать включённым» включено</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="10899" />
         <source>Keep ON disable</source>
-        <translation>Держите включенным отключить</translation>
+        <translation>«Держать включённым» выключено</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="11599" />
@@ -16696,13 +16696,13 @@ To keep it free and current please support us with your donation and subscribe t
         <location filename="../artisanlib/main.py" line="12479" />
         <location filename="../artisanlib/main.py" line="12466" />
         <source>PID Mode: Background</source>
-        <translation>PID-режим: фон</translation>
+        <translation>Режим PID: фон</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="12475" />
         <location filename="../artisanlib/main.py" line="12470" />
         <source>PID Mode: Manual</source>
-        <translation>ПИД-режим: ручной</translation>
+        <translation>Режим PID: ручной</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="12621" />
@@ -16873,12 +16873,12 @@ It is advisable to save your current settings beforehand via menu Help &gt;&gt; 
         <location filename="../artisanlib/main.py" line="17377" />
         <location filename="../artisanlib/main.py" line="17375" />
         <source>Cancelled</source>
-        <translation>Отменить</translation>
+        <translation>Отменено</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="17391" />
         <source>Readings exported</source>
-        <translation>Чтение экспорта</translation>
+        <translation>Показания экспортированы</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="23527" />
@@ -16919,27 +16919,27 @@ It is advisable to save your current settings beforehand via menu Help &gt;&gt; 
     <message>
         <location filename="../artisanlib/main.py" line="17844" />
         <source>Readings imported</source>
-        <translation>Чтение импорта</translation>
+        <translation>Показания импортированы</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="18041" />
         <source>Your batch counter is currently turned off. Turn it on and set it to {} from the settings file to be imported?</source>
-        <translation>Ваш счётчик партий в настоящее время отключен. Включите его и установите значение {} из файла настроек, который нужно импортировать?</translation>
+        <translation>Ваш счётчик батчей в настоящее время отключен. Включите его и установите значение {} из файла настроек, который нужно импортировать?</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="18043" />
         <source>Your batch counter is set to {}. Turn it off as in the settings file to be imported?</source>
-        <translation>Ваш счётчик партий установлен на {}. Отключить его, как в импортируемом файле настроек?</translation>
+        <translation>Ваш счётчик батчей установлен на {}. Отключить его, как в импортируемом файле настроек?</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="18045" />
         <source>Overwrite your current batch counter {} by {} from the settings file to be imported?</source>
-        <translation>Перезаписать текущий счетчик партий {} на {} из файла настроек, который нужно импортировать?</translation>
+        <translation>Перезаписать текущий счётчик батчей {} на {} из файла настроек, который нужно импортировать?</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="18046" />
         <source>Batch Counter</source>
-        <translation>Счетчик пакетов</translation>
+        <translation>Счётчик батчей</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="18049" />
@@ -16995,12 +16995,12 @@ It is advisable to save your current settings beforehand via menu Help &gt;&gt; 
     <message>
         <location filename="../artisanlib/main.py" line="24853" />
         <source>Hottop control turned off</source>
-        <translation>Управление хоттопом отключено</translation>
+        <translation>Управление Hottop отключено</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="24872" />
         <source>Hottop control turned on</source>
-        <translation>Включено управление хоттопом</translation>
+        <translation>Управление Hottop включено</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="24876" />
@@ -17016,7 +17016,7 @@ It is advisable to save your current settings beforehand via menu Help &gt;&gt; 
     <message>
         <location filename="../artisanlib/main.py" line="25093" />
         <source>artisan-settings</source>
-        <translation>ремесленные настройки</translation>
+        <translation>artisan-settings</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="25094" />
@@ -17031,7 +17031,7 @@ It is advisable to save your current settings beforehand via menu Help &gt;&gt; 
     <message>
         <location filename="../artisanlib/main.py" line="25160" />
         <source>artisan-theme</source>
-        <translation>ремесленник-тема</translation>
+        <translation>artisan-theme</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="25161" />
@@ -17061,7 +17061,7 @@ It is advisable to save your current settings beforehand via menu Help &gt;&gt; 
     <message>
         <location filename="../artisanlib/main.py" line="25565" />
         <source>Alarm Config</source>
-        <translation>Конфиг сигнализации</translation>
+        <translation>Настройка сигналов</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="25566" />
@@ -17117,7 +17117,7 @@ It is advisable to save your current settings beforehand via menu Help &gt;&gt; 
     <message>
         <location filename="../artisanlib/main.py" line="26407" />
         <source>Save Graph as PDF</source>
-        <translation>Сохранить График как PDF</translation>
+        <translation>Сохранить график в PDF</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="26409" />
@@ -17177,7 +17177,7 @@ It is advisable to save your current settings beforehand via menu Help &gt;&gt; 
     <message>
         <location filename="../artisanlib/main.py" line="27145" />
         <source>Alarms loaded</source>
-        <translation>Сигнализация загружена</translation>
+        <translation>Сигналы загружены</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="27219" />
@@ -17204,12 +17204,12 @@ Correct this on the Config&gt;Curves&gt;Analyze tab.</source>
     <message>
         <location filename="../artisanlib/main.py" line="28072" />
         <source>debug logging ON</source>
-        <translation>Включение ведения журнала отладки</translation>
+        <translation>Журнал отладки включён</translation>
     </message>
     <message>
         <location filename="../artisanlib/batches.py" line="55" />
         <source>Next batch: counter+1</source>
-        <translation>Следующая партия: счетчик+1</translation>
+        <translation>Следующий батч: счётчик+1</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="3039" />
@@ -17250,7 +17250,7 @@ Correct this on the Config&gt;Curves&gt;Analyze tab.</source>
     <message>
         <location filename="../artisanlib/devices.py" line="3466" />
         <source>Device not set</source>
-        <translation>стройство не задано</translation>
+        <translation>Устройство не задано</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="3753" />
@@ -17404,47 +17404,47 @@ Correct this on the Config&gt;Curves&gt;Analyze tab.</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="3133" />
         <source>seconds before FCs</source>
-        <translation>секунды до FC</translation>
+        <translation>секунд до ПКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="3136" />
         <source>seconds after FCs</source>
-        <translation>секунд после FC</translation>
+        <translation>секунд после ПКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="4385" />
         <source>Alarm notice</source>
-        <translation>Уведомление сигналом тревоги</translation>
+        <translation>Уведомление сигнала</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="6106" />
         <source>Alarm is calling: {0}</source>
-        <translation>Сигнализация звонит: {0}</translation>
+        <translation>Сигнал вызывает: {0}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="6108" />
         <source>Calling alarm failed on {0}</source>
-        <translation>Ошибка вызова будильника {0}</translation>
+        <translation>Не удалось выполнить вызов сигнала на {0}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="6123" />
         <source>Alarm trigger button error, description '{0}' not a number</source>
-        <translation>Ошибка кнопки триггера тревоги, описание '{0}' не является числом</translation>
+        <translation>Ошибка кнопки-триггера сигнала: описание «{0}» не является числом</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="6151" />
         <source>Alarm trigger slider error, description '{0}' not a valid number [0-100]</source>
-        <translation>Ошибка ползунка триггера тревоги, описание '{0}' недопустимое число [0-100]</translation>
+        <translation>Ошибка ползунка-триггера сигнала: описание «{0}» — недопустимое число [0-100]</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="6234" />
         <source>Alarm trigger SV slider error, description '{0}' not a valid number</source>
-        <translation>Ошибка ползунка SV триггера тревоги, описание '{0}' недопустимый номер</translation>
+        <translation>Ошибка ползунка SV триггера сигнала: описание «{0}» — недопустимое число</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="6254" />
         <source>Alarm {0} triggered</source>
-        <translation>Сигнализация {0} срабатывает</translation>
+        <translation>Сигнал {0} сработал</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="7747" />
@@ -17459,7 +17459,7 @@ Correct this on the Config&gt;Curves&gt;Analyze tab.</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="8235" />
         <source>Scope has been reset</source>
-        <translation>Сфера была сброшена</translation>
+        <translation>Захват сброшен</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="11821" />
@@ -17479,7 +17479,7 @@ Correct this on the Config&gt;Curves&gt;Analyze tab.</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="12546" />
         <source>Convert profile data to Fahrenheit?</source>
-        <translation>Конвертировать данные из профиля в градусы Фаренгейта?</translation>
+        <translation>Преобразовать данные профиля в шкалу Фаренгейта?</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12659" />
@@ -17487,17 +17487,17 @@ Correct this on the Config&gt;Curves&gt;Analyze tab.</source>
         <location filename="../artisanlib/canvas.py" line="12597" />
         <location filename="../artisanlib/canvas.py" line="12547" />
         <source>Convert Profile Temperature</source>
-        <translation>Конвертировать температуру профиля</translation>
+        <translation>Преобразовать температуру профиля</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12594" />
         <source>Profile changed to Fahrenheit</source>
-        <translation>Профиль изменен по Фаренгейту</translation>
+        <translation>Профиль переведён в шкалу Фаренгейта</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12598" />
         <source>Unable to comply. You already are in Fahrenheit</source>
-        <translation>Не выполено. Вы уже находитесь в Фаренгейте</translation>
+        <translation>Невозможно выполнить: уже выбрана шкала Фаренгейта</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12661" />
@@ -17508,27 +17508,27 @@ Correct this on the Config&gt;Curves&gt;Analyze tab.</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="12606" />
         <source>Convert profile data to Celsius?</source>
-        <translation>Конвертировать данные из профиля в градусы Цельсия?</translation>
+        <translation>Преобразовать данные профиля в шкалу Цельсия?</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12656" />
         <source>Profile changed to Celsius</source>
-        <translation>Профиль изменен по Цельсию</translation>
+        <translation>Профиль переведён в шкалу Цельсия</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12660" />
         <source>Unable to comply. You already are in Celsius</source>
-        <translation>Не выполено. Вы уже находитесь в Цельсии</translation>
+        <translation>Невозможно выполнить: уже выбрана шкала Цельсия</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12668" />
         <source>Convert Profile Scale</source>
-        <translation>Конвертировать шкалу профиля</translation>
+        <translation>Преобразовать шкалу профиля</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12669" />
         <source>No profile data found</source>
-        <translation>Нет найдены данные профилей</translation>
+        <translation>Данные профиля не найдены</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="12696" />
@@ -17544,7 +17544,7 @@ Correct this on the Config&gt;Curves&gt;Analyze tab.</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="12700" />
         <source>Colors set to grey</source>
-        <translation>Значение цвета - серый</translation>
+        <translation>Цвета установлены в серый</translation>
     </message>
     <message>
         <location filename="../artisanlib/cup_profile.py" line="258" />
@@ -17565,12 +17565,12 @@ Correct this on the Config&gt;Curves&gt;Analyze tab.</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="13442" />
         <source>Scope monitoring...</source>
-        <translation>Сфера наблююдается...</translation>
+        <translation>Мониторинг…</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="13613" />
         <source>Scope stopped</source>
-        <translation>Сфера остановилась</translation>
+        <translation>Мониторинг остановлен</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="13910" />
@@ -17590,12 +17590,12 @@ Correct this on the Config&gt;Curves&gt;Analyze tab.</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="14239" />
         <source>Scope recording...</source>
-        <translation>Сфера записывается...</translation>
+        <translation>Запись…</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="14341" />
         <source>Scope recording stopped</source>
-        <translation>Запись сферы остановлена</translation>
+        <translation>Запись остановлена</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="14481" />
@@ -17605,87 +17605,87 @@ Correct this on the Config&gt;Curves&gt;Analyze tab.</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="14541" />
         <source>CHARGE: Scope is not recording</source>
-        <translation>ЗАРЯД: Scope не записывает</translation>
+        <translation>Загрузка: запись не ведётся</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="14566" />
         <source>Roast time starts now 00:00 BT = {0}</source>
-        <translation>Время жарки начинается сейчас 00:00 BT = {0}</translation>
+        <translation>Время обжарки пошло: 00:00, BT = {0}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="14600" />
         <source>[TP] recorded at {0} BT = {1}</source>
-        <translation>[TP] записано в {0} BT = {1}</translation>
+        <translation>[ТР] записано в {0} BT = {1}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="14684" />
         <source>DRY END: Scope is not recording</source>
-        <translation>DRY END: прицел не записывает</translation>
+        <translation>Пожелтение: запись не ведётся</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="14720" />
         <source>[DRY END] recorded at {0} BT = {1}</source>
-        <translation>[DRY END] записано в {0} BT = {1}</translation>
+        <translation>[Пожелтение] записано в {0} BT = {1}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="14797" />
         <source>FC START: Scope is not recording</source>
-        <translation>FC START: прицел не записывает</translation>
+        <translation>ПКн: запись не ведётся</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="14835" />
         <source>[FC START] recorded at {0} BT = {1}</source>
-        <translation>[FC START] записано в {0} BT = {1}</translation>
+        <translation>[ПКн] записано в {0} BT = {1}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="14903" />
         <source>FC END: Scope is not recording</source>
-        <translation>FC END: Scope не записывает</translation>
+        <translation>ПКк: запись не ведётся</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="14945" />
         <source>[FC END] recorded at {0} BT = {1}</source>
-        <translation>[FC END] записано в {0} BT = {1}</translation>
+        <translation>[ПКк] записано в {0} BT = {1}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="15013" />
         <source>SC START: Scope is not recording</source>
-        <translation>SC START: прицел не записывает</translation>
+        <translation>ВКн: запись не ведётся</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="15061" />
         <source>[SC START] recorded at {0} BT = {1}</source>
-        <translation>[SC START] записано в {0} BT = {1}</translation>
+        <translation>[ВКн] записано в {0} BT = {1}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="15129" />
         <source>SC END: Scope is not recording</source>
-        <translation>SC END: Scope не записывает</translation>
+        <translation>ВКк: запись не ведётся</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="15176" />
         <source>[SC END] recorded at {0} BT = {1}</source>
-        <translation>[SC END] записано в {0} BT = {1}</translation>
+        <translation>[ВКк] записано в {0} BT = {1}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="15310" />
         <source>DROP: Scope is not recording</source>
-        <translation>DROP: Scope не записывает</translation>
+        <translation>Выгрузка: запись не ведётся</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="15363" />
         <source>Roast ended at {0} BT = {1}</source>
-        <translation>Обжарка закончилась в {0} BT = {1}</translation>
+        <translation>Обжарка завершена в {0}, BT = {1}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="15443" />
         <source>COOL: Scope is not recording</source>
-        <translation>COOL: Scope не записывает</translation>
+        <translation>Охлаждение: запись не ведётся</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="15492" />
         <source>[COOL END] recorded at {0} BT = {1}</source>
-        <translation>[COOL END] записано в {0} BT = {1}</translation>
+        <translation>[Кон. охлаждения] записано в {0} BT = {1}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="15887" />
@@ -17696,12 +17696,12 @@ Correct this on the Config&gt;Curves&gt;Analyze tab.</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="15857" />
         <source>Timer is OFF</source>
-        <translation>Таймер ВЫКЛ</translation>
+        <translation>Таймер выключен</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="17334" />
         <source>Unable to move background</source>
-        <translation>Не перемещать фон</translation>
+        <translation>Не удалось переместить фон</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="17386" />
@@ -17731,32 +17731,32 @@ Correct this on the Config&gt;Curves&gt;Analyze tab.</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="17412" />
         <source>Profile information</source>
-        <translation>Информация профиля</translation>
+        <translation>Информация о профиле</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="17906" />
         <source>Save Points</source>
-        <translation>Сохранить очки</translation>
+        <translation>Сохранить точки</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="17915" />
         <source>Points saved</source>
-        <translation>Баллы сохранены</translation>
+        <translation>Точки сохранены</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="17925" />
         <source>Load Points</source>
-        <translation>Очки нагрузки</translation>
+        <translation>Загрузить точки</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="17937" />
         <source>Points loaded</source>
-        <translation>Очки загружены</translation>
+        <translation>Точки загружены</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="18015" />
         <source>Designer Init</source>
-        <translation>Инициализация приектировщика</translation>
+        <translation>Инициализация проектировщика</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="18016" />
@@ -17817,7 +17817,7 @@ Profile missing [CHARGE] or [DROP]</source>
     </message>
     <message>
         <source>Import Giesen CSV</source>
-        <translation type="vanished">Импорт Гизена в формате CSV</translation>
+        <translation type="vanished">Импорт Giesen CSV</translation>
     </message>
     <message>
         <source>Import Stronghold XLSX</source>
@@ -17853,7 +17853,7 @@ Profile missing [CHARGE] or [DROP]</source>
     </message>
     <message>
         <source>Import Artisan URL</source>
-        <translation type="vanished">Импорт URL мастера</translation>
+        <translation type="vanished">Импорт URL Artisan</translation>
     </message>
     <message>
         <source>Import CSV</source>
@@ -17885,7 +17885,7 @@ Profile missing [CHARGE] or [DROP]</source>
     </message>
     <message>
         <source>Import Probat Pilot failed</source>
-        <translation type="vanished">Не удалось импортировать пилотную версию Probat</translation>
+        <translation type="vanished">Не удалось импортировать Probat Pilot</translation>
     </message>
     <message>
         <source>Import RoastLog URL</source>
@@ -17897,7 +17897,7 @@ Profile missing [CHARGE] or [DROP]</source>
     </message>
     <message>
         <source>Import Petroncini CSV</source>
-        <translation type="vanished">Импорт Петрончини в формате CSV</translation>
+        <translation type="vanished">Импорт Petroncini CSV</translation>
     </message>
     <message>
         <source>Import IKAWA URL</source>
@@ -17905,7 +17905,7 @@ Profile missing [CHARGE] or [DROP]</source>
     </message>
     <message>
         <source>Import IKAWA CSV</source>
-        <translation type="vanished">Импорт ИКАВА CSV</translation>
+        <translation type="vanished">Импорт IKAWA CSV</translation>
     </message>
     <message>
         <source>Import Kaleido CSV</source>
@@ -17933,11 +17933,11 @@ Profile missing [CHARGE] or [DROP]</source>
     </message>
     <message>
         <source>Export Probat Pilot</source>
-        <translation type="vanished">Экспорт пробного пилота</translation>
+        <translation type="vanished">Экспорт Probat Pilot</translation>
     </message>
     <message>
         <source>Recomended Mode = 0</source>
-        <translation type="vanished">Рекомендуемый Режим = 0</translation>
+        <translation type="vanished">Рекомендуемый режим = 0</translation>
     </message>
     <message>
         <source>Empty path or box unchecked in Autosave</source>
@@ -17953,7 +17953,7 @@ Profile missing [CHARGE] or [DROP]</source>
     </message>
     <message>
         <source>Designer Start</source>
-        <translation type="vanished">Старт приектировщика</translation>
+        <translation type="vanished">Старт проектировщика</translation>
     </message>
     <message>
         <source>Importing a profile in to Designer will decimate all data except the main [points].
@@ -17963,63 +17963,63 @@ Continue?</source>
     </message>
     <message>
         <source>CHARGE</source>
-        <translation type="vanished">ЗАГРУЗКА</translation>
+        <translation type="vanished">Загрузка</translation>
     </message>
     <message>
         <source>DRY END</source>
-        <translation type="vanished">КОНЕЦ СУШКИ</translation>
+        <translation type="vanished">Пожелтение</translation>
     </message>
     <message>
         <source>FC START</source>
-        <translation type="vanished">FC СТАРТ</translation>
+        <translation type="vanished">ПКн</translation>
     </message>
     <message>
         <source>FC END</source>
-        <translation type="vanished">FC КОНЕЦ</translation>
+        <translation type="vanished">ПКк</translation>
     </message>
     <message>
         <source>SC START</source>
-        <translation type="vanished">SC СТАРТ</translation>
+        <translation type="vanished">ВКн</translation>
     </message>
     <message>
         <source>SC END</source>
-        <translation type="vanished">SC КОНЕЦ</translation>
+        <translation type="vanished">ВКк</translation>
     </message>
     <message>
         <source>DROP</source>
-        <translation type="vanished">СБРОС</translation>
+        <translation type="vanished">Выгрузка</translation>
     </message>
     <message>
         <source>[ CHARGE ]</source>
-        <translation type="vanished">[ ЗАГРУЗКА ]</translation>
+        <translation type="vanished">[ Загрузка ]</translation>
     </message>
     <message>
         <source>[ DRY END ]</source>
-        <translation type="vanished">[ КОНЕЦ СУШКИ ]</translation>
+        <translation type="vanished">[ Пожелтение ]</translation>
     </message>
     <message>
         <source>[ FC START ]</source>
-        <translation type="vanished">[ FC СТАРТ ]</translation>
+        <translation type="vanished">[ ПКн ]</translation>
     </message>
     <message>
         <source>[ FC END ]</source>
-        <translation type="vanished">[ FC КОНЕЦ ]</translation>
+        <translation type="vanished">[ ПКк ]</translation>
     </message>
     <message>
         <source>[ SC START ]</source>
-        <translation type="vanished">[ SC СТАРТ ]</translation>
+        <translation type="vanished">[ ВКн ]</translation>
     </message>
     <message>
         <source>[ SC END ]</source>
-        <translation type="vanished">[ SC Конец ]</translation>
+        <translation type="vanished">[ ВКк ]</translation>
     </message>
     <message>
         <source>[ DROP ]</source>
-        <translation type="vanished">[ Выброс бобов ]</translation>
+        <translation type="vanished">[ Выгрузка ]</translation>
     </message>
     <message>
         <source>[ COOL ]</source>
-        <translation type="vanished">[ ПРОХЛАДНЫЙ ]</translation>
+        <translation type="vanished">[ Охлаждение ]</translation>
     </message>
     <message>
         <source>Bluetooth scale cannot be connected while permission for Artisan to access Bluetooth is denied</source>
@@ -18101,7 +18101,7 @@ Continue?</source>
     <message>
         <location filename="../plus/controller.py" line="410" />
         <source>artisan.plus reconnected</source>
-        <translation>artisan.plus воссоединился</translation>
+        <translation>artisan.plus переподключён</translation>
     </message>
     <message>
         <location filename="../plus/stock.py" line="470" />
@@ -18121,7 +18121,7 @@ Continue?</source>
     <message>
         <location filename="../plus/stock.py" line="475" />
         <source>bags</source>
-        <translation>сумки</translation>
+        <translation>мешки</translation>
     </message>
     <message>
         <location filename="../plus/stock.py" line="476" />
@@ -18183,12 +18183,12 @@ Continue?</source>
     <message>
         <location filename="../plus/schedule.py" line="1957" />
         <source>List only visible items</source>
-        <translation>Список только видимых элементов</translation>
+        <translation>Показывать только видимые элементы</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="1962" />
         <source>List only items scheduled for today</source>
-        <translation>Перечислите только пункты, запланированные на сегодня</translation>
+        <translation>Показывать только запланированные на сегодня</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="1975" />
@@ -18203,7 +18203,7 @@ Continue?</source>
     <message>
         <location filename="../plus/schedule.py" line="2294" />
         <source>Schedule Updated!</source>
-        <translation>График обжарки обновлен!</translation>
+        <translation>График обжарки обновлён!</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="2389" />
@@ -18213,12 +18213,12 @@ Continue?</source>
     <message>
         <location filename="../plus/schedule.py" line="3349" />
         <source>List only items scheduled for the current user {}</source>
-        <translation>Вывести только элементы, запланированные для текущего пользователя {}</translation>
+        <translation>Показывать только запланированные для текущего пользователя {}</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="3357" />
         <source>List only items scheduled for the current machine {}</source>
-        <translation>Вывести только элементы, запланированные для текущей машины {}</translation>
+        <translation>Показывать только запланированные для текущего аппарата {}</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="3989" />
@@ -18253,22 +18253,22 @@ Continue?</source>
     <message>
         <location filename="../plus/login.py" line="112" />
         <source>Email</source>
-        <translation>Электронное письмо</translation>
+        <translation>Эл. почта</translation>
     </message>
     <message>
         <location filename="../plus/login.py" line="121" />
         <source>Remember</source>
-        <translation>Помнить</translation>
+        <translation>Запомнить</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="1213" />
         <source>debug logging ON</source>
-        <translation>Включение ведения журнала отладки</translation>
+        <translation>Журнал отладки включён</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="1214" />
         <source>debug logging OFF</source>
-        <translation>Отладка отключена</translation>
+        <translation>Журнал отладки выключен</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="1227" />
@@ -18288,7 +18288,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/main.py" line="1258" />
         <source>Please visit our {0}shop{1} to extend your subscription</source>
-        <translation>Посетите наш {0} магазин {1}, чтобы продлить подписку.</translation>
+        <translation>Посетите наш {0}магазин{1}, чтобы продлить подписку.</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="1271" />
@@ -18315,7 +18315,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/devices.py" line="123" />
         <source>PID</source>
-        <translation>ПИД</translation>
+        <translation>PID</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="124" />
@@ -18387,7 +18387,7 @@ Continue?</source>
     </message>
     <message>
         <source>CHARGE</source>
-        <translation type="vanished">ЗАГРУЗКА</translation>
+        <translation type="vanished">Загрузка</translation>
     </message>
 </context><context>
     <name>Scope Title</name>
@@ -18404,29 +18404,29 @@ Continue?</source>
         <location filename="../artisanlib/orbiter.py" line="512" />
         <location filename="../plus/schedule.py" line="2972" />
         <source>Roaster Scope</source>
-        <translation>Область обжарки</translation>
+        <translation>Roaster Scope</translation>
     </message>
 </context><context>
     <name>StatusBar</name>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="1763" />
         <source>Decimal position successfully set to 1</source>
-        <translation type="unfinished">Десятичная позиция успешно установлена в 1</translation>
+        <translation type="unfinished">Положение десятичного знака установлено в 1</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="1766" />
         <source>Problem setting decimal position</source>
-        <translation type="unfinished">Проблема установки десятичной позиции</translation>
+        <translation type="unfinished">Не удалось задать положение десятичного знака</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="1820" />
         <source>Thermocouple type successfully set</source>
-        <translation type="unfinished">Термопара успешно устанавлена</translation>
+        <translation type="unfinished">Тип термопары успешно установлен</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="1823" />
         <source>Problem setting thermocouple type</source>
-        <translation type="unfinished">Проблема установки термопары типа</translation>
+        <translation type="unfinished">Не удалось установить тип термопары</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="2742" />
@@ -18444,13 +18444,13 @@ Continue?</source>
         <location filename="../artisanlib/pid_dialogs.py" line="4598" />
         <location filename="../artisanlib/pid_dialogs.py" line="2292" />
         <source>Autotune successfully turned OFF</source>
-        <translation type="unfinished">Автонастройка успешно ВЫКЛ</translation>
+        <translation type="unfinished">Автонастройка отключена</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="4601" />
         <location filename="../artisanlib/pid_dialogs.py" line="2295" />
         <source>Autotune successfully turned ON</source>
-        <translation type="unfinished">Автонастройка успешно ВКЛ</translation>
+        <translation type="unfinished">Автонастройка включена</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="4526" />
@@ -18489,7 +18489,7 @@ Continue?</source>
         <location filename="../artisanlib/pid_dialogs.py" line="4440" />
         <location filename="../artisanlib/pid_dialogs.py" line="2511" />
         <source>Ramp/Soak operation cancelled</source>
-        <translation type="unfinished">Ramp/Soak операция отменена</translation>
+        <translation type="unfinished">Операция «Рампа/выдержка» отменена</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="4443" />
@@ -18556,23 +18556,23 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="2625" />
         <source>Finished reading pid values</source>
-        <translation type="unfinished">Закончено чтение PID значения</translation>
+        <translation type="unfinished">Чтение значений PID завершено</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="4745" />
         <location filename="../artisanlib/pid_dialogs.py" line="2724" />
         <source>Ramp/Soak successfully written</source>
-        <translation type="unfinished">Ramp/Soak успешно записан</translation>
+        <translation type="unfinished">«Рампа/выдержка» успешно записана</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3531" />
         <source>Time Units successfully set to MM:SS</source>
-        <translation>Единицы времени успешно установлен MM:SS</translation>
+        <translation>Единицы времени установлены в MM:SS</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3534" />
         <source>Problem setting time units</source>
-        <translation>Проблема с настройкой единиц времени</translation>
+        <translation>Не удалось задать единицы времени</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3699" />
@@ -18587,7 +18587,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3705" />
         <source>Cancelled svN change</source>
-        <translation>Отменены svN изменения</translation>
+        <translation>Изменение svN отменено</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3723" />
@@ -18688,12 +18688,12 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="4530" />
         <source>PID set to OFF</source>
-        <translation type="unfinished">ПИД-регулятор выключен</translation>
+        <translation type="unfinished">PID выключён</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="4532" />
         <source>PID set to ON</source>
-        <translation type="unfinished">ПИД-регулятор включен</translation>
+        <translation type="unfinished">PID включён</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="4535" />
@@ -18723,7 +18723,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="4666" />
         <source>SV</source>
-        <translation type="unfinished">СВ</translation>
+        <translation type="unfinished">SV</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="4667" />
@@ -18775,37 +18775,37 @@ Continue?</source>
     <message>
         <location filename="../plus/schedule.py" line="2328" />
         <source>To-Do</source>
-        <translation>Делать</translation>
+        <translation>К выполнению</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="2329" />
         <source>Completed</source>
-        <translation>Завершенный</translation>
+        <translation>Завершено</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3335" />
         <location filename="../artisanlib/pid_dialogs.py" line="2182" />
         <location filename="../artisanlib/pid_dialogs.py" line="948" />
         <source>PID</source>
-        <translation>ПИД</translation>
+        <translation>PID</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="951" />
         <source>Ramp/Soak</source>
-        <translation>Рампа / впитывание</translation>
+        <translation>Рампа/выдержка</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3329" />
         <location filename="../artisanlib/pid_dialogs.py" line="2168" />
         <location filename="../artisanlib/pid_dialogs.py" line="1061" />
         <source>RS</source>
-        <translation>РС</translation>
+        <translation>RS</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3332" />
         <location filename="../artisanlib/pid_dialogs.py" line="2171" />
         <source>SV</source>
-        <translation>СВ</translation>
+        <translation>SV</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="3338" />
@@ -18870,17 +18870,17 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/ports.py" line="1511" />
         <source>Modbus</source>
-        <translation>Модбус</translation>
+        <translation>Modbus</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="1514" />
         <source>S7</source>
-        <translation>С7</translation>
+        <translation>S7</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="1517" />
         <source>WebSocket</source>
-        <translation>Вебсокет</translation>
+        <translation>WebSocket</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1660" />
@@ -18897,7 +18897,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1653" />
         <source>Roast</source>
-        <translation>Жарить</translation>
+        <translation>Обжарка</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1656" />
@@ -18912,7 +18912,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1670" />
         <source>Setup</source>
-        <translation>Настраивать</translation>
+        <translation>Настройка</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="2922" />
@@ -18938,7 +18938,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/curves.py" line="1413" />
         <source>RoR</source>
-        <translation>РоР</translation>
+        <translation>RoR</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="1419" />
@@ -18958,12 +18958,12 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/curves.py" line="1437" />
         <source>Analyze</source>
-        <translation>Анализировать</translation>
+        <translation>Анализ</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="1443" />
         <source>UI</source>
-        <translation>пользовательский интерфейс</translation>
+        <translation>Интерфейс</translation>
     </message>
     <message>
         <location filename="../artisanlib/statistics.py" line="563" />
@@ -18973,12 +18973,12 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/alarms.py" line="230" />
         <source>Alarm Table</source>
-        <translation>Таблица сигналов тревоги</translation>
+        <translation>Таблица сигналов</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="239" />
         <source>Alarm Sets</source>
-        <translation>Наборы будильников</translation>
+        <translation>Наборы сигналов</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="4604" />
@@ -18999,7 +18999,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/devices.py" line="1976" />
         <source>Ambient</source>
-        <translation>Окружающий</translation>
+        <translation>Окружающая среда</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1979" />
@@ -19009,7 +19009,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/devices.py" line="1985" />
         <source>Batch Manager</source>
-        <translation>Менеджер партии</translation>
+        <translation>Менеджер батчей</translation>
     </message>
     <message>
         <location filename="../artisanlib/colors.py" line="551" />
@@ -19107,7 +19107,7 @@ Continue?</source>
         <location filename="../artisanlib/pid_dialogs.py" line="972" />
         <location filename="../artisanlib/pid_dialogs.py" line="818" />
         <source>SV</source>
-        <translation>СВ</translation>
+        <translation>SV</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="973" />
@@ -19119,7 +19119,7 @@ Continue?</source>
         <location filename="../artisanlib/pid_dialogs.py" line="974" />
         <location filename="../artisanlib/pid_dialogs.py" line="820" />
         <source>Soak</source>
-        <translation>Замочить</translation>
+        <translation>Выдержка</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="1001" />
@@ -19150,12 +19150,12 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="2649" />
         <source>Ramp HH:MM</source>
-        <translation>Рампа ЧЧ: ММ</translation>
+        <translation>Рампа ЧЧ:ММ</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="2650" />
         <source>Soak HH:MM</source>
-        <translation>Замочить ЧЧ: ММ</translation>
+        <translation>Выдержка ЧЧ:ММ</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="4554" />
@@ -19214,7 +19214,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/ports.py" line="1597" />
         <source>Parity</source>
-        <translation>Паритет</translation>
+        <translation>Чётность</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="1598" />
@@ -19241,7 +19241,7 @@ Continue?</source>
         <location filename="../artisanlib/roast_properties.py" line="4455" />
         <location filename="../artisanlib/background.py" line="1085" />
         <source>#{0} {1}{2}</source>
-        <translation># {0} {1} {2}</translation>
+        <translation>#{0} {1}{2}</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="2933" />
@@ -19256,7 +19256,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="2942" />
         <source>CO2</source>
-        <translation>СО2</translation>
+        <translation>CO2</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="2945" />
@@ -19272,7 +19272,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="2951" />
         <source>Kind</source>
-        <translation>Своего рода</translation>
+        <translation>Тип</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="127" />
@@ -19282,47 +19282,47 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/curves.py" line="129" />
         <source>P1</source>
-        <translation>П1</translation>
+        <translation>P1</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="130" />
         <source>P2</source>
-        <translation>П2</translation>
+        <translation>P2</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="131" />
         <source>P3</source>
-        <translation>П3</translation>
+        <translation>P3</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="132" />
         <source>P4</source>
-        <translation>П4</translation>
+        <translation>P4</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="133" />
         <source>P5</source>
-        <translation>П5</translation>
+        <translation>P5</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="134" />
         <source>P6</source>
-        <translation>П6</translation>
+        <translation>P6</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="135" />
         <source>P7</source>
-        <translation>П7</translation>
+        <translation>P7</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="136" />
         <source>P8</source>
-        <translation>П8</translation>
+        <translation>P8</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="137" />
         <source>P9</source>
-        <translation>П9</translation>
+        <translation>P9</translation>
     </message>
     <message>
         <location filename="../artisanlib/transposer.py" line="187" />
@@ -19355,12 +19355,12 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/alarms.py" line="994" />
         <source>If Alarm</source>
-        <translation>Если тревога</translation>
+        <translation>Если сигнал</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="995" />
         <source>But Not</source>
-        <translation type="unfinished">Но Не</translation>
+        <translation type="unfinished">Но не</translation>
     </message>
     <message>
         <location filename="../artisanlib/alarms.py" line="996" />
@@ -19385,22 +19385,22 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/devices.py" line="2709" />
         <source>Label 1</source>
-        <translation>Этикетка 1</translation>
+        <translation>Метка 1</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="2710" />
         <source>Label 2</source>
-        <translation>Этикетка 2</translation>
+        <translation>Метка 2</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="2711" />
         <source>y1(x)</source>
-        <translation>у1 (х)</translation>
+        <translation>y1(x)</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="2712" />
         <source>y2(x)</source>
-        <translation>у2 (х)</translation>
+        <translation>y2(x)</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="2713" />
@@ -19420,7 +19420,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/devices.py" line="2716" />
         <source>Curve 2</source>
-        <translation type="unfinished">Кривая 1</translation>
+        <translation type="unfinished">Кривая 2</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="2719" />
@@ -19435,7 +19435,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/transposer.py" line="191" />
         <source>BT</source>
-        <translation>БТ</translation>
+        <translation>BT</translation>
     </message>
     <message>
         <location filename="../artisanlib/transposer.py" line="1202" />
@@ -19460,35 +19460,35 @@ Continue?</source>
     </message>
     <message>
         <source>CHARGE</source>
-        <translation type="vanished">ЗАГРУЗКА БОБОВ</translation>
+        <translation type="vanished">Загрузка</translation>
     </message>
     <message>
         <source>DRY END</source>
-        <translation type="vanished">КОНЕЦ СУШКИ</translation>
+        <translation type="vanished">Пожелтение</translation>
     </message>
     <message>
         <source>FC START</source>
-        <translation type="vanished">FC СТАРТ</translation>
+        <translation type="vanished">ПКн</translation>
     </message>
     <message>
         <source>FC END</source>
-        <translation type="vanished">FC КОНЕЦ</translation>
+        <translation type="vanished">ПКк</translation>
     </message>
     <message>
         <source>SC START</source>
-        <translation type="vanished">SC СТАРТ</translation>
+        <translation type="vanished">ВКн</translation>
     </message>
     <message>
         <source>SC END</source>
-        <translation type="vanished">SC КОНЕЦ</translation>
+        <translation type="vanished">ВКк</translation>
     </message>
     <message>
         <source>DROP</source>
-        <translation type="vanished">СБРОС БОБОВ</translation>
+        <translation type="vanished">Выгрузка</translation>
     </message>
     <message>
         <source>COOL</source>
-        <translation type="vanished">ОХЛАЖДЕНИЕ</translation>
+        <translation type="vanished">Охлаждение</translation>
     </message>
 </context><context>
     <name>Textbox</name>
@@ -19524,7 +19524,7 @@ Continue?</source>
         <location filename="../artisanlib/canvas.py" line="447" />
         <location filename="../artisanlib/canvas.py" line="429" />
         <source>Clean Cup</source>
-        <translation>Чистая чашка</translation>
+        <translation>Чистота чашки</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="430" />
@@ -19589,7 +19589,7 @@ Continue?</source>
         <location filename="../artisanlib/canvas.py" line="451" />
         <location filename="../artisanlib/canvas.py" line="440" />
         <source>Fragrance-Aroma</source>
-        <translation>Аромат-Аромат</translation>
+        <translation>Фрагранс — аромат</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="491" />
@@ -19663,13 +19663,13 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="499" />
         <source>Mouthfeel</source>
-        <translation>Послевкусием</translation>
+        <translation>Тактильность</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="522" />
         <location filename="../artisanlib/canvas.py" line="500" />
         <source>Flavour</source>
-        <translation>Привкус</translation>
+        <translation>Вкус</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="509" />
@@ -19684,7 +19684,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="511" />
         <source>Crema Volume</source>
-        <translation>Объем крема</translation>
+        <translation>Объём крема</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="515" />
@@ -19699,7 +19699,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/canvas.py" line="517" />
         <source>Aroma Intensity</source>
-        <translation>Аромат интенсивности</translation>
+        <translation>Интенсивность аромата</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="518" />
@@ -19711,7 +19711,7 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/main.py" line="747" />
         <source>Home</source>
-        <translation>Дом</translation>
+        <translation>Исходный вид</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="748" />
@@ -19721,17 +19721,17 @@ Continue?</source>
     <message>
         <location filename="../artisanlib/main.py" line="749" />
         <source>Forward</source>
-        <translation>Вперед</translation>
+        <translation>Вперёд</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="751" />
         <source>Pan</source>
-        <translation>Кастрюля</translation>
+        <translation>Панорама</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="752" />
         <source>Zoom</source>
-        <translation>Увеличить</translation>
+        <translation>Масштаб</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="941" />
@@ -19744,7 +19744,7 @@ Continue?</source>
     <message>
         <location filename="../plus/schedule.py" line="2262" />
         <source>Update schedule</source>
-        <translation>Обновление графика</translation>
+        <translation>Обновить расписание</translation>
     </message>
     <message>
         <location filename="../artisanlib/axis.py" line="83" />
@@ -19789,7 +19789,7 @@ Continue?</source>
         <location filename="../artisanlib/axis.py" line="207" />
         <location filename="../artisanlib/axis.py" line="205" />
         <source>Distance of major tick labels</source>
-        <translation>Расстояние от основных галочек</translation>
+        <translation>Расстояние между подписями основных делений</translation>
     </message>
     <message>
         <location filename="../artisanlib/axis.py" line="236" />
@@ -19825,7 +19825,7 @@ Continue?</source>
         <location filename="../artisanlib/cup_profile.py" line="115" />
         <location filename="../artisanlib/wheels.py" line="65" />
         <source>Aspect Ratio</source>
-        <translation type="unfinished">Соотношение Сторон</translation>
+        <translation type="unfinished">Соотношение сторон</translation>
     </message>
     <message>
         <location filename="../artisanlib/wheels.py" line="72" />
@@ -20101,12 +20101,12 @@ This range can be clamped by setting tighter minimum and maximum  limits.</sourc
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="760" />
         <source>Automatically turn the PID ON on CHARGE</source>
-        <translation>Автоматически включать PID при ЗАРЯДЕ</translation>
+        <translation>Автоматически включать PID при загрузке</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="764" />
         <source>Automatically turn the PID OFF on DROP</source>
-        <translation>Автоматически выключить PID при DROP</translation>
+        <translation>Автоматически выключать PID при выгрузке</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="769" />
@@ -20123,12 +20123,12 @@ initiated by the PID</source>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="926" />
         <source>Turn PID ON</source>
-        <translation>Включите ПИД-регулятор</translation>
+        <translation>Включить PID</translation>
     </message>
     <message>
         <location filename="../artisanlib/pid_dialogs.py" line="931" />
         <source>Turn PID OFF</source>
-        <translation>ВЫКЛЮЧИТЬ ПИД-регулятор</translation>
+        <translation>Выключить PID</translation>
     </message>
     <message>
         <location filename="../artisanlib/autosave.py" line="46" />
@@ -20153,7 +20153,7 @@ initiated by the PID</source>
     <message>
         <location filename="../artisanlib/autosave.py" line="99" />
         <source>Sets the directory to store batch profiles when using the letter [a]</source>
-        <translation type="unfinished">Задать каталог для хранения профилей при использовании буквы [А]</translation>
+        <translation type="unfinished">Задать каталог для хранения профилей батчей при использовании буквы [А]</translation>
     </message>
     <message>
         <location filename="../artisanlib/autosave.py" line="105" />
@@ -20391,7 +20391,7 @@ has to be reduced by 4 times.</source>
         <location filename="../artisanlib/events.py" line="1063" />
         <location filename="../artisanlib/events.py" line="1058" />
         <source>fire slider action</source>
-        <translation>действие слайдера огня</translation>
+        <translation>запустить действие ползунка</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="1093" />
@@ -20411,7 +20411,7 @@ has to be reduced by 4 times.</source>
         <location filename="../artisanlib/events.py" line="1289" />
         <location filename="../artisanlib/events.py" line="1280" />
         <source>Display the button during roast</source>
-        <translation>Отображать кнопку во время жарки</translation>
+        <translation>Отображать кнопку во время обжарки</translation>
     </message>
     <message>
         <location filename="../artisanlib/events.py" line="1406" />
@@ -20464,13 +20464,13 @@ has to be reduced by 4 times.</source>
         <location filename="../artisanlib/ports.py" line="1136" />
         <location filename="../artisanlib/ports.py" line="671" />
         <source>OFF Action String</source>
-        <translation>ВЫКЛ Строка действия</translation>
+        <translation>Строка действия для ВЫКЛ</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="1139" />
         <location filename="../artisanlib/ports.py" line="674" />
         <source>ON Action String</source>
-        <translation>Строка действия ON</translation>
+        <translation>Строка действия для ВКЛ</translation>
     </message>
     <message>
         <location filename="../artisanlib/ports.py" line="706" />
@@ -20523,7 +20523,7 @@ has to be reduced by 4 times.</source>
     <message>
         <location filename="../artisanlib/background.py" line="254" />
         <source>Set batch size from background profile on load</source>
-        <translation>Установить размер партии из фонового профиля при загрузке</translation>
+        <translation>Устанавливать размер батча из фонового профиля при загрузке</translation>
     </message>
     <message>
         <location filename="../artisanlib/background.py" line="259" />
@@ -20540,17 +20540,17 @@ specified by the lookahead</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="772" />
         <source>Open roast properties dialog on CHARGE</source>
-        <translation>Откройте диалоговое окно свойств обжарки в разделе CHARGE.</translation>
+        <translation>Открывать диалог свойств обжарки при загрузке</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="776" />
         <source>Open roast properties dialog on DROP</source>
-        <translation>Откройте диалоговое окно свойств обжарки в меню DROP.</translation>
+        <translation>Открывать диалог свойств обжарки при выгрузке</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="863" />
         <source>Display the roast title while roasting</source>
-        <translation>Во время обжаривания отображайте название сорта мяса.</translation>
+        <translation>Во время обжаривания отображайте название обжарки.</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="894" />
@@ -20561,12 +20561,12 @@ specified by the lookahead</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="912" />
         <source>batch size</source>
-        <translation>размер партии</translation>
+        <translation>размер батча</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="918" />
         <source>weight of roasted coffee</source>
-        <translation>вес жареного кофе</translation>
+        <translation>вес обжаренного кофе</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="925" />
@@ -20581,7 +20581,7 @@ specified by the lookahead</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="946" />
         <source>weight of defects sorted from roasted coffee or weight of roasted coffee after defects have been removed</source>
-        <translation>вес дефектов, отсортированных из жареного кофе, или вес жареного кофе после удаления дефектов</translation>
+        <translation>вес дефектов, отсортированных из обжаренного кофе, или вес обжаренного кофе после удаления дефектов</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="955" />
@@ -20601,12 +20601,12 @@ specified by the lookahead</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="971" />
         <source>batch volume</source>
-        <translation>объем партии</translation>
+        <translation>объём батча</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="977" />
         <source>volume of roasted coffee</source>
-        <translation>объем жареного кофе</translation>
+        <translation>объем обжаренного кофе</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="983" />
@@ -20626,12 +20626,12 @@ specified by the lookahead</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1002" />
         <source>batch density</source>
-        <translation>плотность партии</translation>
+        <translation>плотность батча</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1008" />
         <source>density of roasted coffee</source>
-        <translation>плотность жареного кофе</translation>
+        <translation>плотность обжаренного кофе</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1016" />
@@ -20671,12 +20671,12 @@ specified by the lookahead</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1072" />
         <source>color measurement of whole roasted beans</source>
-        <translation>измерение цвета цельных жареных зерен</translation>
+        <translation>измерение цвета цельных обжаренных зёрен</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1079" />
         <source>color measurement of ground roasted beans</source>
-        <translation>измерение цвета молотых жареных зерен</translation>
+        <translation>измерение цвета молотых обжаренных зёрен</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1087" />
@@ -20686,7 +20686,7 @@ specified by the lookahead</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1097" />
         <source>temperature of the green coffee</source>
-        <translation>температура зеленого кофе</translation>
+        <translation>температура зелёного кофе</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1108" />
@@ -20697,12 +20697,12 @@ specified by the lookahead</source>
         <location filename="../artisanlib/roast_properties.py" line="1116" />
         <location filename="../artisanlib/roast_properties.py" line="1110" />
         <source>batch moisture</source>
-        <translation>влажность партии</translation>
+        <translation>влажность батча</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1118" />
         <source>moisture of roasted coffee</source>
-        <translation>влажность жареного кофе</translation>
+        <translation>влажность обжаренного кофе</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1124" />
@@ -20742,12 +20742,12 @@ specified by the lookahead</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1231" />
         <source>set scale weight as batch size</source>
-        <translation>установить весовой вес как размер партии</translation>
+        <translation>установить вес с весов как размер батча</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1242" />
         <source>set scale weight as weight of roasted coffee</source>
-        <translation>установить вес на весах равным весу жареного кофе</translation>
+        <translation>установить вес на весах равным весу обжаренного кофе</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1254" />
@@ -20763,7 +20763,7 @@ specified by the lookahead</source>
         <location filename="../artisanlib/roast_properties.py" line="1371" />
         <location filename="../artisanlib/roast_properties.py" line="1363" />
         <source>Select beans from your inventory</source>
-        <translation>Выберите бобы из своего инвентаря</translation>
+        <translation>Выберите зёрна из своих запасов</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1369" />
@@ -20785,7 +20785,7 @@ specified by the lookahead</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1419" />
         <source>Beans are listed as 'origin, name' if ticked, otherwise as 'name, origin'</source>
-        <translation>Если отмечено, бобы указываются как «происхождение, название», в противном случае — как «название, название».</translation>
+        <translation>Если отмечено, зёрна указываются как «происхождение, название», иначе — как «название, происхождение».</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="2966" />
@@ -20830,7 +20830,7 @@ specified by the lookahead</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="4172" />
         <source>The maximum nominal batch size of the machine in kg</source>
-        <translation>Максимальный номинальный размер партии машины в кг</translation>
+        <translation>Максимальный номинальный размер батча аппарата, кг</translation>
     </message>
     <message>
         <location filename="../artisanlib/phases.py" line="167" />
@@ -20910,7 +20910,7 @@ specified by the lookahead</source>
     <message>
         <location filename="../artisanlib/curves.py" line="841" />
         <source>Shows data table of plots</source>
-        <translation type="unfinished">Показать данные таблицы сюжета</translation>
+        <translation type="unfinished">Показать таблицу данных графиков</translation>
     </message>
     <message>
         <location filename="../artisanlib/curves.py" line="930" />
@@ -21091,7 +21091,7 @@ Unchecked: Fits a smooth spline to preserve curve shape.</source>
     <message>
         <location filename="../artisanlib/alarms.py" line="122" />
         <source>Clear alarms table</source>
-        <translation type="unfinished">Очистить таблицу сигнализаций</translation>
+        <translation type="unfinished">Очистить таблицу сигналов</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="745" />
@@ -21116,7 +21116,7 @@ Unchecked: Fits a smooth spline to preserve curve shape.</source>
     <message>
         <location filename="../artisanlib/main.py" line="749" />
         <source>Forward to next view</source>
-        <translation>Вперед к следующему просмотру</translation>
+        <translation>Вперёд к следующему виду</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="751" />
@@ -21147,22 +21147,22 @@ Unchecked: Fits a smooth spline to preserve curve shape.</source>
     <message>
         <location filename="../artisanlib/main.py" line="3243" />
         <source>First Crack Start</source>
-        <translation>Первый старт</translation>
+        <translation>Начало первого крэка</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3247" />
         <source>First Crack End</source>
-        <translation>Конец первой трещины</translation>
+        <translation>Конец первого крэка</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3251" />
         <source>Second Crack Start</source>
-        <translation>Второй старт</translation>
+        <translation>Начало второго крэка</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3255" />
         <source>Second Crack End</source>
-        <translation>Второй конец трещины</translation>
+        <translation>Конец второго крэка</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3267" />
@@ -21177,7 +21177,7 @@ Unchecked: Fits a smooth spline to preserve curve shape.</source>
     <message>
         <location filename="../artisanlib/main.py" line="3277" />
         <source>Drop</source>
-        <translation type="unfinished">Сброс</translation>
+        <translation type="unfinished">Выгрузка</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3295" />
@@ -21187,17 +21187,17 @@ Unchecked: Fits a smooth spline to preserve curve shape.</source>
     <message>
         <location filename="../artisanlib/main.py" line="3304" />
         <source>Increases the current SV value by 5</source>
-        <translation type="unfinished">Увеличивает текущее значение SV по 5</translation>
+        <translation type="unfinished">Увеличивает текущее значение SV на 5</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3313" />
         <source>Increases the current SV value by 10</source>
-        <translation type="unfinished">Увеличивает текущее значение SV по 10</translation>
+        <translation type="unfinished">Увеличивает текущее значение SV на 10</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3322" />
         <source>Increases the current SV value by 20</source>
-        <translation type="unfinished">Увеличивает текущее значение SV по 20</translation>
+        <translation type="unfinished">Увеличивает текущее значение SV на 20</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3331" />
@@ -21217,7 +21217,7 @@ Unchecked: Fits a smooth spline to preserve curve shape.</source>
     <message>
         <location filename="../artisanlib/main.py" line="3356" />
         <source>Dry End</source>
-        <translation type="unfinished">Конец сушки</translation>
+        <translation type="unfinished">Пожелтение</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3361" />
@@ -21262,7 +21262,7 @@ Unchecked: Fits a smooth spline to preserve curve shape.</source>
     <message>
         <location filename="../artisanlib/main.py" line="3527" />
         <source>Number of events found</source>
-        <translation type="unfinished">Найденное количество событий</translation>
+        <translation type="unfinished">Количество найденных событий</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3543" />
@@ -21277,7 +21277,7 @@ Unchecked: Fits a smooth spline to preserve curve shape.</source>
     <message>
         <location filename="../artisanlib/main.py" line="3562" />
         <source>Updates the event</source>
-        <translation type="unfinished">Обновления события</translation>
+        <translation type="unfinished">Обновляет событие</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3933" />
@@ -21293,7 +21293,7 @@ Unchecked: Fits a smooth spline to preserve curve shape.</source>
         <location filename="../artisanlib/main.py" line="5406" />
         <location filename="../artisanlib/main.py" line="5372" />
         <source>Disconnect artisan.plus</source>
-        <translation>Отключить ремесленника.плюс</translation>
+        <translation>Отключить artisan.plus</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="5375" />
@@ -21303,7 +21303,7 @@ Unchecked: Fits a smooth spline to preserve curve shape.</source>
     <message>
         <location filename="../artisanlib/main.py" line="5409" />
         <source>Connect artisan.plus</source>
-        <translation>Подключить ремесленник.плюс</translation>
+        <translation>Подключить artisan.plus</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="8025" />
@@ -21366,17 +21366,17 @@ Currently in TEMP MODE</source>
     <message>
         <location filename="../artisanlib/batches.py" line="37" />
         <source>Batch prefix</source>
-        <translation>Пакетный префикс</translation>
+        <translation>Префикс батча</translation>
     </message>
     <message>
         <location filename="../artisanlib/batches.py" line="44" />
         <source>ON/OFF batch counter</source>
-        <translation type="unfinished">ВКЛя/ВЫКЛ счетчика пакетов</translation>
+        <translation type="unfinished">Вкл/выкл счётчик батчей</translation>
     </message>
     <message>
         <location filename="../artisanlib/batches.py" line="59" />
         <source>If ticked, the batch counter is never modified by loading a settings file</source>
-        <translation>Если флажок установлен, счетчик пакетов никогда не изменяется при загрузке файла настроек.</translation>
+        <translation>Если флажок установлен, счётчик батчей никогда не изменяется при загрузке файла настроек.</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="120" />
@@ -21386,7 +21386,7 @@ Currently in TEMP MODE</source>
     <message>
         <location filename="../artisanlib/devices.py" line="300" />
         <source>Recaclulates all Virtual Devices and updates their values in the profile</source>
-        <translation>Повторно собирает все виртуальные устройства и обновляет их значения в профиле.</translation>
+        <translation>Пересчитывает все виртуальные устройства и обновляет их значения в профиле</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="950" />
@@ -21419,19 +21419,19 @@ Currently in TEMP MODE</source>
         <location filename="../artisanlib/devices.py" line="1662" />
         <location filename="../artisanlib/devices.py" line="1591" />
         <source>Choose your scale</source>
-        <translation>Выберите масштаб</translation>
+        <translation>Выберите весы</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1665" />
         <location filename="../artisanlib/devices.py" line="1594" />
         <source>Start scanning to discover your scale</source>
-        <translation>Начните сканирование, чтобы определить свой масштаб</translation>
+        <translation>Начните сканирование, чтобы обнаружить ваши весы</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1669" />
         <location filename="../artisanlib/devices.py" line="1598" />
         <source>Rename your scale</source>
-        <translation>Переименуйте вашу шкалу</translation>
+        <translation>Переименуйте ваши весы</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1676" />
@@ -21442,57 +21442,57 @@ Currently in TEMP MODE</source>
     <message>
         <location filename="../artisanlib/devices.py" line="1731" />
         <source>Start/stop the green coffee weighting task web display</source>
-        <translation>Запустить/остановить веб-дисплей задачи взвешивания зеленого кофе</translation>
+        <translation>Запустить/остановить веб-дисплей задачи взвешивания зелёного кофе</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1737" />
         <source>IP port of the green coffee weighting task web display</source>
-        <translation>IP-порт веб-дисплея задачи взвешивания зеленого кофе</translation>
+        <translation>IP-порт веб-дисплея задачи взвешивания зелёного кофе</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1773" />
         <source>Start/stop the roasted coffee weighting task web display</source>
-        <translation>Запуск/остановка веб-дисплея задачи взвешивания жареного кофе</translation>
+        <translation>Запуск/остановка веб-дисплея задачи взвешивания обжаренного кофе</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1784" />
         <source>IP port of the roasted coffee weighting task web display</source>
-        <translation>IP-порт веб-дисплея задачи взвешивания жареного кофе</translation>
+        <translation>IP-порт веб-дисплея задачи взвешивания обжаренного кофе</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1825" />
         <source>Weight of your green coffee container</source>
-        <translation>Вес контейнера для зеленого кофе</translation>
+        <translation>Вес контейнера для зелёного кофе</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1827" />
         <source>Identify your green coffee container and its weight. If a container is selected only that container is recognized. If no container is selected, all defined containers are recognized.</source>
-        <translation>Определите контейнер для зеленого кофе и его вес. Если выбран контейнер, распознается только этот контейнер. Если контейнер не выбран, распознаются все заданные контейнеры.</translation>
+        <translation>Определите контейнер для зелёного кофе и его вес. Если выбран контейнер, распознается только этот контейнер. Если контейнер не выбран, распознаются все заданные контейнеры.</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1860" />
         <source>The one-bucket mode assumes that the entire batch fits into a single bucket</source>
-        <translation>Режим одного ковша предполагает, что вся партия помещается в один ковш.</translation>
+        <translation>Режим одного ковша предполагает, что весь батч помещается в один ковш.</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1862" />
         <source>The two-bucket mode allows splitting a batch into two buckets for easier lifting</source>
-        <translation>Режим двух ведер позволяет разделить партию на два ведра для облегчения подъема.</translation>
+        <translation>Режим двух ведер позволяет разделить батч на два ведра для облегчения подъема.</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1889" />
         <source>Target accuracy expressed as a percentage of the batch size. If zero is selected, the check is disabled.</source>
-        <translation>Точность цели, выраженная в процентах от размера партии. Если выбран ноль, проверка отключена.</translation>
+        <translation>Точность цели, выраженная в процентах от размера батча. Если выбран ноль, проверка отключена.</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1911" />
         <source>Weight of your roasted coffee container</source>
-        <translation>Вес контейнера с жареным кофе</translation>
+        <translation>Вес контейнера с обжаренным кофе</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="1913" />
         <source>Identify your roasted coffee container and its weight. If no roasted container is selected, the weighing of roasted batches is disabled.</source>
-        <translation>Определите контейнер для жареного кофе и его вес. Если контейнер для жареного кофе не выбран, взвешивание жареных партий отключено.</translation>
+        <translation>Определите контейнер для обжаренного кофе и его вес. Если контейнер для обжаренного кофе не выбран, взвешивание обжаренных батчей отключено.</translation>
     </message>
     <message>
         <location filename="../artisanlib/devices.py" line="2776" />
