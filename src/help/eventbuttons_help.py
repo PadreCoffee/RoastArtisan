@@ -177,7 +177,6 @@ def content() -> str:
     tbl_Commands.add_row(['&#160;','getDBint(<dbnumber>,<start>)',QApplication.translate('HelpDlg','read int from S7 DB')])
     tbl_Commands.add_row(['&#160;','getDBfloat(<dbnumber>,<start>)',QApplication.translate('HelpDlg','read float from S7 DB')])
     tbl_Commands.add_row(['&#160;','setDBbool(<dbnumber>,<start>,<index>,<value>)',QApplication.translate('HelpDlg','write bool to S7 DB')])
-    tbl_Commands.add_row(['&#160;','setDBbyte(<dbnumber>,<start>,<value>)',QApplication.translate('HelpDlg','write byte to S7 DB')])
     tbl_Commands.add_row(['&#160;','setDBint(<dbnumber>,<start>,<value>)',QApplication.translate('HelpDlg','write int to S7 DB')])
     tbl_Commands.add_row(['&#160;','msetDBint(<dbnumber>,<start>,<andMask>,<orMask>,<value>)',QApplication.translate('HelpDlg','write value where bits are replaced by those from orMask at positions where andMask bits are not set')])
     tbl_Commands.add_row(['&#160;','setDBfloat(<dbnumber>,<start>,<value>)',QApplication.translate('HelpDlg','write float to S7 DB')])

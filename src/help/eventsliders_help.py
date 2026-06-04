@@ -107,7 +107,6 @@ def content() -> str:
     tbl_Commands.add_row(['&#160;','getDBint(<dbnumber>,<start>)',QApplication.translate('HelpDlg','read int from S7 DB'),'&#160;'])
     tbl_Commands.add_row(['&#160;','getDBfloat(<dbnumber>,<start>)',QApplication.translate('HelpDlg','read float from S7 DB'),'&#160;'])
     tbl_Commands.add_row(['&#160;','setDBbool(<dbnumber>,<start>,<index>,<value>)',QApplication.translate('HelpDlg','write bool to S7 DB'),'&#160;'])
-    tbl_Commands.add_row(['&#160;','setDBbyte(<dbnumber>,<start>,<value>)',QApplication.translate('HelpDlg','write byte to S7 DB'),'&#160;'])
     tbl_Commands.add_row(['&#160;','setDBint(<dbnumber>,<start>,<value>)',QApplication.translate('HelpDlg','write int to S7 DB'),'&#160;'])
     tbl_Commands.add_row(['&#160;','setDBfloat(<dbnumber>,<start>,<value>)',QApplication.translate('HelpDlg','write float to S7 DB'),'&#160;'])
     tbl_Commands.add_row([QApplication.translate('HelpDlg','Aillio R1 Heater'),'&#160;',QApplication.translate('HelpDlg','sets heater to value'),'&#160;'])
