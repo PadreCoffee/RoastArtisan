@@ -628,6 +628,9 @@ class editGraphDlg(ArtisanResizeablDialog):
         # seed from currently loaded background so dialog reflects existing reference selection
         self.template_uuid:str|None = self.aw.qmc.backgroundUUID if self.aw.qmc.backgroundUUID else None
         self.org_template_uuid:str|None = self.template_uuid  # snapshot for Cancel / clear-detection in accept()
+        # human label for the already-selected reference, used to keep it visible in the combo
+        # even when the async (coffee/blend/machine-filtered) fetch does not return it
+        self.template_label:str|None = self._referenceDisplayLabel() if self.template_uuid else None
         self.template_batchnr:int|None = None
         self.template_batchprefix:str|None = None
         self.plus_templates:list[dict] = []  # reference items matching current coffee/blend + machine (each: {uuid,label,_raw})
@@ -2517,27 +2520,44 @@ class editGraphDlg(ArtisanResizeablDialog):
         except Exception as e:  # pylint: disable=broad-except
             _log.exception(e)  # dialog may have been closed before callback fired
 
+    def _referenceDisplayLabel(self) -> str:
+        # human label for the currently loaded reference (background), mirroring the
+        # combo's reference labels so the selection reads naturally even when injected.
+        title = (self.aw.qmc.titleB or '').strip()
+        if title:
+            if self.aw.qmc.roastbatchnrB:
+                return f'{self.aw.qmc.roastbatchprefixB}{self.aw.qmc.roastbatchnrB} {title}'.strip()
+            return title
+        return self.template_uuid[:8] if self.template_uuid else ''
+
     def _applyTemplatesToCombo(self, templates:list[dict]) -> None:
+        # preserve existing selection if its uuid is still in the list (e.g. async refetch
+        # after background load completes). Only drop the uuid if the user actively changed
+        # the coffee/blend — otherwise a fetch that happens to not include the saved
+        # reference (e.g. server-side coffee/blend/machine filter mismatch) must NOT collapse
+        # the selection to «Без эталона», as that silently unloads the reference on save.
+        if self.template_uuid and not any(t.get('uuid') == self.template_uuid for t in templates):
+            if self.user_updated_coffee_or_blend:
+                # coffee/blend changed by user — saved reference no longer applies
+                self.template_uuid = None
+                self.template_file = None
+            else:
+                # retained reference missing from the filtered fetch — inject it so it stays
+                # visible and selected instead of falling back to «Без эталона»
+                label = self.template_label or (self.template_uuid[:8] if self.template_uuid else '')
+                templates = [{'uuid': self.template_uuid, 'label': label, '_raw': {}}, *templates]
         self.plus_templates = templates
         self.plus_templates_combo.blockSignals(True)
         self.plus_templates_combo.clear()
         self.plus_templates_combo.addItem('Без эталона')
         for t in templates:
             self.plus_templates_combo.addItem(t.get('label', ''))
-        # preserve existing selection if its uuid is still in the list (e.g. async refetch
-        # after background load completes). Only drop the uuid if the user actively changed
-        # the coffee/blend — otherwise a fetch that happens to not include the saved
-        # reference (e.g. server-side filter mismatch) would silently unload the background.
         selected_idx = 0
         if self.template_uuid:
             for i, t in enumerate(templates):
                 if t.get('uuid') == self.template_uuid:
                     selected_idx = i + 1
                     break
-            if selected_idx == 0 and self.user_updated_coffee_or_blend:
-                # coffee/blend changed by user — saved reference no longer applies
-                self.template_uuid = None
-                self.template_file = None
         self.plus_templates_combo.setCurrentIndex(selected_idx)
         self.plus_templates_combo.setEnabled(len(templates) > 0)
         self.plus_templates_combo.blockSignals(False)
@@ -5989,6 +6009,12 @@ class editGraphDlg(ArtisanResizeablDialog):
                 redraw = True
             except Exception:  # pylint: disable=broad-except
                 pass
+        elif self.template_uuid is not None and self.aw.qmc.backgroundUUID != self.template_uuid:
+            # a reference is still selected but its profile could not be (re)loaded as a
+            # background (e.g. not cached locally and remote fetch unavailable). Preserve the
+            # reference id so the upload still carries the template and the cloud does not
+            # wipe the roast's reference. The chart underlay is unaffected here.
+            self.aw.qmc.backgroundUUID = self.template_uuid
         elif ((not self.aw.qmc.flagon) or
             (self.aw.qmc.specialevents != self.org_specialevents) or
             (self.aw.qmc.specialeventstype != self.org_specialeventstype) or
