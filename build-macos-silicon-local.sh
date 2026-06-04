@@ -50,10 +50,15 @@ fi
 source "$VENV/bin/activate"
 
 echo "Installing Python dependencies ..."
-python -m pip install --upgrade pip
-python -m pip install -r "$SRC/requirements.txt"
+# --retries/--timeout make pip resilient to flaky networks (transient IncompleteRead).
+PIP_NET_OPTS="--retries 10 --timeout 120"
+# shellcheck disable=SC2086
+python -m pip install $PIP_NET_OPTS --upgrade pip
+# shellcheck disable=SC2086
+python -m pip install $PIP_NET_OPTS -r "$SRC/requirements.txt"
 # Build-only tooling. qt6-applications provides lrelease used by build-derived.sh.
-python -m pip install "pyinstaller==$PYINSTALLER_VERSION" pyinstaller-versionfile qt6-applications
+# shellcheck disable=SC2086
+python -m pip install $PIP_NET_OPTS "pyinstaller==$PYINSTALLER_VERSION" qt6-applications
 
 cd "$SRC"
 
