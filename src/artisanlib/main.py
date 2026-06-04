@@ -24597,7 +24597,7 @@ class ApplicationWindow(QMainWindow):
                 '<a href="http://www.gnu.org/copyleft/gpl.html">GNU Public Licence (GPLv3.0)</a>',
                 build,
                 otherlibs, # pyright:ignore[reportUnknownArgumentType]
-                '<a href="https://artisan-scope.org">https://artisan-scope.org</a>'))
+                f'<b>{name}</b>'))
 
     @pyqtSlot()
     @pyqtSlot(bool)
@@ -26433,8 +26433,8 @@ class ApplicationWindow(QMainWindow):
                     metadata = {
                         'Title': f'{batch_nr_str}{self.qmc.title}',
                         'Author': getpass.getuser(),
-                        'Description': f'Artisan Roast Profile {batch_nr_str}{self.qmc.title}',
-                        'Software': f'Artisan v{__version__}, https://artisan-scope.org/'
+                        'Description': f'RoastArtisan Roast Profile {batch_nr_str}{self.qmc.title}',
+                        'Software': f'RoastArtisan v{__version__}'
                     }
                 else:
                     metadata = None
@@ -26485,17 +26485,17 @@ class ApplicationWindow(QMainWindow):
                     metadata = {
                             'Title': f'{batch_nr_str}{self.qmc.title}',
                             'Author': getpass.getuser(),
-                            'Subject': f'Artisan Roast Profile {batch_nr_str}{self.qmc.title}',
-                            'Keywords': ', '.join(filter(None, ['Artisan', 'Roast Profile', batch_nr_str])),
-                            'Creator': f'Artisan v{__version__}, https://artisan-scope.org/'
+                            'Subject': f'RoastArtisan Roast Profile {batch_nr_str}{self.qmc.title}',
+                            'Keywords': ', '.join(filter(None, ['RoastArtisan', 'Roast Profile', batch_nr_str])),
+                            'Creator': f'RoastArtisan v{__version__}'
                             }
                 else: # SVG
                     metadata = {
                             'Title': f'{batch_nr_str}{self.qmc.title}',
                             'Creator': getpass.getuser(),
-                            'Description': f'Artisan Roast Profile {batch_nr_str}{self.qmc.title}',
-                            'Keywords': ', '.join(filter(None, ['Artisan', 'Roast Profile', batch_nr_str])),
-                            'Publisher': f'Artisan v{__version__}, https://artisan-scope.org/'
+                            'Description': f'RoastArtisan Roast Profile {batch_nr_str}{self.qmc.title}',
+                            'Keywords': ', '.join(filter(None, ['RoastArtisan', 'Roast Profile', batch_nr_str])),
+                            'Publisher': f'RoastArtisan v{__version__}'
                     }
                     if self.curFile is not None:
                         metadata['Source'] = Path(self.curFile).name

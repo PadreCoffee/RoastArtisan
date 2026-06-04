@@ -1,5 +1,5 @@
 ; ABOUT
-; NSIS script file for Artisan Windows installer.
+; NSIS script file for RoastArtisan Windows installer.
 ;
 ; LICENSE
 ; This program or module is free software: you can redistribute it and/or
@@ -67,10 +67,10 @@ RequestExecutionLevel admin
 
 !macro IsRunning
   Delete "$TEMP\25b241e1.tmp"
-  nsExec::Exec "cmd /c for /f $\"tokens=1,2$\" %i in ('tasklist') do (if /i %i EQU artisan.exe fsutil file createnew $TEMP\25b241e1.tmp 0)"
+  nsExec::Exec "cmd /c for /f $\"tokens=1,2$\" %i in ('tasklist') do (if /i %i EQU RoastArtisan.exe fsutil file createnew $TEMP\25b241e1.tmp 0)"
   IfFileExists $TEMP\25b241e1.tmp 0 notRunning
     ;we have at least one main window active
-    MessageBox MB_OK|MB_ICONEXCLAMATION "Artisan was found to be running. Please close all instances then try the installer again." /SD IDOK
+    MessageBox MB_OK|MB_ICONEXCLAMATION "RoastArtisan was found to be running. Please close all instances then try the installer again." /SD IDOK
     Delete "$TEMP\25b241e1.tmp"
     Quit
   notRunning:
@@ -124,11 +124,11 @@ RequestExecutionLevel admin
 
 
 ; HM NIS Edit Wizard helper defines
-!define pyinstallerOutputDir 'dist/artisan'
-!define PRODUCT_NAME "Artisan"
-!define PRODUCT_PUBLISHER "The Artisan Team"
-!define PRODUCT_WEB_SITE "https://github.com/artisan-roaster-scope/artisan/blob/master/README.md"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\artisan.exe"
+!define pyinstallerOutputDir 'dist/RoastArtisan'
+!define PRODUCT_NAME "RoastArtisan"
+!define PRODUCT_PUBLISHER "RoastArtisan"
+!define PRODUCT_WEB_SITE ""
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\RoastArtisan.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
@@ -150,9 +150,9 @@ Caption "${PRODUCT_NAME} Installer"
 
 VIProductVersion "${PRODUCT_VERSION}.${PRODUCT_BUILD}"
 VIAddVersionKey ProductName "${PRODUCT_NAME}"
-VIAddVersionKey Comments "Installer for Artisan"
+VIAddVersionKey Comments "Installer for RoastArtisan"
 VIAddVersionKey CompanyName ""
-VIAddVersionKey LegalCopyright "Copyright 2010-${CUR_YEAR}, Artisan developers. GNU General Public License"
+VIAddVersionKey LegalCopyright "Copyright 2010-${CUR_YEAR}, RoastArtisan. GNU General Public License"
 VIAddVersionKey FileVersion "${PRODUCT_VERSION}.${PRODUCT_BUILD}"
 VIAddVersionKey FileDescription "${PRODUCT_NAME} Installer"
 VIAddVersionKey ProductVersion "${PRODUCT_VERSION}.${PRODUCT_BUILD}"
@@ -166,7 +166,7 @@ SetCompressor lzma
 
 ; MUI Settings
 !define MUI_ABORTWARNING
-!define MUI_ICON "artisan.ico"
+!define MUI_ICON "roastartisan.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 
 ; Welcome page
@@ -190,8 +190,8 @@ SetCompressor lzma
 ; MUI end ------
 
 Name "${PRODUCT_NAME}"
-OutFile "artisan-win-x64${LEGACY_STR}-${PRODUCT_VERSION}-setup.exe"
-InstallDir "C:\Program Files\Artisan"
+OutFile "RoastArtisan-win-x64${LEGACY_STR}-${PRODUCT_VERSION}-setup.exe"
+InstallDir "C:\Program Files\RoastArtisan"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
@@ -201,19 +201,19 @@ ShowUnInstDetails show
 Function .onInit
   ${If} ${LEGACY} == "False"
   ${AndIfNot} ${AtLeastWin10}
-    MessageBox mb_iconStop "Artisan requires Windows 10 or later to install and run."
+    MessageBox mb_iconStop "RoastArtisan requires Windows 10 or later to install and run."
     Abort
   ${EndIf}
 
   ${If} ${LEGACY} == "True"
   ${AndIf} ${AtLeastWin10}
-    MessageBox mb_iconStop "Artisan Legacy builds require 64 bit Windows 7 or Windows 8 to install and run."
+    MessageBox mb_iconStop "RoastArtisan Legacy builds require 64 bit Windows 7 or Windows 8 to install and run."
     Abort
   ${EndIf}
 
   ${If} ${LEGACY} == "True"
   ${AndIfNot} ${AtLeastWin7}
-    MessageBox mb_iconStop "Artisan Legacy builds require 64 bit Windows 7 or Windows 8 to install and run."
+    MessageBox mb_iconStop "RoastArtisan Legacy builds require 64 bit Windows 7 or Windows 8 to install and run."
     Abort
   ${EndIf}
   !insertmacro IsRunning
@@ -229,7 +229,7 @@ Function .onInit
     IDOK uninst
     Abort
   ${Else}
-    MessageBox MB_OK "You are not using a 64bit system.\nSorry, we can not install Artisan on your system."
+    MessageBox MB_OK "You are not using a 64bit system.\nSorry, we can not install RoastArtisan on your system."
     Abort
   ${EndIf}
 
@@ -262,9 +262,9 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite on
   File /r '${pyinstallerOutputDir}\*.*'
-  CreateDirectory "$SMPROGRAMS\Artisan"
-  CreateShortCut "$SMPROGRAMS\Artisan\Artisan.lnk" "$INSTDIR\artisan.exe"
-  CreateShortCut "$DESKTOP\Artisan.lnk" "$INSTDIR\artisan.exe"
+  CreateDirectory "$SMPROGRAMS\RoastArtisan"
+  CreateShortCut "$SMPROGRAMS\RoastArtisan\RoastArtisan.lnk" "$INSTDIR\RoastArtisan.exe"
+  CreateShortCut "$DESKTOP\RoastArtisan.lnk" "$INSTDIR\RoastArtisan.exe"
 SectionEnd
 
 Section "Microsoft Visual C++ Redistributable Package (x64)" SEC02
@@ -275,8 +275,8 @@ SectionEnd
 Section -AdditionalIcons
   SetShellVarContext all
   WriteIniStr "$INSTDIR\${PRODUCT_NAME}.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
-  CreateShortCut "$SMPROGRAMS\Artisan\Website.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
-  CreateShortCut "$SMPROGRAMS\Artisan\Uninstall.lnk" "$INSTDIR\uninst.exe"
+  CreateShortCut "$SMPROGRAMS\RoastArtisan\Website.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
+  CreateShortCut "$SMPROGRAMS\RoastArtisan\Uninstall.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
 
 Section -Post
@@ -287,36 +287,36 @@ Section -Post
     WriteUninstaller "$INSTDIR\uninst.exe"
   !endif
 
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\artisan.exe"
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\RoastArtisan.exe"
   WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "Path" "$INSTDIR"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\artisan.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\RoastArtisan.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}.${PRODUCT_BUILD}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
 
   ; file associations
-  !insertmacro APP_ASSOCIATE "alog" "Artisan.Profile" "Artisan Roast Profile" \
-     "$INSTDIR\artisanProfile.ico" "Open with Artisan" "$INSTDIR\artisan.exe $\"%1$\""
+  !insertmacro APP_ASSOCIATE "alog" "Artisan.Profile" "RoastArtisan Roast Profile" \
+     "$INSTDIR\artisanProfile.ico" "Open with RoastArtisan" "$INSTDIR\RoastArtisan.exe $\"%1$\""
 
-  !insertmacro APP_ASSOCIATE "alrm" "Artisan.Alarms" "Artisan Alarms" \
-     "$INSTDIR\artisanAlarms.ico" "Open with Artisan" "$INSTDIR\artisan.exe $\"%1$\""
+  !insertmacro APP_ASSOCIATE "alrm" "Artisan.Alarms" "RoastArtisan Alarms" \
+     "$INSTDIR\artisanAlarms.ico" "Open with RoastArtisan" "$INSTDIR\RoastArtisan.exe $\"%1$\""
 
-  !insertmacro APP_ASSOCIATE "apal" "Artisan.Palettes" "Artisan Palettes" \
-     "$INSTDIR\artisanPalettes.ico" "Open with Artisan" "$INSTDIR\artisan.exe $\"%1$\""
+  !insertmacro APP_ASSOCIATE "apal" "Artisan.Palettes" "RoastArtisan Palettes" \
+     "$INSTDIR\artisanPalettes.ico" "Open with RoastArtisan" "$INSTDIR\RoastArtisan.exe $\"%1$\""
 
-  !insertmacro APP_ASSOCIATE "athm" "Artisan.Theme" "Artisan Theme" \
-     "$INSTDIR\artisanTheme.ico" "Open with Artisan" "$INSTDIR\artisan.exe $\"%1$\""
+  !insertmacro APP_ASSOCIATE "athm" "Artisan.Theme" "RoastArtisan Theme" \
+     "$INSTDIR\artisanTheme.ico" "Open with RoastArtisan" "$INSTDIR\RoastArtisan.exe $\"%1$\""
 
-  !insertmacro APP_ASSOCIATE "aset" "Artisan.Settings" "Artisan Settings" \
-     "$INSTDIR\artisanSettings.ico" "Open with Artisan" "$INSTDIR\artisan.exe $\"%1$\""
+  !insertmacro APP_ASSOCIATE "aset" "Artisan.Settings" "RoastArtisan Settings" \
+     "$INSTDIR\artisanSettings.ico" "Open with RoastArtisan" "$INSTDIR\RoastArtisan.exe $\"%1$\""
 
-  !insertmacro APP_ASSOCIATE "wg" "Artisan.Wheel" "Artisan Wheel" \
-     "$INSTDIR\artisanWheel.ico" "Open with Artisan" "$INSTDIR\artisan.exe $\"%1$\""
+  !insertmacro APP_ASSOCIATE "wg" "Artisan.Wheel" "RoastArtisan Wheel" \
+     "$INSTDIR\artisanWheel.ico" "Open with RoastArtisan" "$INSTDIR\RoastArtisan.exe $\"%1$\""
 
   !insertmacro APP_ASSOCIATE_URL "artisan" "URL:artisan Protocol" \
-     "Open with URL" "$INSTDIR\artisan.exe $\"%1$\""
+     "Open with URL" "$INSTDIR\RoastArtisan.exe $\"%1$\""
 
 SectionEnd
 
@@ -340,8 +340,8 @@ FunctionEnd
 Section Uninstall
   Delete "$INSTDIR\${PRODUCT_NAME}.url"
   Delete "$INSTDIR\uninst.exe"
-  Delete "$INSTDIR\artisan.exe"
-  Delete "$INSTDIR\artisan.exe.manifest"
+  Delete "$INSTDIR\RoastArtisan.exe"
+  Delete "$INSTDIR\RoastArtisan.exe.manifest"
   Delete "$INSTDIR\*.pyd"
   Delete "$INSTDIR\*.dll"
   Delete "$INSTDIR\base_library.zip"
@@ -413,6 +413,7 @@ Section Uninstall
   !insertmacro Rmdir_Wildcard "$INSTDIR\zope.event*.dist-info" ${__LINE__}
   !insertmacro Rmdir_Wildcard "$INSTDIR\zope.interface*.dist-info" ${__LINE__}
 
+  Delete "$INSTDIR\roastartisan.png"
   Delete "$INSTDIR\artisan.png"
   Delete "$INSTDIR\LICENSE.txt"
   Delete "$INSTDIR\README.txt"
@@ -464,12 +465,12 @@ Section Uninstall
   Delete "$INSTDIR\logging.yaml"
 
   SetShellVarContext all
-  Delete "$SMPROGRAMS\Artisan\Uninstall.lnk"
-  Delete "$SMPROGRAMS\Artisan\Website.lnk"
-  Delete "$DESKTOP\Artisan.lnk"
-  Delete "$SMPROGRAMS\Artisan\Artisan.lnk"
+  Delete "$SMPROGRAMS\RoastArtisan\Uninstall.lnk"
+  Delete "$SMPROGRAMS\RoastArtisan\Website.lnk"
+  Delete "$DESKTOP\RoastArtisan.lnk"
+  Delete "$SMPROGRAMS\RoastArtisan\RoastArtisan.lnk"
 
-  RMDir "$SMPROGRAMS\Artisan"
+  RMDir "$SMPROGRAMS\RoastArtisan"
   RMDir "$INSTDIR"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"

@@ -250,7 +250,7 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                                 QApplication.translate(
                                                     'Plus',
                                                     'Full roast profile uploaded to {}'
-                                                ).format(config.app_name)
+                                                ).format(config.app_display_name)
                                             )  # @UndefinedVariable
                                         if item.get('cleanup_profile_path'):
                                             try:
@@ -275,7 +275,7 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                         QApplication.translate(
                                             'Plus',
                                             'Roast successfully uploaded to {}'
-                                        ).format(config.app_name)
+                                        ).format(config.app_display_name)
                                     )  # @UndefinedVariable
                                 self.addSyncItem(item)
                                 sr, h = roast.getSyncRecord()
@@ -619,7 +619,7 @@ def addRoast(roast_record:dict[str, Any]|None = None, unsynced:bool=False) -> No
                     QApplication.translate(
                         'Plus',
                         'Queuing roast for upload to {}'
-                    ).format(config.app_name)
+                    ).format(config.app_display_name)
                 )  # @UndefinedVariable
                 rr: dict[str, Any]
                 if roast_record is not None:

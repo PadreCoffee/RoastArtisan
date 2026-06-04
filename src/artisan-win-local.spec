@@ -252,7 +252,7 @@ copy_file(YOCTO_BIN + r'\yapi64.dll', TARGET + r'_internal\yoctopuce\cdll')
 copy_file(SNAP7_BIN + r'\snap7.dll', TARGET + r'_internal')
 
 for fn in [
-    'artisan.png',
+    'roastartisan.png',  # in-app window icon (artisanlib.main loads roastartisan.png)
     'artisanAlarms.ico',
     'artisanProfile.ico',
     'artisanPalettes.ico',

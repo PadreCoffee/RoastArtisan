@@ -2,6 +2,8 @@ __version__ = '4.0.3'
 __revision__ = ''
 __build__ = '0'
 
-__release_sponsor_name__ = 'artisan.plus'
-__release_sponsor_domain__ = 'artisan.plus'
-__release_sponsor_url__ = 'https://artisan.plus/'
+# RoastArtisan is a standalone product; no third-party release-sponsor branding is shown.
+# Empty values make the window title, chart watermark and sponsor link logic skip the sponsor.
+__release_sponsor_name__ = ''
+__release_sponsor_domain__ = ''
+__release_sponsor_url__ = ''

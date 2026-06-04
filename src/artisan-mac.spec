@@ -53,6 +53,7 @@ except Exception:
 SUPPORTED_LANGUAGES = ['ar', 'cs', 'da', 'de','el','en','es','fa','fi','fr','gd', 'he','hu','id','it','ja','ko','lv', 'nl','no','pl','pt_BR','pt','sk', 'sv','th','tr','uk','vi','zh_CN','zh_TW']
 
 DATA_FILES = [
+        (r'roastartisan.png', '.'),  # in-app window icon (artisanlib.main loads roastartisan.png)
         (r'artisanProfile.icns', '.'),
         (r'artisanAlarms.icns', '.'),
         (r'artisanPalettes.icns', '.'),

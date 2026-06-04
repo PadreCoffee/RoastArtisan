@@ -29,7 +29,12 @@ if TYPE_CHECKING:
     from artisanlib.main import ApplicationWindow # pylint: disable=unused-import
 
 # Constants
+# Internal service identifier — also used as the OS keyring service name under which
+# cloud credentials are stored (see get_keyring_service_name). Kept stable for backward
+# compatibility: changing it would orphan already-saved logins and force users to re-login.
 app_name: Final[str] = 'artisan.plus'
+# User-facing name of the cloud service shown in the UI (login/schedule/upload messages).
+app_display_name: Final[str] = 'RoastArtisan'
 profile_ext: Final[str] = 'alog'
 uuid_tag: Final[str] = 'roastUUID' # as used in .alog profiles, send as 'roast_id' as part of the sync record to the server
 schedule_uuid_tag: Final[str] = 'scheduleID' # send as 's_item_id' as part of the sync record to the server
