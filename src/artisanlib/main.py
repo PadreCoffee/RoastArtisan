@@ -14476,6 +14476,10 @@ class ApplicationWindow(QMainWindow):
                 self.sendmessage(message)
                 self.qmc.backgroundpath = str(filename)
                 self.qmc.backgroundUUID = plus.util.normalizeUUID(profile.get('roastUUID', None))
+                # any load (manual file / recent roast / scheduler) defaults to
+                # non-reference; the cloud-reference selector re-flags this True
+                # explicitly after its load returns.
+                self.qmc.backgroundIsReference = False
                 _log.info('background profile loaded: %s', filename)
             else:
                 self.sendmessage(QApplication.translate('Message', 'Invalid artisan format'))
@@ -25467,6 +25471,7 @@ class ApplicationWindow(QMainWindow):
         self.qmc.backgroundprofile_moved_y = 0
         self.qmc.backgroundpath = ''
         self.qmc.backgroundUUID = None
+        self.qmc.backgroundIsReference = False
         self.qmc.titleB = ''
         self.qmc.roastbatchnrB = 0
         self.qmc.roastbatchprefixB = ''

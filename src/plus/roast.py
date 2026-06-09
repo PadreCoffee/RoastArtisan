@@ -411,6 +411,11 @@ def getRoast() -> dict[str, Any]:
 
         if aw.qmc.backgroundUUID:
             d['template'] = {'id': aw.qmc.backgroundUUID}
+            # only flag as a reference when the background was chosen via the
+            # cloud reference selector; a manual/file/recent-roast background
+            # must not be marked "roasted by reference" in the cloud.
+            if getattr(aw.qmc, 'backgroundIsReference', False):
+                d['template']['is_reference'] = True
 
         # if profile is already saved, that modification date is send along to
         # the server instead the timestamp

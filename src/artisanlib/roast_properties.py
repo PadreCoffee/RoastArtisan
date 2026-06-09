@@ -628,6 +628,12 @@ class editGraphDlg(ArtisanResizeablDialog):
         # seed from currently loaded background so dialog reflects existing reference selection
         self.template_uuid:str|None = self.aw.qmc.backgroundUUID if self.aw.qmc.backgroundUUID else None
         self.org_template_uuid:str|None = self.template_uuid  # snapshot for Cancel / clear-detection in accept()
+        # Tracks whether the current template_uuid denotes a genuine CLOUD REFERENCE (эталон)
+        # versus a manual/recent-roast background. template_uuid is shared by the reference
+        # combo (templateSelectionChanged) and the title-field recent-roast picker
+        # (recentRoastActivated), so its mere presence does not imply a reference. Seed from the
+        # currently loaded background's reference status; only the reference combo sets it True.
+        self.template_is_reference:bool = bool(self.aw.qmc.backgroundIsReference)
         # human label for the already-selected reference, used to keep it visible in the combo
         # even when the async (coffee/blend/machine-filtered) fetch does not return it
         self.template_label:str|None = self._referenceDisplayLabel() if self.template_uuid else None
@@ -2577,6 +2583,9 @@ class editGraphDlg(ArtisanResizeablDialog):
         else:
             self.template_uuid = None
             self.template_file = None
+        # this combo IS the cloud-reference selector: a chosen entry is a genuine reference,
+        # «Без эталона» (index 0 / no uuid) clears it.
+        self.template_is_reference = self.template_uuid is not None
         self._updateSnapshotBlock()
 
     def _clearReferenceSelection(self) -> None:
@@ -2785,6 +2794,9 @@ class editGraphDlg(ArtisanResizeablDialog):
                 self.template_uuid = None
                 self.template_batchnr = None
                 self.template_batchprefix = None
+            # a recent/past roast picked from the title field is NOT a cloud reference,
+            # even though it populates template_uuid — never report it as «эталон».
+            self.template_is_reference = False
             self.updateTemplateLine()
             self.percent()
 
@@ -5997,6 +6009,11 @@ class editGraphDlg(ArtisanResizeablDialog):
         # load selected recent roast template in the background
         if self.aw.loadbackgroundUUID(self.template_file,self.template_uuid):
             try:
+                # mark the loaded background as a reference (эталон) ONLY when the selection
+                # came from the cloud-reference combo. template_is_reference distinguishes that
+                # from a recent/past-roast or pre-existing manual background that merely shares
+                # template_uuid. loadbackground() already cleared the flag during the load.
+                self.aw.qmc.backgroundIsReference = self.template_is_reference
                 self.aw.qmc.background = not self.aw.qmc.hideBgafterprofileload
                 self.aw.qmc.timealign(redraw=False)
                 redraw = True
@@ -6015,6 +6032,10 @@ class editGraphDlg(ArtisanResizeablDialog):
             # reference id so the upload still carries the template and the cloud does not
             # wipe the roast's reference. The chart underlay is unaffected here.
             self.aw.qmc.backgroundUUID = self.template_uuid
+            # preserve the reference signal only if this selection was a genuine cloud
+            # reference; a recent/past-roast template that failed to (re)load keeps its id
+            # but must not be reported as «эталон».
+            self.aw.qmc.backgroundIsReference = self.template_is_reference
         elif ((not self.aw.qmc.flagon) or
             (self.aw.qmc.specialevents != self.org_specialevents) or
             (self.aw.qmc.specialeventstype != self.org_specialeventstype) or
