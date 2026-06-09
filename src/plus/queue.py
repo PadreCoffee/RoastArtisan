@@ -84,6 +84,62 @@ def get_response_json(r:requests.models.Response|None) -> dict[str, Any]|None:
     return None
 
 
+# extracts a short, human-readable reason from a non-2xx response (if any),
+# preferring a structured error/message field and falling back to trimmed raw text
+def extract_response_reason(r:requests.models.Response|None) -> str|None:
+    if r is None:
+        return None
+    response = get_response_json(r)
+    if response is not None:
+        candidates:list[dict[str, Any]] = [response]
+        result = response.get('result')
+        if isinstance(result, dict):
+            candidates.append(result)
+        for candidate in candidates:
+            for key in ('error', 'message', 'detail', 'reason'):
+                value = candidate.get(key)
+                if isinstance(value, str) and value.strip():
+                    return value.strip()
+    try:
+        text = (r.text or '').strip()
+        if text:
+            return text if len(text) <= 300 else text[:300] + '…'
+    except Exception as e:  # pylint: disable=broad-except
+        _log.exception(e)
+    return None
+
+
+# logs the full body of a rejected roast save so the reason is recoverable from client logs,
+# and shows the roaster a visible notification that the save was rejected and not uploaded.
+# Used for the /aroast save path so a rejected save is never lost silently.
+def report_save_rejected(r:requests.models.Response|None, roast_id:str|None, *, conflict:bool) -> None:
+    status:int|str = r.status_code if r is not None else '?'
+    body:str = ''
+    if r is not None:
+        try:
+            body = r.text or ''
+        except Exception:  # pylint: disable=broad-except
+            body = '<unreadable response body>'
+    _log.error('roast save rejected (status %s) for roast_id=%s: %s', status, roast_id, body)
+
+    aw = config.app_window
+    if aw is None:
+        return
+    reason = extract_response_reason(r)
+    if conflict:
+        base = QApplication.translate(
+            'Plus',
+            'Roast save was rejected by {} (conflict) and was not uploaded'
+        ).format(config.app_display_name)
+    else:
+        base = QApplication.translate(
+            'Plus',
+            'Roast save failed and was not uploaded to {}'
+        ).format(config.app_display_name)
+    msg = f'{base} ({reason})' if reason else base
+    aw.sendmessage(msg)  # @UndefinedVariable
+
+
 def extract_authoritative_roast_id(response:dict[str, Any]|None, fallback:str|None) -> str|None:
     fallback_normalized = util.normalizeUUID(fallback)
     if response is None:
@@ -196,6 +252,8 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                     iters = 1 # by default, if no modified_at timestamp is given (no roast; maybe just a lock schedule message) thus we don't retry this
                     requeued = False
                     profile_item = is_profile_upload_item(item)
+                    # roast summary save (POST /aroast); used to ensure a rejected save is never lost silently
+                    save_item = (not profile_item) and item.get('url') == config.roast_url
                     if 'url' not in item:
                         # items without an url are discarded
                         iters = 0
@@ -356,10 +414,20 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                             elif (
                                 r is not None and r.status_code == 409
                             ):
+                                # genuine conflict (e.g. server has a newer version / rejected save):
+                                # retrying will never succeed, so stop retrying this item, but make the
+                                # failure loud — log the body and notify the roaster so it is not lost silently.
                                 iters = 0
+                                if save_item:
+                                    save_roast_id = util.normalizeUUID(item['data'].get('roast_id')) if 'data' in item else None
+                                    report_save_rejected(r, save_roast_id, conflict=True)
                             else:
                                 iters = iters - 1
                                 time.sleep(2*config.queue_retry_delay)
+                                if save_item and iters == 0:
+                                    # retries exhausted for a roast save: never drop silently
+                                    save_roast_id = util.normalizeUUID(item['data'].get('roast_id')) if 'data' in item else None
+                                    report_save_rejected(r, save_roast_id, conflict=False)
 
                             if profile_item and not requeued and iters == 0:
                                 aw = config.app_window
