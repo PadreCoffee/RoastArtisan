@@ -1501,6 +1501,10 @@ class tgraphcanvas(QObject):
         self.backgroundeventsflag:bool = True
         self.backgroundpath:str = ''
         self.backgroundUUID:str|None = None
+        # True only when the current background was selected via the cloud
+        # reference selector (эталон); a manual/file/recent-roast background
+        # leaves this False so it is not reported to the cloud as a reference.
+        self.backgroundIsReference:bool = False
         self.backgroundmovespeed = 30
         self.backgroundShowFullflag:bool = False
         self.backgroundKeyboardControlFlag:bool = True
