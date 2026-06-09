@@ -14288,6 +14288,9 @@ class ApplicationWindow(QMainWindow):
                 # reset the movebackground cache:
                 self.qmc.backgroundprofile_moved_x = 0
                 self.qmc.backgroundprofile_moved_y = 0
+                # reset background deltas so they are recomputed for the new profile
+                self.qmc.delta1B = []
+                self.qmc.delta2B = []
                 # delete background annotation positions
                 self.qmc.deleteAnnoPositions(foreground=False, background=True)
 
@@ -25472,6 +25475,8 @@ class ApplicationWindow(QMainWindow):
         # smoothed versions of the background courves
         self.qmc.stemp1B = numpy.empty(0)
         self.qmc.stemp2B = numpy.empty(0)
+        self.qmc.delta1B = []
+        self.qmc.delta2B = []
         self.qmc.stemp1BX = []
         self.qmc.stemp2BX = []
         self.qmc.extraname1B,self.qmc.extraname2B = [],[]
