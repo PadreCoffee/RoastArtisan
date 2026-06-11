@@ -1267,3 +1267,65 @@ class TestCoffeeLabelGeneration:
             # Assert
             # Should identify duplicates and add to set
             assert len(stock.duplicate_coffee_origin_labels) > 0
+
+
+class TestReferenceComments:
+    """Reference comments are READ-ONLY in the client (parse + detail fetch)."""
+
+    def test_parse_reference_comments_sorted(self) -> None:
+        raw = {'reference_comments': [
+            {'id': 2, 'text': 'second', 'created_by': 'bob', 'created_at': '2026-06-11T11:00:00Z'},
+            {'id': 1, 'text': 'first', 'created_by': 'alice', 'created_at': '2026-06-11T10:00:00Z'},
+        ]}
+        result = stock.parseReferenceComments(raw)
+        # sorted by created_at ascending
+        assert [c['id'] for c in result] == [1, 2]
+        assert result[0] == {'id': 1, 'text': 'first', 'created_by': 'alice', 'created_at': '2026-06-11T10:00:00Z'}
+
+    def test_parse_reference_comments_malformed(self) -> None:
+        assert stock.parseReferenceComments(None) == []
+        assert stock.parseReferenceComments({}) == []
+        assert stock.parseReferenceComments({'reference_comments': 'nope'}) == []
+        result = stock.parseReferenceComments({'reference_comments': [
+            {'id': 1, 'text': 'keep'},
+            {'id': 2, 'text': ''},   # dropped (no text)
+            {'id': 3},               # dropped (no text)
+            'garbage',               # dropped (not a dict)
+        ]})
+        assert result == [{'id': 1, 'text': 'keep', 'created_by': '', 'created_at': ''}]
+
+    def test_reference_comments_delivered(self) -> None:
+        assert stock.referenceCommentsDelivered({'reference_comments': []}) is True
+        assert stock.referenceCommentsDelivered({'reference_comments': [{'text': 'x'}]}) is True
+        assert stock.referenceCommentsDelivered({}) is False          # injected empty _raw
+        assert stock.referenceCommentsDelivered(None) is False
+        assert stock.referenceCommentsDelivered({'reference_comments': 'bad'}) is False
+
+    def test_get_reference_detail_unwrapped(self) -> None:
+        stock.config.reference_detail_url_template = 'https://api.example/roasts/{roast_id}/reference'
+        resp = Mock()
+        resp.status_code = 200
+        resp.json.return_value = {'data': {'id': 'abc', 'reference_comments': [{'text': 'hi'}]}}
+        with patch.object(stock.connection, 'getData', return_value=resp) as get:
+            item = stock.getReferenceDetailFromAPI('abc')
+        assert item is not None and item['reference_comments'] == [{'text': 'hi'}]
+        assert get.call_args[0][0] == 'https://api.example/roasts/abc/reference'
+
+    def test_get_reference_detail_wrapped_item(self) -> None:
+        stock.config.reference_detail_url_template = 'https://api.example/roasts/{roast_id}/reference'
+        resp = Mock()
+        resp.status_code = 200
+        resp.json.return_value = {'data': {'item': {'id': 'abc', 'reference_comments': []}}}
+        with patch.object(stock.connection, 'getData', return_value=resp):
+            item = stock.getReferenceDetailFromAPI('abc')
+        assert item == {'id': 'abc', 'reference_comments': []}
+
+    def test_get_reference_detail_failures(self) -> None:
+        stock.config.reference_detail_url_template = 'https://api.example/roasts/{roast_id}/reference'
+        assert stock.getReferenceDetailFromAPI('') is None
+        resp = Mock()
+        resp.status_code = 404
+        with patch.object(stock.connection, 'getData', return_value=resp):
+            assert stock.getReferenceDetailFromAPI('abc') is None
+        with patch.object(stock.connection, 'getData', side_effect=Exception('boom')):
+            assert stock.getReferenceDetailFromAPI('abc') is None

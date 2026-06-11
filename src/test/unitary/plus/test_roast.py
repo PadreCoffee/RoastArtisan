@@ -657,3 +657,18 @@ class TestGetSyncRecord:
         assert expected_fields.issubset(actual_fields)
         assert 'random_field' not in sync_record
         assert 'another_field' not in sync_record
+
+
+class TestRoastCommentWireContract:
+    """roast_comment replaces roastingnotes as the source of the cloud notes field."""
+
+    def test_roast_comment_is_a_sync_attribute(self) -> None:
+        import plus.roast as roast_module
+        assert 'roast_comment' in roast_module.sync_record_attributes
+        assert 'notes' in roast_module.sync_record_attributes
+
+    def test_roast_comment_suppressed_when_empty(self) -> None:
+        import plus.roast as roast_module
+        # empty roast_comment must be omitted (not sent as an empty tag)
+        assert 'roast_comment' in roast_module.sync_record_empty_string_supressed_attributes
+        assert 'notes' in roast_module.sync_record_empty_string_supressed_attributes

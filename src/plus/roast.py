@@ -389,7 +389,13 @@ def getRoast() -> dict[str, Any]:
             d['location'] = None
 
         try:
-            util.addString2dict(p, 'roastingnotes', d, 'notes', 1023)
+            # roast_comment is the source of the cloud roast-page Notes field.
+            # Send it under both the new 'roast_comment' key and the legacy 'notes'
+            # key with the SAME value: old cloud reads 'notes', new cloud prefers
+            # 'roast_comment' — no deploy coupling. roastingnotes is intentionally
+            # no longer the source of 'notes'; it stays a local Artisan concept.
+            util.addString2dict(p, 'roast_comment', d, 'roast_comment', 1023)
+            util.addString2dict(p, 'roast_comment', d, 'notes', 1023)
         except Exception as e:  # pylint: disable=broad-except
             _log.exception(e)
 
@@ -500,6 +506,7 @@ sync_record_empty_string_supressed_attributes: list[str] = [
     'color_system',
     'machine',
     'notes',
+    'roast_comment',
     'cupping_notes',
 ]
 

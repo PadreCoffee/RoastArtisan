@@ -16301,6 +16301,10 @@ class ApplicationWindow(QMainWindow):
                 self.qmc.cuppingnotes = decodeLocalStrict(profile['cuppingnotes'])
             else:
                 self.qmc.cuppingnotes = ''
+            if 'roast_comment' in profile:
+                self.qmc.roast_comment = decodeLocalStrict(profile['roast_comment'])
+            else:
+                self.qmc.roast_comment = ''
 
             if 'timex' in profile:
                 self.qmc.timex = profile['timex']
@@ -17190,6 +17194,7 @@ class ApplicationWindow(QMainWindow):
             profile['etypes'] = [encodeLocalStrict(et) for et in self.qmc.etypes[:]]
             profile['roastingnotes'] = encodeLocalStrict(self.qmc.roastingnotes)
             profile['cuppingnotes'] = encodeLocalStrict(self.qmc.cuppingnotes)
+            profile['roast_comment'] = encodeLocalStrict(self.qmc.roast_comment)
             profile['timex'] = [float2float(x,10) for x in self.qmc.timex]
             profile['temp1'] = [float2float(x,8) for x in self.qmc.temp1]
             profile['temp2'] = [float2float(x,8) for x in self.qmc.temp2]
