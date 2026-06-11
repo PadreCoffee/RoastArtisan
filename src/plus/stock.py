@@ -1836,3 +1836,66 @@ def getReferencesFromAPI(coffee_hr_id:str|None = None, blend_hr_id:str|None = No
     except Exception as e:  # pylint: disable=broad-except
         _log.exception(e)
     return []
+
+
+# --- Reference comments (READ-ONLY in the client; authoring is cloud-UI only) ---
+
+# Normalizes a single reference comment dict to {id, text, created_by, created_at}.
+def _normalizeReferenceComment(c:dict) -> dict|None:
+    if not isinstance(c, dict):
+        return None
+    text = str(c.get('text', '') or '')
+    if not text:
+        return None
+    return {
+        'id': c.get('id'),
+        'text': text,
+        'created_by': str(c.get('created_by', '') or ''),
+        'created_at': str(c.get('created_at', '') or ''),
+    }
+
+
+# Extracts the reference_comments array already delivered inside a reference's
+# list/detail item ('_raw') and returns it as a normalized list of comment dicts
+# sorted by created_at (oldest first). Safe against missing/malformed data -> [].
+def parseReferenceComments(raw_item:dict|None) -> list[dict]:
+    if not isinstance(raw_item, dict):
+        return []
+    comments = raw_item.get('reference_comments')
+    if not isinstance(comments, list):
+        return []
+    result = []
+    for c in comments:
+        nc = _normalizeReferenceComment(c)
+        if nc is not None:
+            result.append(nc)
+    result.sort(key=lambda c: c.get('created_at') or '')
+    return result
+
+
+# True when the reference item carries a (possibly empty) reference_comments array,
+# i.e. the discussion was actually delivered and a detail fetch is not required.
+def referenceCommentsDelivered(raw_item:dict|None) -> bool:
+    return isinstance(raw_item, dict) and isinstance(raw_item.get('reference_comments'), list)
+
+
+# Fetches a single reference's detail (which includes reference_comments) for the
+# case where the filtered references list omitted it (injected empty _raw). Returns
+# the raw detail item dict or None on any failure (caller degrades gracefully).
+def getReferenceDetailFromAPI(roast_id:str) -> dict|None:
+    _log.debug('getReferenceDetailFromAPI(%s)', roast_id)
+    if not roast_id:
+        return None
+    try:
+        url = config.reference_detail_url_template.format(roast_id=roast_id)
+        r = connection.getData(url)
+        if r is not None and r.status_code == 200:
+            data = r.json().get('data', {})
+            if isinstance(data, dict):
+                # detail may be the item itself or wrapped under 'item'
+                item = data.get('item') if isinstance(data.get('item'), dict) else data
+                if isinstance(item, dict):
+                    return item
+    except Exception as e:  # pylint: disable=broad-except
+        _log.info('getReferenceDetailFromAPI failed: %s', e)
+    return None

@@ -1608,6 +1608,9 @@ class tgraphcanvas(QObject):
         self.machinesetup:str = ''
         self.roastingnotes:str = ''
         self.cuppingnotes:str = ''
+        # roast_comment is a roast-level comment, independent from roastingnotes.
+        # It is the source of the cloud roast-page Notes field (see plus/roast.py).
+        self.roast_comment:str = ''
         self.roastdate:QDateTime = QDateTime.currentDateTime()
         # system batch nr system
         self.roastepoch:int = self.roastdate.toSecsSinceEpoch() # in seconds
@@ -8009,6 +8012,8 @@ class tgraphcanvas(QObject):
             if len(self.timex) > 20:
                 # roast notes of an existing roast are reset
                 self.roastingnotes = ''
+                # the roast comment of an existing roast is reset alongside
+                self.roast_comment = ''
             self.cuppingnotes = ''
             self.whole_color = 0.
             self.ground_color = 0.

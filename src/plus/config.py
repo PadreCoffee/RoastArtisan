@@ -65,6 +65,7 @@ notifications_url: str
 profile_upload_url_template: str
 profile_data_url_template: str
 references_url: str
+reference_detail_url_template: str
 
 # Connection configurations
 
@@ -195,7 +196,7 @@ def derive_service_base_urls(url: str|None) -> tuple[str, str]:
 
 def set_server_base_url(url: str|None) -> None:
     global server_url, web_base_url, api_base_url, shop_base_url
-    global register_url, reset_passwd_url, auth_url, stock_url, roast_url, lock_schedule_url, notifications_url, profile_upload_url_template, profile_data_url_template, references_url
+    global register_url, reset_passwd_url, auth_url, stock_url, roast_url, lock_schedule_url, notifications_url, profile_upload_url_template, profile_data_url_template, references_url, reference_detail_url_template
 
     web_base_url, api_base_url = derive_service_base_urls(url)
     server_url = web_base_url
@@ -214,6 +215,9 @@ def set_server_base_url(url: str|None) -> None:
     profile_upload_url_template = api_base_url + '/roasts/{roast_id}/upload-profile'
     profile_data_url_template = api_base_url + '/roasts/{roast_id}/profile/data'
     references_url = api_base_url + '/roasts/references'
+    # NOTE: route inferred from the comments endpoint /roasts/{roast_id}/reference/comments;
+    # confirm against the cloud reference-detail endpoint (cloud-side dependency).
+    reference_detail_url_template = api_base_url + '/roasts/{roast_id}/reference'
 
 
 def get_keyring_service_name() -> str:

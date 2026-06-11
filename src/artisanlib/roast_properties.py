@@ -62,7 +62,7 @@ from PyQt6.QtGui import QColor, QIntValidator, QRegularExpressionValidator, QKey
 from PyQt6.QtWidgets import (QApplication, QWidget, QCheckBox, QComboBox, QDialogButtonBox, QGridLayout,
                              QHBoxLayout, QVBoxLayout, QHeaderView, QLabel, QLineEdit, QTextEdit, QListView,
                              QPushButton, QSpinBox, QTableWidget, QTableWidgetItem, QTabWidget, QSizePolicy,
-                             QGroupBox, QToolButton, QFrame)
+                             QGroupBox, QToolButton, QFrame, QStackedWidget)
 
 
 ########################################################################################
@@ -544,6 +544,7 @@ class editGraphDlg(ArtisanResizeablDialog):
     connectScaleSignal = pyqtSignal()
     readScaleSignal = pyqtSignal()
     referencesReady = pyqtSignal(int, list)  # (generation, items) — emitted from background fetch thread
+    referenceDetailReady = pyqtSignal(str, dict)  # (uuid, detail item) — emitted from the detail fetch thread
 
     # if start_recording_on_exit is set, on leaving the dialog with OK, the recording is started in case plus is connected and beans have been set
     # and the flags "Open on CHARGE" and "Open on DROP" are not set
@@ -1473,8 +1474,21 @@ class editGraphDlg(ArtisanResizeablDialog):
         textLayout.addWidget(self.template_line,2,1)
         textLayout.addWidget(titlelabel,3,0)
         textLayout.addLayout(titleLine,3,1)
-        textLayout.addWidget(beanslabel,4+textLayoutPlusOffset,0)
-        textLayout.addWidget(self.beansedit,4+textLayoutPlusOffset,1)
+        # Comments editor (left) beside a now-compact Beans editor (right).
+        # Comments has two mutually exclusive modes — editable roast comment when no
+        # reference is selected, read-only reference discussion when one is.
+        self._buildRoastCommentBlock()
+        beansColumn = QVBoxLayout()
+        beansColumn.setSpacing(2)
+        beansColumn.addWidget(beanslabel)
+        beansColumn.addWidget(self.beansedit)
+        beansColumnWidget = QWidget()
+        beansColumnWidget.setLayout(beansColumn)
+        commentsBeansLayout = QHBoxLayout()
+        commentsBeansLayout.setSpacing(8)
+        commentsBeansLayout.addWidget(self.commentsColumnWidget, 1)
+        commentsBeansLayout.addWidget(beansColumnWidget, 1)
+        textLayout.addLayout(commentsBeansLayout,4+textLayoutPlusOffset,0,1,2)
 
         beanSizeLayout = QHBoxLayout()
         beanSizeLayout.setSpacing(2)
@@ -2593,6 +2607,113 @@ class editGraphDlg(ArtisanResizeablDialog):
             return
         self.plus_templates_combo.setCurrentIndex(0)  # triggers templateSelectionChanged → clears state + updates snapshot
 
+    # --- Comments editor (roast comment / read-only reference discussion) ---
+    # Two mutually exclusive modes. No reference: an editable roast comment that
+    # persists to qmc.roast_comment. Reference selected: a read-only view of the
+    # reference's cloud discussion (reference_comments). Reference comments are
+    # NEVER authored here and NEVER copied into the roast comment or beans.
+
+    def _buildRoastCommentBlock(self) -> None:
+        self.commentsHeaderLabel = QLabel()
+        self.roastCommentEdit = QTextEdit()
+        self.roastCommentEdit.setAcceptRichText(False)
+        self.roastCommentEdit.setPlainText(self.aw.qmc.roast_comment)
+        self.roastCommentEdit.setToolTip(QApplication.translate('Tooltip',
+            'Комментарий к этой обжарке (синхронизируется с облаком)'))
+        self.referenceCommentsView = QTextEdit()
+        self.referenceCommentsView.setReadOnly(True)
+        self.commentsStack = QStackedWidget()
+        self.commentsStack.addWidget(self.roastCommentEdit)       # index 0: editable
+        self.commentsStack.addWidget(self.referenceCommentsView)  # index 1: read-only
+        col = QVBoxLayout()
+        col.setSpacing(2)
+        col.addWidget(self.commentsHeaderLabel)
+        col.addWidget(self.commentsStack)
+        self.commentsColumnWidget = QWidget()
+        self.commentsColumnWidget.setLayout(col)
+        self.referenceDetailReady.connect(self._onReferenceDetailReady)
+        self._updateCommentsMode()
+
+    def _updateCommentsMode(self) -> None:
+        # Selects editable vs read-only mode from the current reference selection.
+        # The editable widget retains its text while hidden, so switching modes
+        # (and deselecting the reference) never loses the stored roast comment.
+        if not hasattr(self, 'commentsStack'):
+            return
+        ref_selected = bool(getattr(self, 'template_uuid', None))
+        if ref_selected:
+            self.commentsHeaderLabel.setText('<b>' + QApplication.translate('Label', 'Комментарии референса') + '</b>')
+            self.commentsStack.setCurrentWidget(self.referenceCommentsView)
+            self._refreshReferenceComments()
+        else:
+            self.commentsHeaderLabel.setText('<b>' + QApplication.translate('Label', 'Комментарий к обжарке') + '</b>')
+            self.commentsStack.setCurrentWidget(self.roastCommentEdit)
+
+    def _getSelectedReferenceRaw(self) -> dict|None:
+        uuid = getattr(self, 'template_uuid', None)
+        if not uuid:
+            return None
+        for t in getattr(self, 'plus_templates', []):
+            if t.get('uuid') == uuid:
+                raw = t.get('_raw')
+                return raw if isinstance(raw, dict) else None
+        return None
+
+    def _renderReferenceComments(self, comments:list[dict]) -> None:
+        if not comments:
+            self.referenceCommentsView.setPlainText(
+                QApplication.translate('Label', 'Комментариев пока нет'))
+            return
+        lines = []
+        for c in comments:
+            who = c.get('created_by') or '—'
+            when = c.get('created_at') or ''
+            head = f'{who} · {when}'.strip(' ·')
+            lines.append(f'• {head}\n  {c.get("text", "")}')
+        self.referenceCommentsView.setPlainText('\n\n'.join(lines))
+
+    def _refreshReferenceComments(self) -> None:
+        raw = self._getSelectedReferenceRaw()
+        if plus.stock.referenceCommentsDelivered(raw):
+            self._renderReferenceComments(plus.stock.parseReferenceComments(raw))
+        else:
+            # the filtered references list injected an empty _raw (no comments) —
+            # fetch the reference detail to get the discussion; refresh on return
+            self.referenceCommentsView.setPlainText(
+                QApplication.translate('Label', 'Загрузка комментариев…'))
+            self._fetchReferenceDetail(getattr(self, 'template_uuid', None))
+
+    def _fetchReferenceDetail(self, uuid:str|None) -> None:
+        if not uuid or not plus.config.remote_profile_fetch_enabled():
+            self._renderReferenceComments([])
+            return
+        raw = self._getSelectedReferenceRaw()
+        roast_id = raw.get('id') if isinstance(raw, dict) and raw.get('id') else uuid
+        def _fetch() -> None:
+            item = plus.stock.getReferenceDetailFromAPI(str(roast_id))
+            self.referenceDetailReady.emit(uuid, item or {})
+        threading.Thread(target=_fetch, daemon=True).start()
+
+    @pyqtSlot(str, dict)
+    def _onReferenceDetailReady(self, uuid:str, item:dict) -> None:
+        try:
+            if uuid != getattr(self, 'template_uuid', None):
+                return  # selection changed before the detail returned — stale
+            comments = item.get('reference_comments') if isinstance(item, dict) else None
+            # merge into the matching list entry's _raw so later re-renders are stable
+            for t in getattr(self, 'plus_templates', []):
+                if t.get('uuid') == uuid:
+                    raw = t.get('_raw')
+                    if not isinstance(raw, dict):
+                        raw = {}
+                        t['_raw'] = raw
+                    raw['reference_comments'] = comments if isinstance(comments, list) else []
+                    break
+            self._renderReferenceComments(
+                plus.stock.parseReferenceComments(item if isinstance(item, dict) else {}))
+        except Exception as e:  # pylint: disable=broad-except
+            _log.exception(e)  # dialog may have been closed before the callback fired
+
     # --- Snapshot block (current bean / reference frozen / delta) ---
 
     SNAPSHOT_TOLERANCES = {
@@ -2714,6 +2835,8 @@ class editGraphDlg(ArtisanResizeablDialog):
                 labels['reference'].setText('—')
                 labels['delta'].setText('—')
                 labels['delta'].setStyleSheet('')
+        # the reference selection drives the comments-editor mode too
+        self._updateCommentsMode()
 
     # keeps the weightoutdefectsedit placeholder text set along the weightoutedit text
     def weightouteditSetText(self, txt:str) -> None:
@@ -5828,6 +5951,11 @@ class editGraphDlg(ArtisanResizeablDialog):
 
         # Update beans
         self.aw.qmc.beans = self.beansedit.toPlainText()
+        # Update the roast comment. The editable widget retains its text even while
+        # the read-only reference view is shown, so this saves the operator's comment
+        # regardless of the current mode and never captures reference discussion.
+        if hasattr(self, 'roastCommentEdit'):
+            self.aw.qmc.roast_comment = self.roastCommentEdit.toPlainText()
         #update weight
         w0:float
         w1:float

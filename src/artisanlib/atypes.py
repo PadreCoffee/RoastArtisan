@@ -203,6 +203,7 @@ class ProfileData(TypedDict, total=False):
     etypes: list[str]
     cuppingnotes: str
     roastingnotes: str
+    roast_comment: str
     timex: list[float]
     temp1: list[float]
     temp2: list[float]
