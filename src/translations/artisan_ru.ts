@@ -1345,12 +1345,12 @@ END</source>
     <message>
         <location filename="../artisanlib/background.py" line="229" />
         <source>Playback Events</source>
-        <translation>События воспроизведения</translation>
+        <translation>автоповтор событий</translation>
     </message>
     <message>
         <location filename="../artisanlib/background.py" line="234" />
         <source>Playback DROP</source>
-        <translation>Выгрузка при воспроизведении</translation>
+        <translation>автоповтор выгрузки</translation>
     </message>
     <message>
         <location filename="../artisanlib/background.py" line="248" />

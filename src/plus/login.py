@@ -22,7 +22,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QGroupBox, QHBoxLayout,
-    QVBoxLayout, QLabel, QLineEdit, QDialogButtonBox, QWidget)
+    QVBoxLayout, QLineEdit, QDialogButtonBox, QWidget)
 from PyQt6.QtCore import Qt, pyqtSlot
 from PyQt6.QtGui import QKeySequence, QAction
 
@@ -38,7 +38,7 @@ _log: Final[logging.Logger] = logging.getLogger(__name__)
 
 class Login(ArtisanDialog):
 
-    __slots__ = [ 'login', 'passwd', 'remember', 'server_url', 'linkRegister', 'linkResetPassword', 'textPass', 'textName', 'textServer', 'rememberCheckbox' ]
+    __slots__ = [ 'login', 'passwd', 'remember', 'server_url', 'textPass', 'textName', 'textServer', 'rememberCheckbox' ]
 
 
     def __init__(
@@ -55,16 +55,8 @@ class Login(ArtisanDialog):
         self.login:str|None = None
         self.passwd:str|None = None
         self.remember:bool = remember_credentials
-        self.server_url:str = config.normalize_server_url(server_url)
-
-        self.linkRegister = QLabel(
-            f'<small><a href="{config.register_url}">{QApplication.translate('Plus', 'Register')}</a></small>'
-        )
-        self.linkRegister.setOpenExternalLinks(True)
-        self.linkResetPassword = QLabel(
-            f'<small><a href="{config.reset_passwd_url}">{QApplication.translate('Plus', 'Reset Password')}</a></small>'
-        )
-        self.linkResetPassword.setOpenExternalLinks(True)
+        # the cloud server is fixed to roastlocal.ru; the user can no longer edit it
+        self.server_url:str = config.normalize_server_url('roastlocal.ru')
 
         self.dialogbuttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
@@ -117,12 +109,10 @@ class Login(ArtisanDialog):
 
         self.textPass.textChanged.connect(self.textChanged)
 
+        # the server address is fixed to roastlocal.ru and hidden from the UI
         self.textServer:QLineEdit = QLineEdit(self)
-        self.textServer.setPlaceholderText(
-            QApplication.translate('Plus', 'Server URL')
-        )
         self.textServer.setText(self.server_url)
-        self.textServer.textChanged.connect(self.textChanged)
+        self.textServer.setVisible(False)
         if email is not None:
             self.textName.setText(email)
 
@@ -133,7 +123,6 @@ class Login(ArtisanDialog):
         self.rememberCheckbox.stateChanged.connect(self.rememberCheckChanged)
 
         credentialsLayout:QVBoxLayout = QVBoxLayout(self)
-        credentialsLayout.addWidget(self.textServer)
         credentialsLayout.addWidget(self.textName)
         credentialsLayout.addWidget(self.textPass)
         credentialsLayout.addWidget(self.rememberCheckbox)
@@ -146,16 +135,8 @@ class Login(ArtisanDialog):
         buttonLayout.addWidget(self.dialogbuttons)
         buttonLayout.addStretch()
 
-        linkLayout:QHBoxLayout = QHBoxLayout()
-        linkLayout.addStretch()
-        linkLayout.addWidget(self.linkRegister)
-        linkLayout.addStretch()
-        linkLayout.addWidget(self.linkResetPassword)
-        linkLayout.addStretch()
-
         layout:QVBoxLayout = QVBoxLayout(self)
         layout.addWidget(credentialsGroup)
-        layout.addLayout(linkLayout)
         layout.addLayout(buttonLayout)
         layout.setContentsMargins(10, 10, 10, 10)
         layout.setSpacing(5)
@@ -223,7 +204,7 @@ def plus_login(
 ) -> tuple[str|None, str|None, str, bool, int]:
     _log.debug('plus_login()')
     ld = Login(window, aw, email, saved_password, server_url, remember_credentials)
-    ld.setWindowTitle('plus')
+    ld.setWindowTitle('Roastlocal Cloud')
     ld.setWindowFlags(Qt.WindowType.Sheet)
     ld.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
     res:int = ld.exec()
