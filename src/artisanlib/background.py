@@ -54,7 +54,17 @@ class backgroundDlg(ArtisanResizeablDialog):
             self.restoreGeometry(settings.value('BackgroundGeometry'))
 
         #TAB 1
-        self.pathedit = QLineEdit(self.aw.qmc.backgroundpath)
+        # for a cloud reference background show just the reference name instead of
+        # the internal temp file path; otherwise show the loaded file path as usual
+        reference_title = (self.aw.qmc.titleB or '').strip()
+        if self.aw.qmc.backgroundIsReference and reference_title:
+            if self.aw.qmc.roastbatchnrB:
+                background_display = f'{self.aw.qmc.roastbatchprefixB}{self.aw.qmc.roastbatchnrB} {reference_title}'.strip()
+            else:
+                background_display = reference_title
+        else:
+            background_display = self.aw.qmc.backgroundpath
+        self.pathedit = QLineEdit(background_display)
         self.pathedit.setStyleSheet("background-color:'lightgrey';")
         self.pathedit.setReadOnly(True)
         self.pathedit.setFocusPolicy(Qt.FocusPolicy.NoFocus)

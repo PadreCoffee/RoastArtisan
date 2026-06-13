@@ -4254,7 +4254,7 @@ class ApplicationWindow(QMainWindow):
             string += QApplication.translate('Message','Beginning with release v2.0, settings will no longer be automatically shared at start-up with versions before v2.0.') + '\n\n'
             string += QApplication.translate('Message','Do not worry. Since this is the first time you opened this new version Artisan has already loaded your last used settings.') + '\n\n'
             string += QApplication.translate('Message',"To share settings between this version and Artisan versions before v2.0 use 'Help>Save Settings' and 'Help>Load Settings'.") + '\n\n'
-            string += QApplication.translate('Message','Enjoy using Artisan, The Artisan Team')
+            string += QApplication.translate('Message','Enjoy using Artisan, Roastlocal')
             QMessageBox.information(self, QApplication.translate('Message','One time message about loading settings at start-up'),string)
 
         # provide information message to user about ArtisanViewer the first time it is started
@@ -4265,7 +4265,7 @@ class ApplicationWindow(QMainWindow):
             string += QApplication.translate('Message','ArtisanViewer will preserve all your configuration settings when you exit so they will automatically be available the next time you start ArtisanViewer.') + '\n\n'
             string += QApplication.translate('Message',"Caution, the only way to share settings between Artisan and ArtisanViewer is to explicitly save and load them using 'Help>Save Settings' and 'Help>Load Settings'.") + '\n\n'
             string += QApplication.translate('Message','Enjoy using ArtisanViewer,') +'\n'
-            string += QApplication.translate('Message','The Artisan Team')
+            string += QApplication.translate('Message','Roastlocal')
             QMessageBox.information(self, QApplication.translate('Message','One time message about ArtisanViewer'),string)
             settings.setValue('Mode',self.qmc.mode)  #prevent this popup in case a second instance is started before this first one is closed.
 
