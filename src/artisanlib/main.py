@@ -1217,7 +1217,23 @@ class VMToolbar(NavigationToolbar): # pylint: disable=abstract-method
             # ALT-click (OPTION on macOS) sends the log file by email
             self.aw.sendLog()
         else:
-            plus.controller.toggle(self.aw)
+            # toggle() drives the cloud connect/upload. An unhandled exception escaping this
+            # toolbar action aborts Qt's pending repaint and leaves the plot canvas blank
+            # (grey screen). Guard it: log + surface in Help >> Errors, then redraw in the
+            # finally so a failed *or* successful upload never leaves the chart blank.
+            try:
+                plus.controller.toggle(self.aw)
+            except Exception as e:  # pylint: disable=broad-except
+                _log.exception(e)
+                _, _, exc_tb = sys.exc_info()
+                self.aw.qmc.adderror((QApplication.translate('Error Message', 'Exception:') + ' plus(): {0}').format(str(e)), getattr(exc_tb, 'tb_lineno', '?'))
+            finally:
+                # restore the canvas; skip while actively recording (the sampling loop redraws)
+                if not self.aw.qmc.flagstart:
+                    try:
+                        self.aw.qmc.redraw(recomputeAllDeltas=False)
+                    except Exception as redraw_err:  # pylint: disable=broad-except
+                        _log.exception(redraw_err)
 
     def subscription(self) -> None:
         if self.aw.plus_paidUntil is not None: # after reset and authentication, it might still take a moment until the paidUntil is set via its signal
