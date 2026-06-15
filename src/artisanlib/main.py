@@ -14146,13 +14146,27 @@ class ApplicationWindow(QMainWindow):
                 return None
             if plus.config.uuid_tag not in profile:
                 profile[plus.config.uuid_tag] = UUID
-            import tempfile
-            fd, temp_path = tempfile.mkstemp(prefix=f'roastartisan-background-{UUID[:12]}-', suffix=f'.{plus.config.profile_ext}')
-            os.close(fd)
-            serialize(temp_path, profile)
-            plus.register.addPath(UUID, temp_path)
-            _log.info('remote background profile cached for %s at %s', UUID, temp_path)
-            return temp_path
+            # cache reference background profiles in a persistent app-data dir keyed by UUID so
+            # they survive reboots; OS temp dirs get cleared and would lose the подложка. Fall
+            # back to a temp file only when the data directory is unavailable.
+            cache_path:str|None = None
+            data_dir = getDataDirectory()
+            if data_dir is not None:
+                try:
+                    ref_dir = os.path.join(data_dir, 'references')
+                    if not os.path.isdir(ref_dir):
+                        os.makedirs(ref_dir)
+                    cache_path = os.path.join(ref_dir, f'{UUID}.{plus.config.profile_ext}')
+                except Exception: # pylint: disable=broad-except
+                    cache_path = None
+            if cache_path is None:
+                import tempfile
+                fd, cache_path = tempfile.mkstemp(prefix=f'roastartisan-background-{UUID[:12]}-', suffix=f'.{plus.config.profile_ext}')
+                os.close(fd)
+            serialize(cache_path, profile)
+            plus.register.addPath(UUID, cache_path)
+            _log.info('remote background profile cached for %s at %s', UUID, cache_path)
+            return cache_path
         except Exception as e: # pylint: disable=broad-except
             _log.exception(e)
             return None
@@ -16525,9 +16539,29 @@ class ApplicationWindow(QMainWindow):
                             _log.exception(e)
                             self.deleteBackground() # delete a loaded background if any
                     else:
-                        self.deleteBackground() # delete a loaded background if any
+                        # the cached reference profile is gone (e.g. the OS cleared the temp
+                        # dir on reboot); re-fetch it from the server by UUID before giving up
+                        # so the reference background (подложка) is not silently lost
+                        refetched_path = self.fetchRemoteBackgroundProfile(profile['backgroundUUID'])
+                        if refetched_path is not None and os.path.isfile(refetched_path):
+                            try:
+                                self.loadbackground(refetched_path)
+                                self.qmc.background = not self.qmc.hideBgafterprofileload
+                                self.qmc.timealign(redraw=False) # there will be a later redraw triggered that also recomputes the deltas
+                                self.qmc.backgroundpath = refetched_path
+                                self.qmc.fileDirtySignal.emit() # as we updated the background path we force a profile save
+                            except Exception as e: # pylint: disable=broad-except
+                                _log.exception(e)
+                                self.deleteBackground() # delete a loaded background if any
+                        else:
+                            self.deleteBackground() # delete a loaded background if any
                 else:
                     self.deleteBackground() # delete a loaded background if any
+            # restore the cloud-reference (эталон) flag for the reloaded background. A missing
+            # key (legacy profiles or non-reference backgrounds) means "not a reference", so the
+            # flag stays False. loadbackground() always clears the flag, hence we re-apply here.
+            if (not quiet) and self.qmc.backgroundprofile is not None:
+                self.qmc.backgroundIsReference = bool(profile.get('backgroundIsReference', False))
             self.autoAdjustAxis()
             if 'devices' in profile:
                 self.qmc.profile_meter = decodeLocalStrict(profile['devices'][0], 'Unknown')
@@ -17279,6 +17313,11 @@ class ApplicationWindow(QMainWindow):
                 profile['backgroundpath'] = bpp
             if self.qmc.backgroundUUID is not None:
                 profile['backgroundUUID'] = self.qmc.backgroundUUID
+            # persist the cloud-reference (эталон) flag so the background is restored as a
+            # reference after autosave/reload. Written only when set, mirroring backgroundUUID,
+            # so older readers and non-reference backgrounds are unaffected (missing == False).
+            if self.qmc.backgroundIsReference:
+                profile['backgroundIsReference'] = True
             #write only:
             if self.qmc.profile_sampling_interval is not None:
                 profile['samplinginterval'] = self.qmc.profile_sampling_interval
