@@ -15,7 +15,8 @@
 # AUTHOR
 # Marko Luther, 2023
 
-from typing import override, TYPE_CHECKING
+import logging
+from typing import Final, override, TYPE_CHECKING
 from babel.units import get_unit_name
 
 from artisanlib.dialogs import ArtisanDialog
@@ -29,6 +30,8 @@ if TYPE_CHECKING:
     from artisanlib.main import ApplicationWindow # noqa: F401 # pylint: disable=unused-import
     from PyQt6.QtWidgets import QWidget, QPushButton # pylint: disable=unused-import
     from PyQt6.QtGui import QCloseEvent # pylint: disable=unused-import
+
+_log: Final[logging.Logger] = logging.getLogger(__name__)
 
 class SamplingDlg(ArtisanDialog):
     def __init__(self, parent:'QWidget', aw:'ApplicationWindow') -> None:
@@ -50,11 +53,9 @@ class SamplingDlg(ArtisanDialog):
         self.interval.setRange(self.aw.qmc.min_delay/1000.,999.99)
         interval = self.aw.qmc.delay/1000.
         if self.aw.qmc.xgrid < 3600:
-            unit_name = get_unit_name('duration-second', length='short', locale=self.aw.locale_str)
-            self.interval.setSuffix(f" {unit_name if unit_name is not None else 'sec'}")
+            self.interval.setSuffix(f" {self.unit_name_for('duration-second', 'sec')}")
         else:
-            unit_name = get_unit_name('duration-minute', length='short', locale=self.aw.locale_str)
-            self.interval.setSuffix(f" {unit_name if unit_name is not None else 'min'}")
+            self.interval.setSuffix(f" {self.unit_name_for('duration-minute', 'min')}")
             interval = interval / 60
         self.interval.setValue(interval)
         self.interval.setDecimals(2)
@@ -97,6 +98,22 @@ class SamplingDlg(ArtisanDialog):
             self.move(settings.value('SamplingPosition'))
 
         layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
+
+    # localized short unit name (e.g. 'sec'/'min') for the given babel measurement unit.
+    # Robust against locales whose babel locale-data is unavailable (e.g. the bundled
+    # Windows build may ship without 'ru' locale-data, in which case babel raises
+    # UnknownLocaleError); falls back to the English unit name and finally to a plain
+    # default so the dialog always opens. Mirrors the guard in canvas.default_xlabel_text().
+    def unit_name_for(self, measurement_unit:str, default:str) -> str:
+        try:
+            return get_unit_name(measurement_unit, length='short', locale=self.aw.locale_str) or default
+        except Exception as e:  # pylint: disable=broad-except # UnknownLocaleError
+            _log.error(e)
+            try:
+                return get_unit_name(measurement_unit, length='short', locale='en') or default
+            except Exception as e2:  # pylint: disable=broad-except
+                _log.error(e2)
+                return default
 
     #window close box
     @pyqtSlot('QCloseEvent')

@@ -228,8 +228,10 @@ def authentify() -> bool:
                         notifications = 0 # unqualified notifications
                         machines = [] # list of machine names with matching notifications
                         try:
-                            if 'limit' in res['result']['user']['account']:
-                                ol = res_account['limit']
+                            # the server may send account.limit as null; guard against it
+                            # so we don't raise (and silently skip the quota) on every connect
+                            ol = res_account.get('limit')
+                            if isinstance(ol, dict):
                                 if 'rlimit' in ol:
                                     rlimit = ol['rlimit']
                                 if 'rused' in ol:
