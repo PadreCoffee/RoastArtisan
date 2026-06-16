@@ -4765,10 +4765,21 @@ class ApplicationWindow(QMainWindow):
     @pyqtSlot(float,float,str,int,list)
     def updateLimits(self, rlimit:float, rused:float, pu:str, notifications:int, machines: list[str]) -> None:
         _log.debug('updateLimits(%s,%s,%s,%s,%s)', rlimit, rused, pu, notifications, machines)
-        self.updatePlusLimits(rlimit, rused)
-        self.updatePlusPaidUntil(pu)
-        self.updatePlusStatus()
-        plus.notifications.updateNotifications(notifications, machines)
+        # This slot fires on the queue worker's replySignal once a roast upload succeeds
+        # (the connected/online path). An exception escaping the slot during Qt's pending
+        # repaint aborts the repaint and leaves the plot canvas blank (grey screen) until
+        # restart -- the same bug class already guarded for the "+" toolbar button and the
+        # automatic OFF/DROP completion. Guard the body: log + surface in Help >> Errors so
+        # a malformed/unexpected server reply never blanks the chart.
+        try:
+            self.updatePlusLimits(rlimit, rused)
+            self.updatePlusPaidUntil(pu)
+            self.updatePlusStatus()
+            plus.notifications.updateNotifications(notifications, machines)
+        except Exception as e:  # pylint: disable=broad-except
+            _log.exception(e)
+            _, _, exc_tb = sys.exc_info()
+            self.qmc.adderror((QApplication.translate('Error Message', 'Exception:') + ' updateLimits(): {0}').format(str(e)),getattr(exc_tb, 'tb_lineno', '?'))
 
 
     @pyqtSlot()
