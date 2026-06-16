@@ -2834,6 +2834,23 @@ class tgraphcanvas(QObject):
                     self.update_additional_artists()
                     self.fig.canvas.blit(axfig.bbox)
 
+    # Defensive guard against the "grey screen" blank-canvas bug (mirrors the "+" toolbar
+    # fix, commit e8e43edc). Finishing a roast (OFF/DROP) while artisan.plus is unreachable
+    # runs the cloud-sync / upload-queue completion path; an exception escaping a Qt slot
+    # there can abort Qt's pending repaint with nothing re-issuing the draw, leaving the
+    # plot canvas blank until the client is restarted. The manual "+" button was already
+    # hardened; this re-issues a guarded full redraw as the final paint of the OFF sequence
+    # so a roast finished offline never leaves the chart blank. Skipped while actively
+    # recording (the sampling loop owns the redraw then).
+    @pyqtSlot()
+    def guaranteeCanvasRedraw(self) -> None:
+        if self.flagstart:
+            return
+        try:
+            self.redraw(recomputeAllDeltas=False)
+        except Exception as e:  # pylint: disable=broad-except
+            _log.exception(e)
+
     def device_name_subst(self, device_name:str) -> str:
         try:
             return device_name.format(self.etypes[0],self.etypes[1],self.etypes[2],self.etypes[3],self.mode)
@@ -13652,6 +13669,14 @@ class tgraphcanvas(QObject):
                     self.aw.automaticsave(False)
                 except Exception as e: # pylint: disable=broad-except
                     _log.exception(e)
+
+            # Stopgap for the "grey screen" blank-canvas bug: the cloud-sync / upload-queue
+            # completion above (automaticsave -> updateSyncRecordHashAndSync -> addRoast, and
+            # the updatePlusStatus signal below) can abort Qt's pending repaint when
+            # artisan.plus is unreachable, leaving the chart blank until restart. Schedule a
+            # guarded full redraw as the final paint of the OFF sequence (after the +100ms
+            # updateBackground above) so finishing a roast offline never leaves it blank.
+            QTimer.singleShot(150, self.guaranteeCanvasRedraw)
 
             # update error dlg
             if self.aw.error_dlg:
