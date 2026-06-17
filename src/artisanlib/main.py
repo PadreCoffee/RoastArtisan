@@ -18283,6 +18283,19 @@ class ApplicationWindow(QMainWindow):
             self.plus_language = settings.value('plus_language',self.plus_language)
             self.plus_user_id = settings.value('plus_user_id',self.plus_user_id)
             self.plus_account_id = settings.value('plus_account_id',self.plus_account_id)
+            # Migration: seed the saved-operators list from a pre-existing remembered account
+            try:
+                import plus.operators as operators
+                if self.plus_account:
+                    _ops = operators.load_operators()
+                    if operators.find_operator(_ops, self.plus_account) is None:
+                        _ops = operators.upsert_operator(
+                            _ops, self.plus_account,
+                            (self.plus_account or ''), self.plus_server_url,
+                            account_id=self.plus_account_id)
+                        operators.save_operators(_ops)
+            except Exception as e:  # pylint: disable=broad-except
+                _log.exception(e)
             plus.config.set_server_base_url(self.plus_server_url)
             plus.stock.coffee_label_normal_order = settings.value('standard_bean_labels',plus.stock.coffee_label_normal_order)
             #restore mode
