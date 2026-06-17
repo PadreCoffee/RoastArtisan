@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from artisanlib.main import ApplicationWindow # noqa: F401 # pylint: disable=unused-import
 
 from plus import config, connection, stock, queue, sync, roast, util
+import plus.operators as operators
 
 
 _log: Final[logging.Logger] = logging.getLogger(__name__)
@@ -264,6 +265,18 @@ def connect(clear_on_failure: bool =False, interactive: bool = True) -> None:
                             aw.resetDonateCounter()
                         except Exception as e:  # pylint: disable=broad-except
                             _log.exception(e)
+                        # remember this operator for one-click switching later
+                        try:
+                            if aw.plus_remember_credentials and aw.plus_account:
+                                ops_list = operators.load_operators()
+                                ops_list = operators.upsert_operator(
+                                    ops_list, aw.plus_account,
+                                    connection.getNickname() or aw.plus_account,
+                                    config.server_url,
+                                    account_id=getattr(aw, 'plus_account_id', None))
+                                operators.save_operators(ops_list)
+                        except Exception as e:  # pylint: disable=broad-except
+                            _log.exception(e)
                     elif clear_on_failure:
                         connection.clearCredentials()
                         aw.sendmessageSignal.emit(
@@ -415,6 +428,34 @@ def reconnected() -> None:
                         'Plus', 'Roastlocal Cloud reconnected'),
                     True,
                     None)
+
+
+def switchOperator(email: str, server_url: str|None = None) -> bool:
+    """Switch the active cloud operator to `email` using the password saved in the OS keyring.
+
+    Logs out the current operator WITHOUT deleting any saved passwords, points the app at the new
+    account, authenticates silently, and on success syncs the roast operator name from the
+    account nickname. Returns True on success. PIN verification (if any) is the caller's job.
+    """
+    aw = config.app_window
+    if aw is None:
+        return False
+    # log out current operator but keep everyone's saved keyring passwords
+    connection.clearCredentials(remove_from_keychain=False)
+    if server_url is not None:
+        aw.plus_server_url = server_url
+        config.server_url = server_url
+    aw.plus_account = email
+    aw.plus_email = email
+    config.passwd = None  # force reload from keyring for the new account in authentify()
+    try:
+        ok = connection.authentify()
+    except Exception as e:  # pylint: disable=broad-except
+        _log.exception(e)
+        ok = False
+    if ok:
+        connection.setToken(config.token, connection.getNickname(), force_operator=True)
+    return ok
 
 
 # if plus is ON and synced, computes the sync record hash, updates the
