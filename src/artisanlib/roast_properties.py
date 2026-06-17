@@ -4628,6 +4628,14 @@ class editGraphDlg(ArtisanResizeablDialog):
             # fill dialog with data
             self.setup_ui.lineEditOrganization.setText(self.aw.qmc.organization)
             self.setup_ui.lineEditOperator.setText(self.aw.qmc.operator)
+            # when logged in to the cloud the operator is driven by the active account nickname,
+            # so hide the manual operator field + its label (logged out: unchanged free-text field)
+            _logged_in = self.aw.plus_account is not None
+            self.setup_ui.lineEditOperator.setVisible(not _logged_in)
+            self.setup_ui.labelOperator.setVisible(not _logged_in)
+            # the grey default-operator value shares the operator row; hide it too to avoid an orphan
+            if hasattr(self.setup_ui, 'labelOperatorDefault'):
+                self.setup_ui.labelOperatorDefault.setVisible(not _logged_in)
             self.setup_ui.lineEditMachine.setText(self.aw.qmc.roastertype)
             self.setup_ui.doubleSpinBoxRoasterSize.setValue(self.aw.qmc.roastersize)
             self.setup_ui.comboBoxHeating.setCurrentIndex(self.aw.qmc.roasterheating)
@@ -6102,7 +6110,9 @@ class editGraphDlg(ArtisanResizeablDialog):
         if self.tabInitialized[5] and self.setup_ui is not None:
             #update setup
             self.aw.qmc.organization = self.setup_ui.lineEditOrganization.text()
-            self.aw.qmc.operator = self.setup_ui.lineEditOperator.text()
+            if self.aw.plus_account is None:
+                self.aw.qmc.operator = self.setup_ui.lineEditOperator.text()
+            # when logged in, qmc.operator is driven by the active account nickname -- leave it
             self.aw.qmc.roastertype = self.setup_ui.lineEditMachine.text()
             self.aw.qmc.roastersize = self.setup_ui.doubleSpinBoxRoasterSize.value()
             self.aw.qmc.roasterheating = self.setup_ui.comboBoxHeating.currentIndex()
