@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from artisanlib.main import ApplicationWindow # noqa: F401 # pylint: disable=unused-import
 
 from plus import config, connection, stock, queue, sync, roast, util
+import plus.operators as operators
 
 
 _log: Final[logging.Logger] = logging.getLogger(__name__)
@@ -262,6 +263,18 @@ def connect(clear_on_failure: bool =False, interactive: bool = True) -> None:
                             _log.exception(e)
                         try:
                             aw.resetDonateCounter()
+                        except Exception as e:  # pylint: disable=broad-except
+                            _log.exception(e)
+                        # remember this operator for one-click switching later
+                        try:
+                            if aw.plus_remember_credentials and aw.plus_account:
+                                ops_list = operators.load_operators()
+                                ops_list = operators.upsert_operator(
+                                    ops_list, aw.plus_account,
+                                    connection.getNickname() or aw.plus_account,
+                                    config.server_url,
+                                    account_id=getattr(aw, 'plus_account_id', None))
+                                operators.save_operators(ops_list)
                         except Exception as e:  # pylint: disable=broad-except
                             _log.exception(e)
                     elif clear_on_failure:
