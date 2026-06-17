@@ -417,6 +417,34 @@ def reconnected() -> None:
                     None)
 
 
+def switchOperator(email: str, server_url: str|None = None) -> bool:
+    """Switch the active cloud operator to `email` using the password saved in the OS keyring.
+
+    Logs out the current operator WITHOUT deleting any saved passwords, points the app at the new
+    account, authenticates silently, and on success syncs the roast operator name from the
+    account nickname. Returns True on success. PIN verification (if any) is the caller's job.
+    """
+    aw = config.app_window
+    if aw is None:
+        return False
+    # log out current operator but keep everyone's saved keyring passwords
+    connection.clearCredentials(remove_from_keychain=False)
+    if server_url is not None:
+        aw.plus_server_url = server_url
+        config.server_url = server_url
+    aw.plus_account = email
+    aw.plus_email = email
+    config.passwd = None  # force reload from keyring for the new account in authentify()
+    try:
+        ok = connection.authentify()
+    except Exception as e:  # pylint: disable=broad-except
+        _log.exception(e)
+        ok = False
+    if ok:
+        connection.setToken(config.token, connection.getNickname(), force_operator=True)
+    return ok
+
+
 # if plus is ON and synced, computes the sync record hash, updates the
 # sync record cache and returns the sync record hash
 # otherwise return None
