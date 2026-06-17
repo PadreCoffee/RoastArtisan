@@ -7068,13 +7068,13 @@ CTRL+F [Win]</source>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="59" />
-        <source>Open the roast in artisan.plus</source>
-        <translation>Откройте обжарку в artisan.plus</translation>
+        <source>Open the roast in Roastlocal Cloud</source>
+        <translation>Откройте обжарку в Roastlocal Cloud</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="59" />
-        <source>Requires an artisan.plus account</source>
-        <translation>Требуется учетная запись artisan.plus</translation>
+        <source>Requires an Roastlocal Cloud account</source>
+        <translation>Требуется учетная запись Roastlocal Cloud</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="60" />
@@ -7160,8 +7160,8 @@ Double click again to zoom in to original view</source>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="66" />
-        <source>Sync the roast with artisan.plus</source>
-        <translation>Синхронизируйте обжарку с artisan.plus</translation>
+        <source>Sync the roast with Roastlocal Cloud</source>
+        <translation>Синхронизируйте обжарку с Roastlocal Cloud</translation>
     </message>
     <message>
         <location filename="../help/keyboardshortcuts_help.py" line="67" />
@@ -15916,8 +15916,8 @@ ATTENTION: Recorded data will get cleared without confirmation</source>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1714" />
-        <source>artisan.plus needs to know the beans you are roasting</source>
-        <translation>artisan.plus необходимо знать, какие именно кофейные зерна вы обжариваете.</translation>
+        <source>Roastlocal Cloud needs to know the beans you are roasting</source>
+        <translation>Roastlocal Cloud необходимо знать, какие именно кофейные зерна вы обжариваете.</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="4189" />
@@ -16325,10 +16325,10 @@ ATTENTION: Recorded data will get cleared without confirmation</source>
         <location filename="../artisanlib/main.py" line="5100" />
         <source>Artisan is free to use!
 
-To keep it free and current please support us with your donation and subscribe to artisan.plus to suppress this dialog!</source>
+To keep it free and current please support us with your donation and subscribe to Roastlocal Cloud to suppress this dialog!</source>
         <translation>Artisan можно использовать бесплатно!
 
-Чтобы он оставался бесплатным и актуальным, поддержите нас своим пожертвованием и подпишитесь на artisan.plus, чтобы скрыть этот диалог!</translation>
+Чтобы он оставался бесплатным и актуальным, поддержите нас своим пожертвованием и подпишитесь на Roastlocal Cloud, чтобы скрыть этот диалог!</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="5866" />
@@ -18120,8 +18120,8 @@ Continue?</source>
     </message>
     <message>
         <location filename="../plus/sync.py" line="738" />
-        <source>Updated data received from artisan.plus</source>
-        <translation>Обновленные данные, полученные от artisan.plus</translation>
+        <source>Updated data received from Roastlocal Cloud</source>
+        <translation>Обновленные данные, полученные от Roastlocal Cloud</translation>
     </message>
     <message>
         <location filename="../plus/controller.py" line="224" />
@@ -18140,15 +18140,15 @@ Continue?</source>
     </message>
     <message>
         <location filename="../plus/controller.py" line="252" />
-        <source>Connected to artisan.plus</source>
-        <translation>Подключено к artisan.plus</translation>
+        <source>Connected to Roastlocal Cloud</source>
+        <translation>Подключено к Roastlocal Cloud</translation>
     </message>
     <message>
         <location filename="../plus/controller.py" line="368" />
         <location filename="../plus/controller.py" line="293" />
         <location filename="../plus/controller.py" line="270" />
-        <source>artisan.plus turned off</source>
-        <translation>artisan.plus выключен</translation>
+        <source>Roastlocal Cloud turned off</source>
+        <translation>Roastlocal Cloud выключен</translation>
     </message>
     <message>
         <location filename="../plus/controller.py" line="277" />
@@ -18157,28 +18157,28 @@ Continue?</source>
     </message>
     <message>
         <location filename="../plus/controller.py" line="302" />
-        <source>Couldn't connect to artisan.plus</source>
-        <translation>Не удалось подключиться к artisan.plus</translation>
+        <source>Couldn't connect to Roastlocal Cloud</source>
+        <translation>Не удалось подключиться к Roastlocal Cloud</translation>
     </message>
     <message>
         <location filename="../plus/controller.py" line="327" />
-        <source>Disconnect artisan.plus?</source>
-        <translation>Отключить artisan.plus?</translation>
+        <source>Disconnect Roastlocal Cloud?</source>
+        <translation>Отключить Roastlocal Cloud?</translation>
     </message>
     <message>
         <location filename="../plus/controller.py" line="377" />
-        <source>artisan.plus connection lost. Reconnecting automatically...</source>
-        <translation>Соединение с artisan.plus потеряно. Автоматическое переподключение...</translation>
+        <source>Roastlocal Cloud connection lost. Reconnecting automatically...</source>
+        <translation>Соединение с Roastlocal Cloud потеряно. Автоматическое переподключение...</translation>
     </message>
     <message>
         <location filename="../plus/controller.py" line="381" />
-        <source>artisan.plus disconnected</source>
-        <translation>artisan.plus отключен</translation>
+        <source>Roastlocal Cloud disconnected</source>
+        <translation>Roastlocal Cloud отключен</translation>
     </message>
     <message>
         <location filename="../plus/controller.py" line="414" />
-        <source>artisan.plus reconnected</source>
-        <translation>artisan.plus переподключён</translation>
+        <source>Roastlocal Cloud reconnected</source>
+        <translation>Roastlocal Cloud переподключён</translation>
     </message>
     <message>
         <location filename="../plus/stock.py" line="470" />
@@ -21329,24 +21329,24 @@ Unchecked: Fits a smooth spline to preserve curve shape.</source>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="5370" />
-        <source>Syncing with artisan.plus</source>
-        <translation>Синхронизация с artisan.plus</translation>
+        <source>Syncing with Roastlocal Cloud</source>
+        <translation>Синхронизация с Roastlocal Cloud</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="5407" />
         <location filename="../artisanlib/main.py" line="5373" />
-        <source>Disconnect artisan.plus</source>
-        <translation>Отключить artisan.plus</translation>
+        <source>Disconnect Roastlocal Cloud</source>
+        <translation>Отключить Roastlocal Cloud</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="5376" />
-        <source>Upload to artisan.plus</source>
-        <translation>Загрузить на artisan.plus</translation>
+        <source>Upload to Roastlocal Cloud</source>
+        <translation>Загрузить на Roastlocal Cloud</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="5410" />
-        <source>Connect artisan.plus</source>
-        <translation>Подключить artisan.plus</translation>
+        <source>Connect Roastlocal Cloud</source>
+        <translation>Подключить Roastlocal Cloud</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="8026" />

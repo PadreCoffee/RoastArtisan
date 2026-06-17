@@ -5124,7 +5124,7 @@ class ApplicationWindow(QMainWindow):
                     0 <= starts < everystarts):
 #                message = QApplication.translate('Message', 'Artisan is free to use!<br><br>To keep it free and current please support us<br><br><a href="{0}">{0}</a><br><br>and book<br><br><a href="{1}">{1}</a><br><br>to suppress this dialog')
 #                message = message.format('https://artisan-scope.org/donate/', 'https://artisan.plus')
-                message = QApplication.translate('Message', 'Artisan is free to use!\n\nTo keep it free and current please support us with your donation and subscribe to artisan.plus to suppress this dialog!')
+                message = QApplication.translate('Message', 'Artisan is free to use!\n\nTo keep it free and current please support us with your donation and subscribe to Roastlocal Cloud to suppress this dialog!')
                 donate_message_box = QMessageBox()
                 donate_message_box.setText(message)
                 donate_message_box.setIcon(QMessageBox.Icon.Information)
@@ -5394,13 +5394,13 @@ class ApplicationWindow(QMainWindow):
                     if self.editgraphdialog is False:
                         # syncing from server in progress
                         plus_icon = 'plus-dirty'
-                        tooltip = QApplication.translate('Tooltip', 'Syncing with artisan.plus')
+                        tooltip = QApplication.translate('Tooltip', 'Syncing with Roastlocal Cloud')
                     elif plus.controller.is_synced():
                         plus_icon = 'plus-connected'
-                        tooltip = QApplication.translate('Tooltip', 'Disconnect artisan.plus')
+                        tooltip = QApplication.translate('Tooltip', 'Disconnect Roastlocal Cloud')
                     else:
                         plus_icon = 'plus-unsynced'
-                        tooltip = QApplication.translate('Tooltip', 'Upload to artisan.plus')
+                        tooltip = QApplication.translate('Tooltip', 'Upload to Roastlocal Cloud')
                     if self.plus_subscription == 'HOME':
                         subscription_icon = 'plus-home'
                         if self.plus_paidUntil is not None:
@@ -5431,10 +5431,10 @@ class ApplicationWindow(QMainWindow):
                                     subscription_icon = 'plus-pro-low'
                 else:
                     plus_icon = 'plus-on'
-                    tooltip = QApplication.translate('Tooltip', 'Disconnect artisan.plus')
+                    tooltip = QApplication.translate('Tooltip', 'Disconnect Roastlocal Cloud')
             else:
                 plus_icon = 'plus-off'
-                tooltip = QApplication.translate('Tooltip', 'Connect artisan.plus')
+                tooltip = QApplication.translate('Tooltip', 'Connect Roastlocal Cloud')
             if svgsupport:
                 plus_icon += '.svg'
             else:
