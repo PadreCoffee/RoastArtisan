@@ -90,18 +90,21 @@ def getNickname() -> str|None:
             token_semaphore.release(1)
 
 
-def setToken(token: str, nickname: str|None = None) -> None:
+def setToken(token: str, nickname: str|None = None, force_operator: bool = False) -> None:
     try:
         token_semaphore.acquire(1)
         config.token = token
         config.nickname = nickname
         aw = config.app_window
         if (aw is not None
-            and aw.qmc.operator == ''
             and nickname is not None
             and nickname != ''
+            and (force_operator or aw.qmc.operator == '')
         ):  # @UndefinedVariable
             aw.qmc.operator = nickname
+            if force_operator:
+                # explicit operator switch: also make it the default for new roasts
+                aw.qmc.operator_setup = nickname
     finally:
         if token_semaphore.available() < 1:
             token_semaphore.release(1)
