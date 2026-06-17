@@ -2601,6 +2601,10 @@ class ApplicationWindow(QMainWindow):
             self.addLanguage(iso, name)
 
 
+        # Operators submenu (multi-operator cloud login); rebuilt each time it is about to show
+        self.operatorsMenu:QMenu = QMenu(QApplication.translate('Menu', 'Operators'))
+        self.operatorsMenu.aboutToShow.connect(self.populateOperatorsMenu)
+
         self.UIModeMenu:QMenu = QMenu(QApplication.translate('Menu', 'Mode'))
         self.productionModeAction:QAction = QAction(QApplication.translate('Menu', 'Production'), self)
         self.productionModeAction.triggered.connect(self.setProductionMode)
@@ -4442,6 +4446,9 @@ class ApplicationWindow(QMainWindow):
             config_menu.addMenu(self.temperatureConfMenu)
         if ui_mode is not UI_MODE.PRODUCTION:
             config_menu.addMenu(self.languageMenu)
+        # Operators (multi-operator cloud login)
+        config_menu.addSeparator()
+        config_menu.addMenu(self.operatorsMenu)
         # the UI mode selector should always be present
         config_menu.addSeparator()
         config_menu.addMenu(self.UIModeMenu)
@@ -4524,6 +4531,53 @@ class ApplicationWindow(QMainWindow):
             help_menu.addSeparator()
             help_menu.addAction(self.resetAction)
         return help_menu
+
+    # Operators menu (multi-operator cloud login)
+
+    @pyqtSlot()
+    def populateOperatorsMenu(self) -> None:
+        import plus.operators as operators
+        self.operatorsMenu.clear()
+        for entry in operators.load_operators():
+            act = self.operatorsMenu.addAction(entry.get('nickname') or entry['email'])
+            act.setCheckable(True)
+            act.setChecked(entry['email'] == self.plus_account)
+            act.triggered.connect(lambda _checked=False, e=dict(entry): self.switchToOperator(e))
+        self.operatorsMenu.addSeparator()
+        addAct = self.operatorsMenu.addAction(QApplication.translate('Menu', 'Add operator…'))
+        addAct.triggered.connect(self.addOperator)
+        mgrAct = self.operatorsMenu.addAction(QApplication.translate('Menu', 'Manage operators…'))
+        mgrAct.triggered.connect(self.manageOperators)
+
+    @pyqtSlot()
+    def switchToOperator(self, entry:dict) -> None:
+        import plus.controller as plus_controller
+        import plus.operators as operators
+        if operators.has_pin(entry):
+            pin, okp = QInputDialog.getText(
+                self, QApplication.translate('Message', 'Operator PIN'),
+                QApplication.translate('Message', 'Enter PIN for {0}').format(entry.get('nickname') or entry['email']),
+                QLineEdit.EchoMode.Password)
+            if not okp or not operators.verify_pin(entry, pin):
+                self.sendmessage(QApplication.translate('Message', 'Wrong PIN'))
+                return
+        ok = plus_controller.switchOperator(entry['email'], server_url=entry.get('server_url'))
+        if not ok:
+            # stored password missing/invalid -> fall back to the normal login flow
+            plus_controller.connect(self)
+        self.updatePlusStatusSignal.emit()   # refresh plus icon + operator-field visibility
+
+    @pyqtSlot()
+    def addOperator(self) -> None:
+        import plus.controller as plus_controller
+        plus_controller.connect(self)        # existing login dialog; remembers it on success
+        self.updatePlusStatusSignal.emit()
+
+    @pyqtSlot()
+    def manageOperators(self) -> None:
+        from artisanlib.operators_dialog import OperatorsDialog
+        OperatorsDialog(self, self).exec()
+        self.updatePlusStatusSignal.emit()
 
     #
 
