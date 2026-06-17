@@ -14496,16 +14496,11 @@ class tgraphcanvas(QObject):
             if not self.checkSaved():
                 return
 
-            # ensure that beans are specified if plus is connected
-            if (self.aw.plus_account is not None and              # plus connected
-                    not self.roastpropertiesAutoOpenFlag and      # no "Open on CHARGE"
-                    not self.roastpropertiesAutoOpenDropFlag and  # no "Open on DROP"
-                    self.plus_beans_reminder_on_start and         # warning was not yet shown for this recording
-                    (self.plus_coffee is None and self.plus_blend_spec is None and self.beans == '') and # beans are not set
-                    (self.aw.schedule_window is None or self.aw.schedule_window.selected_remaining_item is None) # scheduler is off or no schedule item selected
-                    ):
-                self.aw.open_roast_properties_dialog(start_recording_on_exit=True)
-                return
+            # NOTE: the forced "needs to know the beans you are roasting" prompt that opened Roast
+            # Properties and blocked START until a bean/blend was selected (when connected to the
+            # cloud) was removed by request -- roasting an unspecified/unknown bean, or uploading a
+            # roast without beans, must be allowed. START now always begins recording; beans can
+            # still be set manually via Roast Properties at any time.
 
             self.aw.soundpopSignal.emit()
             if self.flagon and len(self.timex) == 1:
