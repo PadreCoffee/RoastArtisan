@@ -250,7 +250,7 @@ def connect(clear_on_failure: bool =False, interactive: bool = True) -> None:
                         )  # @UndefinedVariable
                         aw.sendmessageSignal.emit(
                             QApplication.translate(
-                                'Plus', 'Connected to artisan.plus'
+                                'Plus', 'Connected to Roastlocal Cloud'
                             ),
                             True,
                             None,
@@ -268,7 +268,7 @@ def connect(clear_on_failure: bool =False, interactive: bool = True) -> None:
                         connection.clearCredentials()
                         aw.sendmessageSignal.emit(
                             QApplication.translate(
-                                'Plus', 'artisan.plus turned off'
+                                'Plus', 'Roastlocal Cloud turned off'
                             ),
                             True,
                             None,
@@ -291,7 +291,7 @@ def connect(clear_on_failure: bool =False, interactive: bool = True) -> None:
                 if interactive and aw is not None:
                     aw.sendmessageSignal.emit(
                         QApplication.translate(
-                            'Plus', 'artisan.plus turned off'
+                            'Plus', 'Roastlocal Cloud turned off'
                         ),
                         True,
                         None,
@@ -300,7 +300,7 @@ def connect(clear_on_failure: bool =False, interactive: bool = True) -> None:
                 if interactive:
                     aw.sendmessageSignal.emit(
                         QApplication.translate(
-                            'Plus', "Couldn't connect to artisan.plus"
+                            'Plus', "Couldn't connect to Roastlocal Cloud"
                         ),
                         True,
                         None,
@@ -324,7 +324,7 @@ def connect(clear_on_failure: bool =False, interactive: bool = True) -> None:
 
 # show a dialog to have the user confirm the disconnect action
 def disconnect_confirmed() -> bool:
-    string = QApplication.translate('Plus', 'Disconnect artisan.plus?')
+    string = QApplication.translate('Plus', 'Disconnect Roastlocal Cloud?')
     mbox = QMessageBox()
     mbox.setText(string)
     util.setPlusIcon(mbox)
@@ -366,7 +366,7 @@ def disconnect(
                 if remove_credentials:
                     aw.sendmessageSignal.emit(
                         QApplication.translate(
-                            'Plus', 'artisan.plus turned off'
+                            'Plus', 'Roastlocal Cloud turned off'
                         ),
                         True,
                         None,
@@ -375,18 +375,18 @@ def disconnect(
                     aw.sendmessageSignal.emit(
                         (
                         QApplication.translate(
-                            'Plus', 'artisan.plus connection lost. Reconnecting automatically...'
+                            'Plus', 'Roastlocal Cloud connection lost. Reconnecting automatically...'
                         )
                         if keepON else
                         QApplication.translate(
-                            'Plus', 'artisan.plus disconnected'
+                            'Plus', 'Roastlocal Cloud disconnected'
                         )),
                         True,
                         None,
                     )
             if stop_queue:
                 queue.stop()  # stop the outbox queue
-            _log.info('artisan.plus disconnected')
+            _log.info('Roastlocal Cloud disconnected')
         finally:
             if connect_semaphore.available() < 1:
                 connect_semaphore.release(1)
@@ -400,7 +400,7 @@ def reconnected() -> None:
         try:
             connect_semaphore.acquire(1)
             config.connected = True
-            _log.info('artisan.plus reconnected')
+            _log.info('Roastlocal Cloud reconnected')
         finally:
             if connect_semaphore.available() < 1:
                 connect_semaphore.release(1)
@@ -412,7 +412,7 @@ def reconnected() -> None:
             if aw is not None:
                 aw.sendmessageSignal.emit(
                     QApplication.translate(
-                        'Plus', 'artisan.plus reconnected'),
+                        'Plus', 'Roastlocal Cloud reconnected'),
                     True,
                     None)
 

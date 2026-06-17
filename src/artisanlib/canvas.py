@@ -2370,6 +2370,12 @@ class tgraphcanvas(QObject):
         self.ax_background:Any = None # pylint: disable=c-extension-no-member
         self.block_update:bool = False
 
+        # [greyscreen] instrumentation: when True, redraw()/updateBackground() emit INFO traces
+        # around their blocking semaphore acquires. Enabled only across the OFF/DROP completion
+        # window (set in OffMonitorCloseDown, cleared in guaranteeCanvasRedraw) so normal-use
+        # redraws stay quiet. See _logCanvasState() for the rationale.
+        self._greyscreen_trace:bool = False
+
         # flag to toggle between Temp and RoR scale of xy-display
         self.fmt_data_RoR:bool = False
         self.fmt_data_ON:bool = True #; if False, the xy-display is deactivated
@@ -2800,7 +2806,11 @@ class tgraphcanvas(QObject):
     def updateBackground(self) -> None:
         if not self.block_update and self.ax is not None:
             try:
+                if self._greyscreen_trace:
+                    _log.info('[greyscreen] updateBackground: waiting updateBackgroundSemaphore (avail=%s)', self.updateBackgroundSemaphore.available())
                 self.updateBackgroundSemaphore.acquire(1)
+                if self._greyscreen_trace:
+                    _log.info('[greyscreen] updateBackground: got updateBackgroundSemaphore')
                 self.block_update = True
                 self.doUpdate()
             finally:
@@ -2842,14 +2852,49 @@ class tgraphcanvas(QObject):
     # hardened; this re-issues a guarded full redraw as the final paint of the OFF sequence
     # so a roast finished offline never leaves the chart blank. Skipped while actively
     # recording (the sampling loop owns the redraw then).
+    # [greyscreen] instrumentation. The "grey screen" bug leaves NO Python traceback: an uncaught
+    # slot exception would be logged by sys.excepthook at ERROR (and surfaced via adderror), but
+    # the affected client shows an empty log -- so the cause is a silent failure, not an exception,
+    # and the existing try/except guards cannot catch it. This snapshot (logged at INFO, which IS
+    # persisted to roastartisan.log; debug is not) discriminates the two remaining candidates on the
+    # failing machine: a GUI-thread hang (milestone/"waiting <lock>" lines with no matching "got")
+    # vs a silent render-state / high-DPI issue (redraw returns but canvas is 0-sized, ax/ax_background
+    # stale, or devicePixelRatio fractional).
+    def _logCanvasState(self, where:str) -> None:
+        try:
+            cv = self.fig.canvas
+            try:
+                w:object = cv.width()
+                h:object = cv.height()
+            except Exception:  # pylint: disable=broad-except
+                w = h = -1
+            try:
+                dpr:object = cv.devicePixelRatioF()
+            except Exception:  # pylint: disable=broad-except
+                dpr = -1.0
+            _log.info('[greyscreen] %s: canvas=%sx%s dpr=%s ax_is_None=%s delta_ax_is_None=%s '
+                      'ax_background_is_None=%s designerflag=%s comparator=%s flagon=%s flagstart=%s',
+                      where, w, h, dpr, self.ax is None, self.delta_ax is None,
+                      self.ax_background is None, self.designerflag,
+                      self.aw.comparator is not None, self.flagon, self.flagstart)
+        except Exception as e:  # pylint: disable=broad-except
+            _log.exception(e)
+
     @pyqtSlot()
     def guaranteeCanvasRedraw(self) -> None:
         if self.flagstart:
+            _log.info('[greyscreen] guaranteeCanvasRedraw: skipped (flagstart=True, sampling owns redraw)')
+            self._greyscreen_trace = False
             return
+        self._logCanvasState('guaranteeCanvasRedraw pre-redraw')
         try:
             self.redraw(recomputeAllDeltas=False)
+            _log.info('[greyscreen] guaranteeCanvasRedraw: redraw() returned')
         except Exception as e:  # pylint: disable=broad-except
             _log.exception(e)
+        finally:
+            self._logCanvasState('guaranteeCanvasRedraw post-redraw')
+            self._greyscreen_trace = False  # end of the traced OFF/DROP completion window
 
     def device_name_subst(self, device_name:str) -> str:
         try:
@@ -5543,7 +5588,11 @@ class tgraphcanvas(QObject):
             try:
                 if self.flagon and self.ax is not None:
                     #### lock shared resources #####
+                    if self._greyscreen_trace:
+                        _log.info('[greyscreen] updategraphics: waiting profileDataSemaphore (avail=%s)', self.profileDataSemaphore.available())
                     self.profileDataSemaphore.acquire(1)
+                    if self._greyscreen_trace:
+                        _log.info('[greyscreen] updategraphics: got profileDataSemaphore')
                     try:
                         # initialize the arrays depending on the recording state
                         if (self.flagstart and len(self.timex) > 0) or not self.flagon: # on recording or off we use the standard data structures
@@ -9411,6 +9460,21 @@ class tgraphcanvas(QObject):
         return f"{self.__dijkstra_to_ascii(self.roastertype_setup)} {(render_weight(self.roastersize_setup, 1, weight_units.index(self.weight[2])) if self.roastersize_setup>0 else '')}"
 
 
+    # Recreate the standard profile axis (and its twin delta axis) if it was removed. flavorchart(),
+    # graphwheel() and roastReport() set self.ax = None and clear the figure on the documented
+    # assumption that the next redraw() rebuilds the axis -- but that recreation lived inside
+    # redraw()'s `elif self.ax is not None:` branch, so with ax None redraw() fell through every
+    # branch and drew nothing, leaving the chart blank until restart (the "grey screen" bug;
+    # confirmed from a [greyscreen] trace on the PDF-Report autosave path: flavorchart() nulled
+    # self.ax and the following redraw() was a silent no-op). Rebuilding here lets redraw() recover
+    # from a removed axis and turns guaranteeCanvasRedraw() into a real safety net.
+    def _ensureStandardAxis(self) -> None:
+        if self.ax is None:
+            self.fig.clf()
+            self.ax = self.fig.add_subplot(111, facecolor=self.palette['background'])
+            self.ax.set_autoscale_on(False)
+            self.delta_ax = self.ax.twinx()
+
     #Redraws data
     # if recomputeAllDeltas, the delta arrays and if smooth the smoothed line arrays are recomputed (incl. those of the background curves)
     # re_smooth_foreground: the foreground curves (incl. extras) will be re-smoothed if called while not recording. During recording foreground will never be smoothed here.
@@ -9422,22 +9486,38 @@ class tgraphcanvas(QObject):
     def redraw(self, recomputeAllDeltas:bool = True, re_smooth_foreground:bool = True, takelock:bool = True, forceRenewAxis:bool = False, re_smooth_background:bool = False) -> None: # pyright: ignore [reportGeneralTypeIssues] # Code is too complex to analyze; reduce complexity by refactoring into subroutines or reducing conditional code paths
 #        _log.debug("PRINT redraw(recomputeAllDeltas: %s, re_smooth_foreground: %s, takelock: %s, forceRenewAxis: %s, re_smooth_background: %s)",recomputeAllDeltas, re_smooth_foreground, takelock, forceRenewAxis, re_smooth_background)
 
+        if self._greyscreen_trace:
+            # If none of the branches below run (not designer, no comparator, ax is None) redraw()
+            # is a silent no-op and the chart is never repainted -- this entry line captures that.
+            _log.info('[greyscreen] redraw() entry: designerflag=%s comparator=%s ax_is_None=%s takelock=%s',
+                      self.designerflag, self.aw.comparator is not None, self.ax is None, takelock)
         if self.designerflag:
             self.redrawdesigner(force=True)
         elif self.aw.comparator is not None:
             self.aw.comparator.redraw()
             if self.aw.qpc is not None:
                 self.aw.qpc.redraw_phases()
-        elif self.ax is not None:
+        else:
+            # Recover from a removed axis (flavorchart()/graphwheel()/roastReport() null self.ax)
+            # so redraw() can never be a silent no-op -- root-cause fix for the "grey screen" bug.
+            self._ensureStandardAxis()
             ax:Axes = self.ax
             titleB = ''
             try:
                 #### lock shared resources   ####
                 if takelock:
+                    if self._greyscreen_trace:
+                        _log.info('[greyscreen] redraw: waiting profileDataSemaphore (avail=%s)', self.profileDataSemaphore.available())
                     self.profileDataSemaphore.acquire(1)
+                    if self._greyscreen_trace:
+                        _log.info('[greyscreen] redraw: got profileDataSemaphore')
                 try:
                     # prevent interleaving of updateBackground() and redraw()
+                    if self._greyscreen_trace:
+                        _log.info('[greyscreen] redraw: waiting updateBackgroundSemaphore (avail=%s)', self.updateBackgroundSemaphore.available())
                     self.updateBackgroundSemaphore.acquire(1)
+                    if self._greyscreen_trace:
+                        _log.info('[greyscreen] redraw: got updateBackgroundSemaphore')
 
                     if self.flagon:
                         # on redraw during recording we reset the linecounts to avoid issues with projection lines
@@ -13653,7 +13733,14 @@ class tgraphcanvas(QObject):
             self.aw.enableEditMenus()
 
             self.aw.autoAdjustAxis()
+            # [greyscreen] arm instrumentation across the OFF/DROP completion paint window. It is
+            # cleared at the end of guaranteeCanvasRedraw (+150ms below), so it spans this full
+            # redraw, the +100ms updateBackground and the +150ms guaranteeCanvasRedraw.
+            self._greyscreen_trace = True
+            _log.info('[greyscreen] OffMonitorCloseDown: begin completion paint (timex=%s autosaveflag=%s flagon=%s flagstart=%s)',
+                      len(self.timex), self.autosaveflag, self.flagon, self.flagstart)
             self.redraw(recomputeAllDeltas=True,re_smooth_foreground=True, re_smooth_background=True)
+            _log.info('[greyscreen] OffMonitorCloseDown: full redraw() returned')
             # HACK:
             # with visible (draggable) legend a click (or several) on the canvas makes the extra lines disappear
             # this happens after real recordings or simlator runs and also if signals onclick/onpick/ondraw are disconnected
@@ -13666,7 +13753,9 @@ class tgraphcanvas(QObject):
             # we autosave after full redraw after OFF to have the optional generated PDF containing all information
             if len(self.timex) > 2 and self.autosaveflag != 0:
                 try:
+                    _log.info('[greyscreen] OffMonitorCloseDown: automaticsave() begin')
                     self.aw.automaticsave(False)
+                    _log.info('[greyscreen] OffMonitorCloseDown: automaticsave() end')
                 except Exception as e: # pylint: disable=broad-except
                     _log.exception(e)
 
@@ -13705,8 +13794,10 @@ class tgraphcanvas(QObject):
             if respectAlwaysON and self.flagKeepON and len(self.timex) > 10:
                 QTimer.singleShot(300, self.onMonitorSignal.emit)
 
+            _log.info('[greyscreen] OffMonitorCloseDown: emitting updatePlusStatusSignal + monitorClosedDown')
             self.aw.updatePlusStatusSignal.emit() # update plus icon (roast might not have been uploaded yet)
             self.monitorClosedDown.emit()
+            _log.info('[greyscreen] OffMonitorCloseDown: synchronous body complete (guaranteeCanvasRedraw scheduled +150ms)')
 
         except Exception as ex: # pylint: disable=broad-except
             _log.exception(ex)
@@ -14405,16 +14496,11 @@ class tgraphcanvas(QObject):
             if not self.checkSaved():
                 return
 
-            # ensure that beans are specified if plus is connected
-            if (self.aw.plus_account is not None and              # plus connected
-                    not self.roastpropertiesAutoOpenFlag and      # no "Open on CHARGE"
-                    not self.roastpropertiesAutoOpenDropFlag and  # no "Open on DROP"
-                    self.plus_beans_reminder_on_start and         # warning was not yet shown for this recording
-                    (self.plus_coffee is None and self.plus_blend_spec is None and self.beans == '') and # beans are not set
-                    (self.aw.schedule_window is None or self.aw.schedule_window.selected_remaining_item is None) # scheduler is off or no schedule item selected
-                    ):
-                self.aw.open_roast_properties_dialog(start_recording_on_exit=True)
-                return
+            # NOTE: the forced "needs to know the beans you are roasting" prompt that opened Roast
+            # Properties and blocked START until a bean/blend was selected (when connected to the
+            # cloud) was removed by request -- roasting an unspecified/unknown bean, or uploading a
+            # roast without beans, must be allowed. START now always begins recording; beans can
+            # still be set manually via Roast Properties at any time.
 
             self.aw.soundpopSignal.emit()
             if self.flagon and len(self.timex) == 1:

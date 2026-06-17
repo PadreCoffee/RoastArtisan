@@ -5124,7 +5124,7 @@ class ApplicationWindow(QMainWindow):
                     0 <= starts < everystarts):
 #                message = QApplication.translate('Message', 'Artisan is free to use!<br><br>To keep it free and current please support us<br><br><a href="{0}">{0}</a><br><br>and book<br><br><a href="{1}">{1}</a><br><br>to suppress this dialog')
 #                message = message.format('https://artisan-scope.org/donate/', 'https://artisan.plus')
-                message = QApplication.translate('Message', 'Artisan is free to use!\n\nTo keep it free and current please support us with your donation and subscribe to artisan.plus to suppress this dialog!')
+                message = QApplication.translate('Message', 'Artisan is free to use!\n\nTo keep it free and current please support us with your donation and subscribe to Roastlocal Cloud to suppress this dialog!')
                 donate_message_box = QMessageBox()
                 donate_message_box.setText(message)
                 donate_message_box.setIcon(QMessageBox.Icon.Information)
@@ -5394,13 +5394,13 @@ class ApplicationWindow(QMainWindow):
                     if self.editgraphdialog is False:
                         # syncing from server in progress
                         plus_icon = 'plus-dirty'
-                        tooltip = QApplication.translate('Tooltip', 'Syncing with artisan.plus')
+                        tooltip = QApplication.translate('Tooltip', 'Syncing with Roastlocal Cloud')
                     elif plus.controller.is_synced():
                         plus_icon = 'plus-connected'
-                        tooltip = QApplication.translate('Tooltip', 'Disconnect artisan.plus')
+                        tooltip = QApplication.translate('Tooltip', 'Disconnect Roastlocal Cloud')
                     else:
                         plus_icon = 'plus-unsynced'
-                        tooltip = QApplication.translate('Tooltip', 'Upload to artisan.plus')
+                        tooltip = QApplication.translate('Tooltip', 'Upload to Roastlocal Cloud')
                     if self.plus_subscription == 'HOME':
                         subscription_icon = 'plus-home'
                         if self.plus_paidUntil is not None:
@@ -5431,10 +5431,10 @@ class ApplicationWindow(QMainWindow):
                                     subscription_icon = 'plus-pro-low'
                 else:
                     plus_icon = 'plus-on'
-                    tooltip = QApplication.translate('Tooltip', 'Disconnect artisan.plus')
+                    tooltip = QApplication.translate('Tooltip', 'Disconnect Roastlocal Cloud')
             else:
                 plus_icon = 'plus-off'
-                tooltip = QApplication.translate('Tooltip', 'Connect artisan.plus')
+                tooltip = QApplication.translate('Tooltip', 'Connect Roastlocal Cloud')
             if svgsupport:
                 plus_icon += '.svg'
             else:
@@ -13022,6 +13022,25 @@ class ApplicationWindow(QMainWindow):
             _log.exception(e)
         return filename
 
+    @staticmethod
+    def _substituteAutosaveFields(fn:str, fields:'list[tuple[str,str]]', fielddelim:str='~', flags:int=re.IGNORECASE) -> str:
+        # Replace each ~field token with its value, substituting the value LITERALLY via a
+        # replacement function -- never as a regex replacement template. re.sub() interprets
+        # backslashes and \1 / \g<> group references in a string replacement AND parses that
+        # template eagerly (so it raises even when the token is absent). A value containing such
+        # text therefore used to raise re.error and abort the WHOLE substitution loop, leaving the
+        # autosave filename as the raw "~title ~date ..." template. The trigger in the wild was RU
+        # locale: the ~mmm/~ddd fields were built via encodeLocal(), turning a Cyrillic month/day
+        # into "и..." escapes. A replacement function inserts the value verbatim, and a single
+        # failing field is logged and skipped rather than killing the whole filename.
+        for name, value in fields:
+            try:
+                v = str(value)
+                fn = re.sub(fr'{fielddelim}{name}', lambda _m, _v=v: _v, fn, count=0, flags=flags)
+            except Exception as e:  # pylint: disable=broad-except
+                _log.exception(e)
+        return fn
+
     #replace autosave delimited fields with the corresponding value
     #previewmode 0=not preview, 1=preview for while recording, 2=preview for while not recording
     def parseAutosaveprefix(self,fn:str='',previewmode:int=0) -> str:
@@ -13202,9 +13221,9 @@ class ApplicationWindow(QMainWindow):
                 ('roastmoisture',drop_trailing_zero(f'{float2float(float(self.qmc.moisture_roasted))}')),     #deprecated, undocumented
                 ('yyyy',self.qmc.roastdate.toString('yyyy')),
                 ('yy',self.qmc.roastdate.toString('yy')),
-                ('mmm',f"{encodeLocal(self.qmc.roastdate.toString('MMM'))}"),
+                ('mmm',self.qmc.roastdate.toString('MMM')),  # localized month abbrev (e.g. RU Cyrillic); NOT encodeLocal()'d -- that injected "\u..." escapes that broke re.sub
                 ('mm',self.qmc.roastdate.toString('MM')),
-                ('ddd',f"{encodeLocal(self.qmc.roastdate.toString('ddd'))}"),
+                ('ddd',self.qmc.roastdate.toString('ddd')),  # localized day abbrev (see ~mmm)
                 ('dd',self.qmc.roastdate.toString('dd')),
                 ('hour',self.qmc.roastdate.toString('hh')),
                 ('minute',self.qmc.roastdate.toString('mm')),
@@ -13235,9 +13254,10 @@ class ApplicationWindow(QMainWindow):
             #text between double quotes " will show only when flagon is False
             fn = re.sub(fr'{offDelim}([^{offDelim}]+){offDelim}',
                 r'\1',fn) if (previewmode==2 or (previewmode==0 and not self.qmc.flagon)) else re.sub(fr'{offDelim}([^{offDelim}]+){offDelim}',r'',fn)
-            #replace the fields with content
-            for fi in fields:
-                fn = re.sub(fr'{fieldDelim}{fi[0]}', fr'{str(fi[1])}', fn, count=0, flags=_ignorecase)
+            #replace the fields with content (literal replacement -- a value must never be treated
+            #as a regex template, otherwise a backslash / \u / group-ref in a value, e.g. a Cyrillic
+            #~mmm/~ddd, aborts the whole filename; see _substituteAutosaveFields)
+            fn = self._substituteAutosaveFields(fn, fields, fieldDelim, _ignorecase)
 
             #cleaning is performed in generateFilename()
             #fn = self.removeDisallowedFilenameChars(str(fn))
