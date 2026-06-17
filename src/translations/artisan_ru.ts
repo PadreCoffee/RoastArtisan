@@ -178,6 +178,14 @@
 </context><context>
     <name>Button</name>
     <message>
+        <source>Set/Clear PIN</source>
+        <translation>Задать/снять PIN</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Удалить</translation>
+    </message>
+    <message>
         <location filename="../artisanlib/colors.py" line="567" />
         <location filename="../artisanlib/designer.py" line="244" />
         <location filename="../artisanlib/phases.py" line="119" />
@@ -818,29 +826,29 @@ Extra Device</source>
         <location filename="../artisanlib/main.py" line="3243" />
         <source>FC
 START</source>
-        <translation>FC
-НАЧАЛО</translation>
+        <translation>Первый крэк
+начало</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3247" />
         <source>FC
 END</source>
-        <translation>FC
-КОНЕЦ</translation>
+        <translation>Первый крэк
+конец</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3251" />
         <source>SC
 START</source>
-        <translation>SC
-НАЧАЛО</translation>
+        <translation>Второй крэк
+начало</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3255" />
         <source>SC
 END</source>
-        <translation>SC
-КОНЕЦ</translation>
+        <translation>Второй крэк
+конец</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3260" />
@@ -901,8 +909,7 @@ END</source>
         <location filename="../artisanlib/main.py" line="3356" />
         <source>DRY
 END</source>
-        <translation>Закончить
-сушку</translation>
+        <translation>Пожелтение</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3361" />
@@ -4483,6 +4490,10 @@ END</source>
     </message>
 </context><context>
     <name>Form Caption</name>
+    <message>
+        <source>Manage Operators</source>
+        <translation>Управление операторами</translation>
+    </message>
     <message>
         <location filename="../artisanlib/axis.py" line="70" />
         <source>Axes</source>
@@ -14655,6 +14666,18 @@ Fewer nodes: simpler curve but may lose detail</source>
 </context><context>
     <name>Menu</name>
     <message>
+        <source>Operators</source>
+        <translation>Операторы</translation>
+    </message>
+    <message>
+        <source>Add operator…</source>
+        <translation>Добавить оператора…</translation>
+    </message>
+    <message>
+        <source>Manage operators…</source>
+        <translation>Управление операторами…</translation>
+    </message>
+    <message>
         <location filename="../artisanlib/main.py" line="4398" />
         <location filename="../artisanlib/pid_dialogs.py" line="751" />
         <source>Config</source>
@@ -15275,6 +15298,34 @@ Fewer nodes: simpler curve but may lose detail</source>
     </message>
 </context><context>
     <name>Message</name>
+    <message>
+        <source>Operator PIN</source>
+        <translation>PIN оператора</translation>
+    </message>
+    <message>
+        <source>Enter PIN for {0}</source>
+        <translation>Введите PIN для {0}</translation>
+    </message>
+    <message>
+        <source>Wrong PIN</source>
+        <translation>Неверный PIN</translation>
+    </message>
+    <message>
+        <source>Set PIN</source>
+        <translation>Задать PIN</translation>
+    </message>
+    <message>
+        <source>New PIN (digits):</source>
+        <translation>Новый PIN (цифры):</translation>
+    </message>
+    <message>
+        <source>Remove password</source>
+        <translation>Удалить пароль</translation>
+    </message>
+    <message>
+        <source>Also delete the saved password for {0}?</source>
+        <translation>Также удалить сохранённый пароль для {0}?</translation>
+    </message>
     <message>
         <location filename="../artisanlib/axis.py" line="896" />
         <source>xlimit = ({2},{3}) ylimit = ({0},{1}) zlimit = ({4},{5})</source>
