@@ -9460,6 +9460,21 @@ class tgraphcanvas(QObject):
         return f"{self.__dijkstra_to_ascii(self.roastertype_setup)} {(render_weight(self.roastersize_setup, 1, weight_units.index(self.weight[2])) if self.roastersize_setup>0 else '')}"
 
 
+    # Recreate the standard profile axis (and its twin delta axis) if it was removed. flavorchart(),
+    # graphwheel() and roastReport() set self.ax = None and clear the figure on the documented
+    # assumption that the next redraw() rebuilds the axis -- but that recreation lived inside
+    # redraw()'s `elif self.ax is not None:` branch, so with ax None redraw() fell through every
+    # branch and drew nothing, leaving the chart blank until restart (the "grey screen" bug;
+    # confirmed from a [greyscreen] trace on the PDF-Report autosave path: flavorchart() nulled
+    # self.ax and the following redraw() was a silent no-op). Rebuilding here lets redraw() recover
+    # from a removed axis and turns guaranteeCanvasRedraw() into a real safety net.
+    def _ensureStandardAxis(self) -> None:
+        if self.ax is None:
+            self.fig.clf()
+            self.ax = self.fig.add_subplot(111, facecolor=self.palette['background'])
+            self.ax.set_autoscale_on(False)
+            self.delta_ax = self.ax.twinx()
+
     #Redraws data
     # if recomputeAllDeltas, the delta arrays and if smooth the smoothed line arrays are recomputed (incl. those of the background curves)
     # re_smooth_foreground: the foreground curves (incl. extras) will be re-smoothed if called while not recording. During recording foreground will never be smoothed here.
@@ -9482,7 +9497,10 @@ class tgraphcanvas(QObject):
             self.aw.comparator.redraw()
             if self.aw.qpc is not None:
                 self.aw.qpc.redraw_phases()
-        elif self.ax is not None:
+        else:
+            # Recover from a removed axis (flavorchart()/graphwheel()/roastReport() null self.ax)
+            # so redraw() can never be a silent no-op -- root-cause fix for the "grey screen" bug.
+            self._ensureStandardAxis()
             ax:Axes = self.ax
             titleB = ''
             try:
