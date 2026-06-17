@@ -13022,6 +13022,25 @@ class ApplicationWindow(QMainWindow):
             _log.exception(e)
         return filename
 
+    @staticmethod
+    def _substituteAutosaveFields(fn:str, fields:'list[tuple[str,str]]', fielddelim:str='~', flags:int=re.IGNORECASE) -> str:
+        # Replace each ~field token with its value, substituting the value LITERALLY via a
+        # replacement function -- never as a regex replacement template. re.sub() interprets
+        # backslashes and \1 / \g<> group references in a string replacement AND parses that
+        # template eagerly (so it raises even when the token is absent). A value containing such
+        # text therefore used to raise re.error and abort the WHOLE substitution loop, leaving the
+        # autosave filename as the raw "~title ~date ..." template. The trigger in the wild was RU
+        # locale: the ~mmm/~ddd fields were built via encodeLocal(), turning a Cyrillic month/day
+        # into "и..." escapes. A replacement function inserts the value verbatim, and a single
+        # failing field is logged and skipped rather than killing the whole filename.
+        for name, value in fields:
+            try:
+                v = str(value)
+                fn = re.sub(fr'{fielddelim}{name}', lambda _m, _v=v: _v, fn, count=0, flags=flags)
+            except Exception as e:  # pylint: disable=broad-except
+                _log.exception(e)
+        return fn
+
     #replace autosave delimited fields with the corresponding value
     #previewmode 0=not preview, 1=preview for while recording, 2=preview for while not recording
     def parseAutosaveprefix(self,fn:str='',previewmode:int=0) -> str:
@@ -13202,9 +13221,9 @@ class ApplicationWindow(QMainWindow):
                 ('roastmoisture',drop_trailing_zero(f'{float2float(float(self.qmc.moisture_roasted))}')),     #deprecated, undocumented
                 ('yyyy',self.qmc.roastdate.toString('yyyy')),
                 ('yy',self.qmc.roastdate.toString('yy')),
-                ('mmm',f"{encodeLocal(self.qmc.roastdate.toString('MMM'))}"),
+                ('mmm',self.qmc.roastdate.toString('MMM')),  # localized month abbrev (e.g. RU Cyrillic); NOT encodeLocal()'d -- that injected "\u..." escapes that broke re.sub
                 ('mm',self.qmc.roastdate.toString('MM')),
-                ('ddd',f"{encodeLocal(self.qmc.roastdate.toString('ddd'))}"),
+                ('ddd',self.qmc.roastdate.toString('ddd')),  # localized day abbrev (see ~mmm)
                 ('dd',self.qmc.roastdate.toString('dd')),
                 ('hour',self.qmc.roastdate.toString('hh')),
                 ('minute',self.qmc.roastdate.toString('mm')),
@@ -13235,9 +13254,10 @@ class ApplicationWindow(QMainWindow):
             #text between double quotes " will show only when flagon is False
             fn = re.sub(fr'{offDelim}([^{offDelim}]+){offDelim}',
                 r'\1',fn) if (previewmode==2 or (previewmode==0 and not self.qmc.flagon)) else re.sub(fr'{offDelim}([^{offDelim}]+){offDelim}',r'',fn)
-            #replace the fields with content
-            for fi in fields:
-                fn = re.sub(fr'{fieldDelim}{fi[0]}', fr'{str(fi[1])}', fn, count=0, flags=_ignorecase)
+            #replace the fields with content (literal replacement -- a value must never be treated
+            #as a regex template, otherwise a backslash / \u / group-ref in a value, e.g. a Cyrillic
+            #~mmm/~ddd, aborts the whole filename; see _substituteAutosaveFields)
+            fn = self._substituteAutosaveFields(fn, fields, fieldDelim, _ignorecase)
 
             #cleaning is performed in generateFilename()
             #fn = self.removeDisallowedFilenameChars(str(fn))
