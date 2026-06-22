@@ -1337,7 +1337,8 @@ class editGraphDlg(ArtisanResizeablDialog):
         self.plus_store_selected:str|None = None # holds the hr_id of the store of the selected coffee or blend
         self.plus_store_selected_label:str|None = None # the label of the selected store
         self.plus_coffee_selected:str|None = None # holds the hr_id of the selected coffee
-        self.plus_coffee_selected_label:str|None = None # the label of the selected coffee
+        self.plus_coffee_selected_label:str|None = None # the label of the selected coffee ("<country>, <lot>")
+        self.plus_coffee_title_label:str|None = None # lot label only (no country) used to auto-fill the roast title
         self.plus_blend_selected_label:str|None = None # the name of the selected blend
         self.plus_blend_selected_spec:Blend|None = None # holds the blend dict specification of the selected blend
         self.plus_blend_selected_spec_labels:list[str]|None = None # the list of coffee labels of the selected blend specification
@@ -2230,23 +2231,34 @@ class editGraphDlg(ArtisanResizeablDialog):
             self.bean_size_max_edit.setStyleSheet(background_white_style)
             self.moisture_greens_edit.setStyleSheet(background_white_style)
 
+    @staticmethod
+    def _lotLabel(coffee_label:str|None) -> str:
+        # the lot label without the leading country: coffeeLabel() renders coffees as
+        # "<country>, <lot>" (country never contains ", "), so everything after the first
+        # ", " is the lot label (which itself may contain commas and already names the country)
+        if not coffee_label:
+            return ''
+        return coffee_label.split(', ', 1)[-1]
+
     def updateTitle(self, prev_coffee_label:str|None, prev_blend_label:str|None) -> None:
         titles_to_be_overwritten = [ '', QApplication.translate('Scope Title', 'Roaster Scope') ]
         if prev_coffee_label is not None:
             titles_to_be_overwritten.append(prev_coffee_label)
+            # also recognise the country-stripped form, since coffee titles are now auto-filled
+            # with the lot label only (below) — otherwise switching coffees would not refresh it
+            titles_to_be_overwritten.append(self._lotLabel(prev_coffee_label))
         if prev_blend_label is not None:
             titles_to_be_overwritten.append(prev_blend_label)
         if self.titleedit.currentText() in titles_to_be_overwritten:
             if self.plus_blend_selected_label is not None:
-                self.titleedit.textEdited(self.plus_blend_selected_label)
-                self.titleedit.setEditText(self.plus_blend_selected_label)
+                new_title = self.plus_blend_selected_label
             elif self.plus_coffee_selected_label is not None:
-                self.titleedit.textEdited(self.plus_coffee_selected_label)
-                self.titleedit.setEditText(self.plus_coffee_selected_label)
+                # auto-fill with the lot label only, dropping the leading country
+                new_title = self.plus_coffee_title_label or self._lotLabel(self.plus_coffee_selected_label)
             else:
-                default_title = QApplication.translate('Scope Title', 'Roaster Scope')
-                self.titleedit.textEdited(default_title)
-                self.titleedit.setEditText(default_title)
+                new_title = QApplication.translate('Scope Title', 'Roaster Scope')
+            self.titleedit.textEdited(new_title)
+            self.titleedit.setEditText(new_title)
 
     def updateBlendLines(self, blend:plus.stock.BlendStructure) -> None:
         if self.weightinedit.text() != '':
@@ -2377,6 +2389,7 @@ class editGraphDlg(ArtisanResizeablDialog):
             self.plus_store_selected_label = None
             self.plus_coffee_selected = None
             self.plus_coffee_selected_label = None
+            self.plus_coffee_title_label = None
             self.plus_amount_selected = None
             self.plus_amount_replace_selected = None
             self.updateTitle(prev_coffee_label,prev_blend_label)
@@ -2390,6 +2403,8 @@ class editGraphDlg(ArtisanResizeablDialog):
             cd = plus.stock.getCoffeeCoffeeDict(selected_coffee)
             self.plus_coffee_selected = cd.get('hr_id','')
             self.plus_coffee_selected_label = plus.stock.coffeeLabel(cd)
+            # lot label only (no leading country) for the roast title
+            self.plus_coffee_title_label = (cd.get('label') or '').strip() or None
             self.plus_blend_selected_label = None
             self.plus_blend_selected_spec = None
             self.plus_blend_selected_spec_labels = None
@@ -2585,12 +2600,14 @@ class editGraphDlg(ArtisanResizeablDialog):
 
     @pyqtSlot(int)
     def templateSelectionChanged(self, n:int) -> None:
+        reference_label:str|None = None
         if n > 0 and self.plus_templates and n - 1 < len(self.plus_templates):
             t = self.plus_templates[n - 1]
             uuid_str:str = t.get('uuid', '')
             if uuid_str:
                 self.template_uuid = uuid_str  # already normalized hex
                 self.template_file = plus.register.getPath(self.template_uuid)
+                reference_label = (t.get('label') or '').strip() or None
             else:
                 self.template_uuid = None
                 self.template_file = None
@@ -2600,7 +2617,24 @@ class editGraphDlg(ArtisanResizeablDialog):
         # this combo IS the cloud-reference selector: a chosen entry is a genuine reference,
         # «Без эталона» (index 0 / no uuid) clears it.
         self.template_is_reference = self.template_uuid is not None
+        # selecting a reference pulls its name into the roast title (unless the user typed a custom one)
+        if self.template_is_reference and reference_label:
+            self._setTitleFromReference(reference_label)
         self._updateSnapshotBlock()
+
+    def _setTitleFromReference(self, reference_label:str) -> None:
+        # overwrite only an empty/default or auto-derived (coffee/blend) title — never a custom one
+        titles_to_be_overwritten = [ '', QApplication.translate('Scope Title', 'Roaster Scope') ]
+        if self.plus_coffee_selected_label:
+            titles_to_be_overwritten.append(self.plus_coffee_selected_label)
+            titles_to_be_overwritten.append(self._lotLabel(self.plus_coffee_selected_label))
+        if self.plus_coffee_title_label:
+            titles_to_be_overwritten.append(self.plus_coffee_title_label)
+        if self.plus_blend_selected_label:
+            titles_to_be_overwritten.append(self.plus_blend_selected_label)
+        if self.titleedit.currentText() in titles_to_be_overwritten:
+            self.titleedit.textEdited(reference_label)
+            self.titleedit.setEditText(reference_label)
 
     def _clearReferenceSelection(self) -> None:
         if not hasattr(self, 'plus_templates_combo'):
@@ -2932,8 +2966,10 @@ class editGraphDlg(ArtisanResizeablDialog):
                 self.plus_coffee_selected = rr.get('plus_coffee', None)
                 if 'plus_coffee_label' in rr:
                     self.plus_coffee_selected_label = rr['plus_coffee_label']
+                    self.plus_coffee_title_label = self._lotLabel(rr['plus_coffee_label']) or None
                 else:
                     self.plus_coffee_selected_label = None
+                    self.plus_coffee_title_label = None
                 if 'plus_blend_spec' in rr:
                     self.plus_blend_selected_label = rr.get('plus_blend_label', None)
                     self.plus_blend_selected_spec = rr['plus_blend_spec']
