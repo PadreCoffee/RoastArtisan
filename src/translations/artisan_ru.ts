@@ -203,7 +203,7 @@
         <location filename="../artisanlib/wheels.py" line="135" />
         <location filename="../artisanlib/wheels.py" line="50" />
         <source>Close</source>
-        <translation type="unfinished">Закрыть</translation>
+        <translation>Закрыть</translation>
     </message>
     <message>
         <location filename="../artisanlib/wheels.py" line="89" />
@@ -226,7 +226,7 @@
         <location filename="../artisanlib/comparator.py" line="985" />
         <location filename="../artisanlib/wheels.py" line="102" />
         <source>Add</source>
-        <translation type="unfinished">Добавить</translation>
+        <translation>Добавить</translation>
     </message>
     <message>
         <location filename="../artisanlib/wheels.py" line="114" />
@@ -18422,42 +18422,42 @@ Continue?</source>
         <location filename="../artisanlib/canvas.py" line="8599" />
         <location filename="../artisanlib/canvas.py" line="8587" />
         <source>TP {0}</source>
-        <translation type="unfinished" />
+        <translation>ТР {0}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="14668" />
         <location filename="../artisanlib/canvas.py" line="14635" />
         <location filename="../artisanlib/canvas.py" line="8613" />
         <source>DE {0}</source>
-        <translation type="unfinished" />
+        <translation>Пожелтение {0}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="14783" />
         <location filename="../artisanlib/canvas.py" line="14750" />
         <location filename="../artisanlib/canvas.py" line="8628" />
         <source>FCs {0}</source>
-        <translation type="unfinished" />
+        <translation>ПКс {0}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="14891" />
         <location filename="../artisanlib/canvas.py" line="14861" />
         <location filename="../artisanlib/canvas.py" line="8642" />
         <source>FCe {0}</source>
-        <translation type="unfinished" />
+        <translation>ПКк {0}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="15001" />
         <location filename="../artisanlib/canvas.py" line="14972" />
         <location filename="../artisanlib/canvas.py" line="8664" />
         <source>SCs {0}</source>
-        <translation type="unfinished" />
+        <translation>ВКс {0}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="15117" />
         <location filename="../artisanlib/canvas.py" line="15088" />
         <location filename="../artisanlib/canvas.py" line="8678" />
         <source>SCe {0}</source>
-        <translation type="unfinished" />
+        <translation>ВКк {0}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="15250" />
@@ -18465,13 +18465,13 @@ Continue?</source>
         <location filename="../artisanlib/canvas.py" line="12216" />
         <location filename="../artisanlib/canvas.py" line="8712" />
         <source>DROP {0}</source>
-        <translation type="unfinished" />
+        <translation>Выгрузка {0}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="15431" />
         <location filename="../artisanlib/canvas.py" line="15400" />
         <source>CE {0}</source>
-        <translation type="unfinished" />
+        <translation>Охл {0}</translation>
     </message>
     <message>
         <source>CHARGE</source>
