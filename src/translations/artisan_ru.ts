@@ -12886,7 +12886,11 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
         <location filename="../artisanlib/roast_properties.py" line="221" />
         <location filename="../artisanlib/roast_properties.py" line="148" />
         <source>g</source>
-        <translation type="unfinished">г</translation>
+        <translation>г</translation>
+    </message>
+    <message>
+        <source>kg</source>
+        <translation>кг</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="2049" />
@@ -12953,7 +12957,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1057" />
         <source>Screen</source>
-        <translation>Экран</translation>
+        <translation>Скрин</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1076" />
@@ -13007,7 +13011,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1370" />
         <source>Store</source>
-        <translation>Хранилище</translation>
+        <translation>Склад</translation>
     </message>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1372" />
@@ -13017,7 +13021,7 @@ Keyboard Shortcuts must be disabled (ENTER)</source>
     <message>
         <location filename="../artisanlib/roast_properties.py" line="1437" />
         <source>Reference</source>
-        <translation type="unfinished" />
+        <translation>Эталон</translation>
     </message>
     <message>
         <location filename="../plus/schedule.py" line="2081" />

@@ -32,6 +32,8 @@ from matplotlib import colors
 from collections.abc import Iterator
 from typing import Final, Literal, Any, TypeGuard, cast, TYPE_CHECKING
 
+from PyQt6.QtCore import QCoreApplication
+
 if TYPE_CHECKING:
     from collections.abc import Sequence
     from artisanlib.main import Artisan # pylint: disable=unused-import
@@ -756,6 +758,17 @@ def convertVolume(v:float, i:int, o:int) -> float:
 # the rendering might loose precision
 # with smart_unit_upgrade (default True), a weight like 1600g is rendered more readable as 1.6kg (but leaves 1610g and 1601g as is)
 @functools.lru_cache(maxsize=100)
+def weight_unit_display(unit:str) -> str:
+    # localized display text for a weight unit; only the visible text changes, never the
+    # canonical key used for indexing/conversion. Without an installed translator (e.g. unit
+    # tests) QCoreApplication.translate returns the source, so the English keys are preserved.
+    u = unit.lower()
+    if u == 'kg':
+        return QCoreApplication.translate('Label', 'kg')
+    if u == 'g':
+        return QCoreApplication.translate('Label', 'g')
+    return unit
+
 def render_weight(amount:float, weight_unit_index:int, target_unit_idx:int,
         right_to_left_lang:bool = False, brief:int=0, smart_unit_upgrade:bool=True) -> str:
     w = convertWeight(
@@ -854,7 +867,8 @@ def render_weight(amount:float, weight_unit_index:int, target_unit_idx:int,
     if brief > 0:
         decimals = max(0, decimals-brief)
     w = float2float(w,decimals)
-    return (f'{target_unit.lower()}{w:g}' if right_to_left_lang else f'{w:g}{target_unit.lower()}')
+    target = weight_unit_display(target_unit.lower())
+    return (f'{target}{w:g}' if right_to_left_lang else f'{w:g}{target}')
 
 
 # typing tools

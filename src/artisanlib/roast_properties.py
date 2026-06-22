@@ -45,7 +45,7 @@ import plus.register
 
 #from artisanlib.suppress_errors import suppress_stdout_stderr
 from artisanlib.util import (deltaLabelUTF8, stringfromseconds,stringtoseconds, toInt, toFloat, abbrevString,
-        scaleFloat2String, comma2dot, weight_units, render_weight, weight_units_lower, volume_units, float2floatWeightVolume, float2float,
+        scaleFloat2String, comma2dot, weight_units, render_weight, weight_units_lower, weight_unit_display, volume_units, float2floatWeightVolume, float2float,
         convertWeight, convertVolume, float2str)
 from artisanlib.dialogs import ArtisanDialog, ArtisanResizeablDialog, tareDlg
 from artisanlib.widgets import MyQComboBox, ClickableQLabel, ClickableTextEdit, MyTableWidgetItemNumber
@@ -160,7 +160,7 @@ class volumeCalculatorDlg(ArtisanDialog):
             self.coffeeinweight.setStyleSheet("border: 0.5px solid lightgrey; background-color:'lightgrey'")
         else:
             self.coffeeinweight.setStyleSheet("background-color:'lightgrey'")
-        coffeeinweightUnit = QLabel(weight_units[weightunit])
+        coffeeinweightUnit = QLabel(weight_unit_display(weight_units[weightunit]))
 
         coffeeinvolumeLabel = QLabel('<b>' + QApplication.translate('Label','Volume') + '</b>')
         self.coffeeinvolume = QLineEdit()
@@ -233,7 +233,7 @@ class volumeCalculatorDlg(ArtisanDialog):
         else:
             self.coffeeoutweight.setStyleSheet("background-color:'lightgrey'")
         self.coffeeoutweight.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        coffeeoutweightUnit = QLabel(weight_units[weightunit])
+        coffeeoutweightUnit = QLabel(weight_unit_display(weight_units[weightunit]))
 
         coffeeoutvolumeLabel = QLabel('<b>' + QApplication.translate('Label','Volume') + '</b>')
         self.coffeeoutvolume = QLineEdit()
@@ -880,8 +880,10 @@ class editGraphDlg(ArtisanResizeablDialog):
         self.titleShowAlwaysFlag.setChecked(self.aw.qmc.title_show_always)
         #Date
         datelabel1 = QLabel('<b>' + QApplication.translate('Label', 'Date') + '</b>')
-        date = self.aw.qmc.roastdate.date().toString()
-        date += ', ' + self.aw.qmc.roastdate.time().toString()[:-3]
+        # localize the weekday/month names to the app UI language (toString() w/o a locale is English)
+        _date_locale = QLocale(self.aw.locale_str)
+        date = _date_locale.toString(self.aw.qmc.roastdate.date(), 'ddd, d MMM yyyy')
+        date += ', ' + _date_locale.toString(self.aw.qmc.roastdate.time(), 'HH:mm')
         dateedit = QLabel(date)
         #Batch
         batchlabel = ClickableQLabel('<b>' + QApplication.translate('Label', 'Batch') + '</b>')
@@ -949,7 +951,8 @@ class editGraphDlg(ArtisanResizeablDialog):
         self.unitsComboBox.setToolTip(QApplication.translate('Tooltip', 'weight unit'))
         self.unitsComboBox.setMaximumWidth(60)
         self.unitsComboBox.setMinimumWidth(60)
-        self.unitsComboBox.addItems(weight_units_lower)
+        # display localized unit names; the canonical key is read back by index via _selectedWeightUnit()
+        self.unitsComboBox.addItems([weight_unit_display(u) for u in weight_units_lower])
         self.unitsComboBox.setCurrentIndex(weight_units.index(self.aw.qmc.weight[2]))
         self.unitsComboBox.currentIndexChanged.connect(self.changeWeightUnit)
 
@@ -967,7 +970,7 @@ class editGraphDlg(ArtisanResizeablDialog):
         self.weightoutdefectsedit.setMinimumWidth(70)
         self.weightoutdefectsedit.setMaximumWidth(70)
         self.weightoutdefectsedit.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.weightoutdefects_unit_label = QLabel(self.aw.qmc.weight[2].lower())
+        self.weightoutdefects_unit_label = QLabel(weight_unit_display(self.aw.qmc.weight[2]))
         self.weightoutdefects_unit_label.setToolTip(QApplication.translate('Tooltip', 'weight unit of defects'))
         self.weightoutdefectspercentlabel = QLabel()
         self.weightoutdefectspercentlabel.setToolTip(QApplication.translate('Tooltip', 'weight loss caused by defects'))
@@ -1938,10 +1941,10 @@ class editGraphDlg(ArtisanResizeablDialog):
             if weight_units.index(self.aw.qmc.weight[2]) in {0, 1}:
                 if v > 1000:
                     v_formatted = f'{v/1000:.2f}'
-                    unit = 'kg'
+                    unit = weight_unit_display('kg')
                 else:
                     v_formatted = f'{v:.0f}' # never show decimals for g
-                    unit = 'g'
+                    unit = weight_unit_display('g')
             # non-metric
             else:
                 v = convertWeight(v,0,weight_units.index(self.aw.qmc.weight[2]))
@@ -2002,15 +2005,13 @@ class editGraphDlg(ArtisanResizeablDialog):
 
     def updatePlusSelectedLine(self) -> None:
         try:
-            if self.aw.app.darkmode:
-                dark_mode_link_color = " style=\"color: #e5e9ec;\""
-            else:
-                dark_mode_link_color = ''
+            # plain text (no hyperlinks): the cloud web UI has no public coffee/store pages,
+            # so the links pointed at non-existent URLs
             line = ''
             if self.plus_coffee_selected is not None and self.plus_coffee_selected_label:
-                line = f'<a href="{plus.util.coffeeLink(self.plus_coffee_selected)}"{dark_mode_link_color}>{self.plus_coffee_selected_label}</a>'
+                line = self.plus_coffee_selected_label
             elif self.plus_blend_selected_spec and self.plus_blend_selected_spec_labels:
-                # limit to max 3 component links
+                # limit to max 3 components
                 line = f'{self.plus_blend_selected_label}: '
                 first_component = True
                 for i, ll in sorted(zip(self.plus_blend_selected_spec['ingredients'],self.plus_blend_selected_spec_labels, strict=True), key=lambda tup:tup[0]['ratio'],reverse = True)[:3]:
@@ -2018,10 +2019,11 @@ class editGraphDlg(ArtisanResizeablDialog):
                         first_component = False
                     else:
                         line = line + ', '
-                    c = f"<a href=\"{plus.util.coffeeLink(i['coffee'])}\"{dark_mode_link_color}>{abbrevString(ll, 18)}</a>"
-                    line = line + str(int(round(i['ratio']*100))) + '% ' + c
-            if line and len(line)>0 and self.plus_store_selected is not None and self.plus_store_selected_label is not None:
-                line = line + f'  (<a href="{plus.util.storeLink(self.plus_store_selected)}"{dark_mode_link_color}>{self.plus_store_selected_label}</a>)'
+                    line = line + str(int(round(i['ratio']*100))) + '% ' + abbrevString(ll, 18)
+            if line and len(line)>0 and self.plus_store_selected is not None:
+                # show the warehouse name if the cloud provided one, else a generic "Store" label
+                store_label = self.plus_store_selected_label or QApplication.translate('Label', 'Store')
+                line = line + f'  ({store_label})'
             ok_button: QPushButton|None
             if line == '':
                 # beans not specified
@@ -2230,6 +2232,11 @@ class editGraphDlg(ArtisanResizeablDialog):
             self.bean_size_min_edit.setStyleSheet(background_white_style)
             self.bean_size_max_edit.setStyleSheet(background_white_style)
             self.moisture_greens_edit.setStyleSheet(background_white_style)
+
+    def _selectedWeightUnit(self) -> str:
+        # canonical lower-case weight unit key ('g'/'kg'/'lb'/'oz') of the units combo, read by
+        # index so it is independent of the (now localized) display text of the combo items
+        return weight_units_lower[self.unitsComboBox.currentIndex()]
 
     @staticmethod
     def _lotLabel(coffee_label:str|None) -> str:
@@ -3023,7 +3030,7 @@ class editGraphDlg(ArtisanResizeablDialog):
         try:
             title = ' '.join(self.titleedit.currentText().split())
             weightIn = float(comma2dot(self.weightinedit.text()))
-            weightUnit = self.unitsComboBox.currentText()
+            weightUnit = self._selectedWeightUnit()
             if weightUnit == 'kg':
                 weightUnit = 'Kg'
             self.aw.recentRoasts = self.aw.delRecentRoast(title,weightIn,weightUnit)
@@ -3038,7 +3045,7 @@ class editGraphDlg(ArtisanResizeablDialog):
             # add new recent roast entry only if title is not default, beans is not empty and weight-in is not 0
             if title != QApplication.translate('Scope Title', 'Roaster Scope') and weightIn != 0:
                 beans = self.beansedit.toPlainText()
-                weightUnit = self.unitsComboBox.currentText()
+                weightUnit = self._selectedWeightUnit()
                 if weightUnit == 'kg':
                     weightUnit = 'Kg'
                 if self.volumeinedit.text() != '':
@@ -3280,12 +3287,12 @@ class editGraphDlg(ArtisanResizeablDialog):
     @pyqtSlot(int)
     def changeWeightUnit(self, i:int) -> None:
         o = weight_units.index(self.aw.qmc.weight[2]) # previous unit index
-        weightUnit = self.unitsComboBox.currentText()
+        weightUnit = self._selectedWeightUnit()
         if weightUnit == 'kg':
             weightUnit = 'Kg'
         self.aw.qmc.weight = (self.aw.qmc.weight[0],self.aw.qmc.weight[1],weightUnit) # update weight unit
         # update defects unit label
-        self.weightoutdefects_unit_label.setText(weightUnit.lower())
+        self.weightoutdefects_unit_label.setText(weight_unit_display(weightUnit))
         for le in [self.weightinedit,self.weightoutedit,self.weightoutdefectsedit]:
             if le.text() and le.text() != '':
                 wi = float(comma2dot(le.text()))
@@ -5494,7 +5501,7 @@ class editGraphDlg(ArtisanResizeablDialog):
         if self.plus_amount_selected is not None:
             try:
                 # convert weight to kg
-                weightUnit = self.unitsComboBox.currentText()
+                weightUnit = self._selectedWeightUnit()
                 if weightUnit == 'kg':
                     wc = weightIn
                 else:
@@ -5506,11 +5513,11 @@ class editGraphDlg(ArtisanResizeablDialog):
         if self.plus_amount_replace_selected is not None:
             try:
                 # convert weight to kg
-                weightUnit = self.unitsComboBox.currentText()
+                weightUnit = self._selectedWeightUnit()
                 if weightUnit == 'kg':
                     wc = weightIn
                 else:
-                    wc = convertWeight(weightIn,weight_units.index(self.unitsComboBox.currentText()),weight_units.index('Kg'))
+                    wc = convertWeight(weightIn,weight_units.index(self._selectedWeightUnit()),weight_units.index('Kg'))
                 if wc <= self.plus_amount_replace_selected:
                     enough_replacement = True
             except Exception: # pylint: disable=broad-except
@@ -5635,7 +5642,7 @@ class editGraphDlg(ArtisanResizeablDialog):
                 if volumein != 0.0 and weightin != 0.0:
                     vol_idx = volume_units.index(self.volumeUnitsComboBox.currentText())
                     volumein = convertVolume(volumein,vol_idx,0)
-                    weight_idx = weight_units_lower.index(self.unitsComboBox.currentText())
+                    weight_idx = weight_units_lower.index(self._selectedWeightUnit())
                     weightin = convertWeight(weightin,weight_idx,0)
                     din = weightin / volumein
             if self.volumeoutedit.text() != ''  and self.weightoutedit.text() != '':
@@ -5644,7 +5651,7 @@ class editGraphDlg(ArtisanResizeablDialog):
                 if volumeout != 0.0 and weightout != 0.0:
                     vol_idx = volume_units.index(self.volumeUnitsComboBox.currentText())
                     volumeout = convertVolume(volumeout,vol_idx,0)
-                    weight_idx = weight_units_lower.index(self.unitsComboBox.currentText())
+                    weight_idx = weight_units_lower.index(self._selectedWeightUnit())
                     weightout = convertWeight(weightout,weight_idx,0)
                     dout = weightout / volumeout
         except Exception as e: # pylint: disable=broad-except
@@ -6018,7 +6025,7 @@ class editGraphDlg(ArtisanResizeablDialog):
             w1 = float(comma2dot(self.weightoutedit.text()))
         except Exception: # pylint: disable=broad-except
             w1 = 0
-        w2 = self.unitsComboBox.currentText()
+        w2 = self._selectedWeightUnit()
 
         # update defect weight
         try:
