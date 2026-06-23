@@ -826,29 +826,25 @@ Extra Device</source>
         <location filename="../artisanlib/main.py" line="3243" />
         <source>FC
 START</source>
-        <translation>Первый крэк
-начало</translation>
+        <translation>ПКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3247" />
         <source>FC
 END</source>
-        <translation>Первый крэк
-конец</translation>
+        <translation>ПКк</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3251" />
         <source>SC
 START</source>
-        <translation>Второй крэк
-начало</translation>
+        <translation>ВКн</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3255" />
         <source>SC
 END</source>
-        <translation>Второй крэк
-конец</translation>
+        <translation>ВКк</translation>
     </message>
     <message>
         <location filename="../artisanlib/main.py" line="3260" />
@@ -18199,6 +18195,10 @@ Continue?</source>
         <translation>Подключено к Roastlocal Cloud</translation>
     </message>
     <message>
+        <source>Operator {0} connected</source>
+        <translation>Оператор {0} подключён</translation>
+    </message>
+    <message>
         <location filename="../plus/controller.py" line="368" />
         <location filename="../plus/controller.py" line="293" />
         <location filename="../plus/controller.py" line="270" />
@@ -18440,7 +18440,7 @@ Continue?</source>
         <location filename="../artisanlib/canvas.py" line="14750" />
         <location filename="../artisanlib/canvas.py" line="8628" />
         <source>FCs {0}</source>
-        <translation>ПКс {0}</translation>
+        <translation>ПКн {0}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="14891" />
@@ -18454,7 +18454,7 @@ Continue?</source>
         <location filename="../artisanlib/canvas.py" line="14972" />
         <location filename="../artisanlib/canvas.py" line="8664" />
         <source>SCs {0}</source>
-        <translation>ВКс {0}</translation>
+        <translation>ВКн {0}</translation>
     </message>
     <message>
         <location filename="../artisanlib/canvas.py" line="15117" />

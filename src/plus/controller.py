@@ -249,10 +249,11 @@ def connect(clear_on_failure: bool =False, interactive: bool = True) -> None:
                             True,
                             None,
                         )  # @UndefinedVariable
+                        _operator = config.nickname or aw.plus_account
                         aw.sendmessageSignal.emit(
                             QApplication.translate(
                                 'Plus', 'Connected to Roastlocal Cloud'
-                            ),
+                            ) + (f' — {_operator}' if _operator else ''),
                             True,
                             None,
                         )  # @UndefinedVariable

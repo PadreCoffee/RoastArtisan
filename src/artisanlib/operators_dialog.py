@@ -61,6 +61,15 @@ class OperatorsDialog(ArtisanDialog):
         if entry is None:
             return
         if operators.has_pin(entry):
+            # require the current PIN before clearing it, so nobody can drop another operator's PIN
+            pin, ok = QInputDialog.getText(self, _tr('Message', 'Operator PIN'),
+                                           _tr('Message', 'Enter PIN for {0}').format(entry.get('nickname') or entry['email']),
+                                           QLineEdit.EchoMode.Password)
+            if not ok:
+                return
+            if not operators.verify_pin(entry, pin):
+                QMessageBox.warning(self, _tr('Message', 'Operator PIN'), _tr('Message', 'Wrong PIN'))
+                return
             operators.clear_pin(entry)
         else:
             pin, ok = QInputDialog.getText(self, _tr('Message', 'Set PIN'),
@@ -90,6 +99,6 @@ class OperatorsDialog(ArtisanDialog):
         self._reload()
 
     def _add(self) -> None:
-        import plus.controller as plus_controller
-        plus_controller.connect(self.aw)
+        # forces a fresh login dialog (works even while already connected) and remembers it
+        self.aw.addOperator()
         self._reload()

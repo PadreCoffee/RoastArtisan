@@ -4562,15 +4562,32 @@ class ApplicationWindow(QMainWindow):
                 self.sendmessage(QApplication.translate('Message', 'Wrong PIN'))
                 return
         ok = plus_controller.switchOperator(entry['email'], server_url=entry.get('server_url'))
-        if not ok:
-            # stored password missing/invalid -> fall back to the normal login flow
-            plus_controller.connect(self)
+        if ok:
+            name = entry.get('nickname') or entry['email']
+            self.sendmessage(QApplication.translate('Plus', 'Operator {0} connected').format(name))
+        else:
+            # stored password missing/invalid -> fall back to the login dialog (prefill the email)
+            import plus.config as plus_config
+            self.plus_account = None
+            self.plus_email = entry['email']
+            plus_config.passwd = None
+            plus_controller.connect(interactive=True)
         self.updatePlusStatusSignal.emit()   # refresh plus icon + operator-field visibility
 
     @pyqtSlot()
     def addOperator(self) -> None:
         import plus.controller as plus_controller
-        plus_controller.connect(self)        # existing login dialog; remembers it on success
+        import plus.config as plus_config
+        # Adding a new operator needs the login dialog. connect() is a no-op while already
+        # connected (and would otherwise silently reuse the active account), so drop the
+        # session — keeping every saved password — and clear the active account to force the
+        # credential prompt. The new account is remembered on a successful login.
+        if plus_controller.is_connected() or plus_controller.is_on():
+            plus_controller.disconnect(remove_credentials=False, keepON=False)
+        self.plus_account = None
+        self.plus_email = None
+        plus_config.passwd = None
+        plus_controller.connect(interactive=True)        # login dialog; remembers it on success
         self.updatePlusStatusSignal.emit()
 
     @pyqtSlot()
@@ -5489,6 +5506,11 @@ class ApplicationWindow(QMainWindow):
             else:
                 plus_icon = 'plus-off'
                 tooltip = QApplication.translate('Tooltip', 'Connect Roastlocal Cloud')
+            # surface the active operator on the plus icon when logged in
+            if self.plus_account is not None:
+                operator_name = self.qmc.operator or self.plus_account
+                if operator_name:
+                    tooltip = f'{tooltip} — {operator_name}'
             if svgsupport:
                 plus_icon += '.svg'
             else:
