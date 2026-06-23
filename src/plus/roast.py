@@ -546,6 +546,17 @@ def getSyncRecord(r: dict[str, Any]|None = None) -> tuple[dict[str, Any], str]:
             if a in r:
                 d[a] = r[a]
                 m.update(str(r[a]).encode('utf-8'))
+        # carry the background/reference 'template' link through the diff/update
+        # path as well. 'template' is a nested dict (not a bidirectionally-synced
+        # scalar) so it is not part of sync_record_attributes, but it must ride
+        # the post-DROP property-save / OFF re-sync updates - otherwise selecting
+        # or changing a cloud reference (эталон) after DROP, which goes through
+        # this sync (diff) record, would drop template.is_reference and the cloud
+        # would never link the roast to its reference. Including it in the hash
+        # also makes such a reference change register as a sync update.
+        if 'template' in r:
+            d['template'] = r['template']
+            m.update(str(r['template']).encode('utf-8'))
     except Exception as e:  # pylint: disable=broad-except
         _log.exception(e)
     _log.debug('getSyncRecord d -> %s', d)
