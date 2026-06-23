@@ -659,6 +659,67 @@ class TestGetSyncRecord:
         assert 'another_field' not in sync_record
 
 
+class TestGetSyncRecordTemplateLink:
+    """Regression: the background/reference 'template' link must ride the sync
+    (diff/update) record, not only the full DROP upload.
+
+    'template' is not a member of sync_record_attributes (it is a nested dict),
+    so before the fix getSyncRecord stripped it. That dropped template.is_reference
+    on the post-DROP property-save / OFF re-sync, and a cloud reference (эталон)
+    selected or changed after DROP - the normal workflow, since the reference combo
+    lives in the Roast Properties dialog - never linked on the cloud.
+    """
+
+    def test_cloud_reference_template_rides_sync_record(self) -> None:
+        roast_data = {
+            'roast_id': 'roast123',
+            'amount': 1000,
+            'template': {'id': 'ref-uuid', 'is_reference': True},
+        }
+
+        sync_record, _ = getSyncRecord(roast_data)
+
+        # the reference signal survives the diff path: cloud receives id + flag
+        assert sync_record['template'] == {'id': 'ref-uuid', 'is_reference': True}
+
+    def test_manual_background_template_carries_no_flag(self) -> None:
+        # a manual / past-roast background: template id only, no is_reference.
+        roast_data = {
+            'roast_id': 'roast123',
+            'amount': 1000,
+            'template': {'id': 'bg-uuid'},
+        }
+
+        sync_record, _ = getSyncRecord(roast_data)
+
+        # id is carried (so the cloud keeps the manual background) but no flag is
+        # added - the cloud must NOT auto-link a manual background as a reference.
+        assert sync_record['template'] == {'id': 'bg-uuid'}
+        assert 'is_reference' not in sync_record['template']
+
+    def test_no_background_yields_no_template(self) -> None:
+        roast_data = {'roast_id': 'roast123', 'amount': 1000}
+
+        sync_record, _ = getSyncRecord(roast_data)
+
+        assert 'template' not in sync_record
+
+    def test_reference_change_alters_sync_hash(self) -> None:
+        # toggling/selecting a reference must register as a sync update so the
+        # diff upload actually fires (otherwise the change is never pushed).
+        without_ref = {'roast_id': 'roast123', 'amount': 1000}
+        with_ref = {
+            'roast_id': 'roast123',
+            'amount': 1000,
+            'template': {'id': 'ref-uuid', 'is_reference': True},
+        }
+
+        _, hash_without = getSyncRecord(without_ref)
+        _, hash_with = getSyncRecord(with_ref)
+
+        assert hash_without != hash_with
+
+
 class TestRoastCommentWireContract:
     """roast_comment replaces roastingnotes as the source of the cloud notes field."""
 
