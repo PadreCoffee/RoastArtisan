@@ -1336,6 +1336,11 @@ class editGraphDlg(ArtisanResizeablDialog):
         self.template_line.setFont(template_font)
 
 #PLUS
+        # the last title value the dialog auto-applied (from a coffee/blend selection or a reference).
+        # used to recognise an auto-derived title even after the selection moved on (so a stale prior
+        # coffee/blend title is still refreshable), while a user-typed custom title is never overwritten.
+        # seeded from the loaded title just before the initial populate (see below).
+        self.last_auto_title:str|None = None
         self.user_updated_coffee_or_blend:bool = False # this is set if user changed once either the coffee or blend popup selection. Only after this, changes to the plus coffee/blend selections are persisted on leaving the dialog with OK not to overwrite existing selections if coffees/blends become unvable in the selected store
         self.plus_store_selected:str|None = None # holds the hr_id of the store of the selected coffee or blend
         self.plus_store_selected_label:str|None = None # the label of the selected store
@@ -1748,6 +1753,15 @@ class editGraphDlg(ArtisanResizeablDialog):
 
         self.setLayout(totallayout)
 
+        # seed the auto-title tracker: treat the loaded title as auto-derived (and thus refreshable
+        # by a later coffee/blend/reference change) only if it equals what the loaded coffee/blend
+        # would auto-fill. Any other non-empty title is treated as a user-typed custom title and is
+        # protected from auto-overwrite. Must run before the initial populate, which may refresh the
+        # title for a completed roast.
+        _loaded_title = self.titleedit.currentText()
+        if _loaded_title and _loaded_title == self._autoTitleCandidate():
+            self.last_auto_title = _loaded_title
+
         self.populatePlusCoffeeBlendCombos()
 
         self.titleedit.setFocus()
@@ -2145,6 +2159,11 @@ class editGraphDlg(ArtisanResizeablDialog):
                         # we first change the index and then unblock signals to avoid properties being overwritten from the selected coffee
                         self.plus_coffees_combo.setCurrentIndex(p+1)
                         self.plus_coffees_combo.blockSignals(False)
+                        # the change-signal (coffeeSelectionChanged -> fillCoffeeData -> updateTitle)
+                        # stayed blocked to protect the completed roast's stored properties; that also
+                        # suppressed the title auto-refresh. Refresh the title here explicitly
+                        # (title-only, no property fill) so it tracks the coffee on a completed roast.
+                        self.updateTitle(self.plus_coffee_selected_label, self.plus_blend_selected_label)
                     else:
                         # if roast is not yet complete we unblock the signals before changing the index to get the coffee data be filled in
                         self.plus_coffees_combo.blockSignals(False)
@@ -2190,6 +2209,10 @@ class editGraphDlg(ArtisanResizeablDialog):
                         # we first change the index and then unblock signals to avoid properties being overwritten from the selected blend
                         self.plus_blends_combo.setCurrentIndex(p+1)
                         self.plus_blends_combo.blockSignals(False)
+                        # refresh the title here explicitly (title-only, no property fill); the blocked
+                        # change-signal that protects the completed roast's stored properties would
+                        # otherwise also suppress the title auto-refresh (see coffee branch above)
+                        self.updateTitle(self.plus_coffee_selected_label, self.plus_blend_selected_label)
                     else:
                         # if roast is not yet complete we unblock the signals before changing the index to get the blend data be filled in
                         self.plus_blends_combo.blockSignals(False)
@@ -2247,25 +2270,44 @@ class editGraphDlg(ArtisanResizeablDialog):
             return ''
         return coffee_label.split(', ', 1)[-1]
 
+    def _autoTitleCandidate(self) -> str:
+        # the roast title that the CURRENT coffee/blend selection auto-derives. Single source of
+        # truth shared by updateTitle() and the loaded-title seeding so they never drift apart.
+        if self.plus_blend_selected_label is not None:
+            return self.plus_blend_selected_label
+        if self.plus_coffee_selected_label is not None:
+            # auto-fill with the lot label only, dropping the leading country
+            return self.plus_coffee_title_label or self._lotLabel(self.plus_coffee_selected_label)
+        return QApplication.translate('Scope Title', 'Roaster Scope')
+
+    def _titleIsAutoDerived(self, *prev_labels:str|None) -> bool:
+        # True when the current title may be auto-overwritten: it is empty/default, equals the value
+        # we last auto-applied (so a stale prior coffee/blend title that the selection moved on from
+        # is still recognised — fixes the "both coffee and reference changed" strand), or matches one
+        # of the provided previous coffee/blend labels. A user-TYPED custom title matches none of
+        # these and is therefore never overwritten.
+        current = self.titleedit.currentText()
+        overwritable:set[str] = { '', QApplication.translate('Scope Title', 'Roaster Scope') }
+        if self.last_auto_title is not None:
+            overwritable.add(self.last_auto_title)
+        for lbl in prev_labels:
+            if lbl:
+                overwritable.add(lbl)
+                # also recognise the country-stripped form, since coffee titles are auto-filled
+                # with the lot label only — otherwise switching coffees would not refresh it
+                overwritable.add(self._lotLabel(lbl))
+        return current in overwritable
+
+    def _applyAutoTitle(self, new_title:str) -> None:
+        # apply an auto-derived title and remember it, so a later auto-refresh still recognises it
+        # as auto-derived even after the underlying coffee/blend selection has changed.
+        self.titleedit.textEdited(new_title)
+        self.titleedit.setEditText(new_title)
+        self.last_auto_title = new_title
+
     def updateTitle(self, prev_coffee_label:str|None, prev_blend_label:str|None) -> None:
-        titles_to_be_overwritten = [ '', QApplication.translate('Scope Title', 'Roaster Scope') ]
-        if prev_coffee_label is not None:
-            titles_to_be_overwritten.append(prev_coffee_label)
-            # also recognise the country-stripped form, since coffee titles are now auto-filled
-            # with the lot label only (below) — otherwise switching coffees would not refresh it
-            titles_to_be_overwritten.append(self._lotLabel(prev_coffee_label))
-        if prev_blend_label is not None:
-            titles_to_be_overwritten.append(prev_blend_label)
-        if self.titleedit.currentText() in titles_to_be_overwritten:
-            if self.plus_blend_selected_label is not None:
-                new_title = self.plus_blend_selected_label
-            elif self.plus_coffee_selected_label is not None:
-                # auto-fill with the lot label only, dropping the leading country
-                new_title = self.plus_coffee_title_label or self._lotLabel(self.plus_coffee_selected_label)
-            else:
-                new_title = QApplication.translate('Scope Title', 'Roaster Scope')
-            self.titleedit.textEdited(new_title)
-            self.titleedit.setEditText(new_title)
+        if self._titleIsAutoDerived(prev_coffee_label, prev_blend_label):
+            self._applyAutoTitle(self._autoTitleCandidate())
 
     def updateBlendLines(self, blend:plus.stock.BlendStructure) -> None:
         if self.weightinedit.text() != '':
@@ -2630,18 +2672,11 @@ class editGraphDlg(ArtisanResizeablDialog):
         self._updateSnapshotBlock()
 
     def _setTitleFromReference(self, reference_label:str) -> None:
-        # overwrite only an empty/default or auto-derived (coffee/blend) title — never a custom one
-        titles_to_be_overwritten = [ '', QApplication.translate('Scope Title', 'Roaster Scope') ]
-        if self.plus_coffee_selected_label:
-            titles_to_be_overwritten.append(self.plus_coffee_selected_label)
-            titles_to_be_overwritten.append(self._lotLabel(self.plus_coffee_selected_label))
-        if self.plus_coffee_title_label:
-            titles_to_be_overwritten.append(self.plus_coffee_title_label)
-        if self.plus_blend_selected_label:
-            titles_to_be_overwritten.append(self.plus_blend_selected_label)
-        if self.titleedit.currentText() in titles_to_be_overwritten:
-            self.titleedit.textEdited(reference_label)
-            self.titleedit.setEditText(reference_label)
+        # overwrite only an empty/default or auto-derived (coffee/blend/prior-reference) title —
+        # never a user-typed custom one. _titleIsAutoDerived() also covers the current coffee/blend
+        # labels (passed below) and the lot-label form via the title we last auto-applied.
+        if self._titleIsAutoDerived(self.plus_coffee_selected_label, self.plus_blend_selected_label, self.plus_coffee_title_label):
+            self._applyAutoTitle(reference_label)
 
     def _clearReferenceSelection(self) -> None:
         if not hasattr(self, 'plus_templates_combo'):
@@ -2889,8 +2924,10 @@ class editGraphDlg(ArtisanResizeablDialog):
         # note, the first item is the edited text!
         if 0 < n <= len(self.aw.recentRoasts):
             rr:RecentRoast = self.aw.recentRoasts[n-1]
-            self.titleedit.textEdited(rr['title'])
-            self.titleedit.setEditText(rr['title'])
+            # picking a recent roast fills the title from it; track it as auto-applied so a
+            # subsequent coffee/blend/reference change can still refresh the title (and so it is
+            # not later mistaken for a user-typed custom title)
+            self._applyAutoTitle(rr['title'])
             self.unitsComboBox.setCurrentIndex(weight_units.index(rr['weightUnit']))
             self.weightinedit.setText(f"{rr['weightIn']:g}")
             # all of the following items might not be in the dict
