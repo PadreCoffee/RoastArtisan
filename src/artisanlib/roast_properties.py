@@ -1341,6 +1341,10 @@ class editGraphDlg(ArtisanResizeablDialog):
         # coffee/blend title is still refreshable), while a user-typed custom title is never overwritten.
         # seeded from the loaded title just before the initial populate (see below).
         self.last_auto_title:str|None = None
+        # the title currently taken from the selected REFERENCE (эталон), if any. A reference is
+        # picked explicitly and outranks the coffee/blend auto-derivation, so such a title must not
+        # be reverted by a later coffee/blend title refresh (updateTitle).
+        self.reference_auto_title:str|None = None
         self.user_updated_coffee_or_blend:bool = False # this is set if user changed once either the coffee or blend popup selection. Only after this, changes to the plus coffee/blend selections are persisted on leaving the dialog with OK not to overwrite existing selections if coffees/blends become unvable in the selected store
         self.plus_store_selected:str|None = None # holds the hr_id of the store of the selected coffee or blend
         self.plus_store_selected_label:str|None = None # the label of the selected store
@@ -1461,6 +1465,7 @@ class editGraphDlg(ArtisanResizeablDialog):
             self.plus_templates_combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
             self.plus_templates_combo.setMinimumContentsLength(20)
             self.plus_templates_combo.currentIndexChanged.connect(self.templateSelectionChanged)
+            self.plus_templates_combo.activated.connect(self.templateReactivated)
             self.referencesReady.connect(self._onReferencesFetched)
             # explicit clear button next to the combo
             self.plus_templates_clear_btn = QToolButton()
@@ -1761,6 +1766,10 @@ class editGraphDlg(ArtisanResizeablDialog):
         _loaded_title = self.titleedit.currentText()
         if _loaded_title and _loaded_title == self._autoTitleCandidate():
             self.last_auto_title = _loaded_title
+        elif _loaded_title and self.template_is_reference and _loaded_title == self.template_label:
+            # the loaded title is the name of the loaded reference: remember it as reference-derived
+            # so it keeps outranking the coffee/blend auto-title across dialog sessions
+            self.reference_auto_title = _loaded_title
 
         self.populatePlusCoffeeBlendCombos()
 
@@ -2287,6 +2296,10 @@ class editGraphDlg(ArtisanResizeablDialog):
         # of the provided previous coffee/blend labels. A user-TYPED custom title matches none of
         # these and is therefore never overwritten.
         current = self.titleedit.currentText()
+        if self.reference_auto_title is not None and current == self.reference_auto_title:
+            # the title comes from the explicitly selected reference, which outranks the
+            # coffee/blend auto-derivation — never revert it to the coffee/blend name
+            return False
         overwritable:set[str] = { '', QApplication.translate('Scope Title', 'Roaster Scope') }
         if self.last_auto_title is not None:
             overwritable.add(self.last_auto_title)
@@ -2298,12 +2311,15 @@ class editGraphDlg(ArtisanResizeablDialog):
                 overwritable.add(self._lotLabel(lbl))
         return current in overwritable
 
-    def _applyAutoTitle(self, new_title:str) -> None:
+    def _applyAutoTitle(self, new_title:str, *, from_reference:bool = False) -> None:
         # apply an auto-derived title and remember it, so a later auto-refresh still recognises it
         # as auto-derived even after the underlying coffee/blend selection has changed.
         self.titleedit.textEdited(new_title)
         self.titleedit.setEditText(new_title)
         self.last_auto_title = new_title
+        # a title taken from a reference is tracked separately: it outranks the coffee/blend
+        # auto-derivation and is therefore protected from updateTitle() (see _titleIsAutoDerived)
+        self.reference_auto_title = new_title if from_reference else None
 
     def updateTitle(self, prev_coffee_label:str|None, prev_blend_label:str|None) -> None:
         if self._titleIsAutoDerived(prev_coffee_label, prev_blend_label):
@@ -2649,6 +2665,7 @@ class editGraphDlg(ArtisanResizeablDialog):
 
     @pyqtSlot(int)
     def templateSelectionChanged(self, n:int) -> None:
+        prev_reference_title:str|None = self.reference_auto_title
         reference_label:str|None = None
         if n > 0 and self.plus_templates and n - 1 < len(self.plus_templates):
             t = self.plus_templates[n - 1]
@@ -2666,17 +2683,35 @@ class editGraphDlg(ArtisanResizeablDialog):
         # this combo IS the cloud-reference selector: a chosen entry is a genuine reference,
         # «Без эталона» (index 0 / no uuid) clears it.
         self.template_is_reference = self.template_uuid is not None
-        # selecting a reference pulls its name into the roast title (unless the user typed a custom one)
+        # selecting a reference pulls its name into the roast title
         if self.template_is_reference and reference_label:
             self._setTitleFromReference(reference_label)
+        elif prev_reference_title is not None and self.titleedit.currentText() == prev_reference_title:
+            # the reference was cleared («Без эталона») and the title still shows its name — that
+            # name no longer describes this roast, so fall back to the coffee/blend auto-title
+            # (_applyAutoTitle clears reference_auto_title as it is not a reference title anymore)
+            self._applyAutoTitle(self._autoTitleCandidate())
         self._updateSnapshotBlock()
 
+    @pyqtSlot(int)
+    def templateReactivated(self, n:int) -> None:
+        # currentIndexChanged does NOT fire when the user picks the entry that is already
+        # selected, so re-picking the current reference would not restore the roast title after
+        # it was edited by hand. activated fires on every user pick, so re-apply the title here
+        # (idempotent: on a real index change templateSelectionChanged has just set the same one).
+        if n > 0 and self.plus_templates and n - 1 < len(self.plus_templates):
+            t = self.plus_templates[n - 1]
+            label = (t.get('label') or '').strip()
+            if label and t.get('uuid') == self.template_uuid:
+                self._setTitleFromReference(label)
+
     def _setTitleFromReference(self, reference_label:str) -> None:
-        # overwrite only an empty/default or auto-derived (coffee/blend/prior-reference) title —
-        # never a user-typed custom one. _titleIsAutoDerived() also covers the current coffee/blend
-        # labels (passed below) and the lot-label form via the title we last auto-applied.
-        if self._titleIsAutoDerived(self.plus_coffee_selected_label, self.plus_blend_selected_label, self.plus_coffee_title_label):
-            self._applyAutoTitle(reference_label)
+        # picking an entry in the reference combo is an explicit user action, so the roast title
+        # always follows the selected reference — including when the current title came from an
+        # earlier reference (which the coffee/blend-based _titleIsAutoDerived() cannot recognise
+        # after a reload) or was typed by hand. A title typed AFTER this still survives every
+        # automatic coffee/blend refresh; only picking another reference replaces it again.
+        self._applyAutoTitle(reference_label, from_reference=True)
 
     def _clearReferenceSelection(self) -> None:
         if not hasattr(self, 'plus_templates_combo'):
