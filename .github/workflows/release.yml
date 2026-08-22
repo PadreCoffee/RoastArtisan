@@ -86,13 +86,22 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET: '13.0'
         run: pyinstaller -y --log-level=INFO artisan-mac.spec
 
-      - name: Verify architecture of the built binary
+      - name: Verify architecture of the built bundle
         working-directory: src
         run: |
+          set -euo pipefail
           BIN=dist/RoastArtisan.app/Contents/MacOS/RoastArtisan
           file "$BIN"
           lipo -info "$BIN"
           lipo -archs "$BIN" | grep -qw arm64
+          # every Mach-O in the bundle must be runnable on arm64
+          find dist/RoastArtisan.app -type f -print0 | xargs -0 file \
+            | grep -a 'Mach-O' | grep -av '(for architecture' > /tmp/macho-silicon.txt
+          echo "Mach-O files in bundle: $(wc -l < /tmp/macho-silicon.txt)"
+          if grep -a 'Mach-O' /tmp/macho-silicon.txt | grep -av 'arm64'; then
+            echo "ERROR: the above binaries have no arm64 slice"
+            exit 1
+          fi
           ls -lh RoastArtisan-mac-silicon-*.dmg
 
       - uses: actions/upload-artifact@v4
@@ -199,10 +208,34 @@ jobs:
           lipo -info "$BIN"
           lipo -archs "$BIN" | grep -qw arm64
           lipo -archs "$BIN" | grep -qw x86_64
-          echo "--- spot check of collected extension modules ---"
-          for so in $(find dist/RoastArtisan.app -name '*.so' | head -20); do
-            printf '%-90s %s\n' "${so#dist/}" "$(lipo -archs "$so" 2>/dev/null)"
-          done
+
+          # Exhaustive check: EVERY Mach-O file shipped inside the .app must
+          # carry both slices, otherwise the bundle only appears universal.
+          find dist/RoastArtisan.app -type f -print0 | xargs -0 file \
+            | grep -a 'Mach-O' | grep -av '(for architecture' > /tmp/macho-universal.txt
+          total=$(wc -l < /tmp/macho-universal.txt)
+          echo "Mach-O files in bundle: ${total}"
+          if [ "${total}" -lt 100 ]; then
+            echo "ERROR: implausibly few Mach-O files found; the check is not working"
+            exit 1
+          fi
+          if grep -a -v 'universal binary with 2 architectures' /tmp/macho-universal.txt \
+             > /tmp/macho-thin.txt && [ -s /tmp/macho-thin.txt ]; then
+            echo "ERROR: the following binaries are not universal2:"
+            cat /tmp/macho-thin.txt
+            exit 1
+          fi
+          if grep -a -v 'x86_64' /tmp/macho-universal.txt > /tmp/no-intel.txt \
+             && [ -s /tmp/no-intel.txt ]; then
+            echo "ERROR: binaries without an x86_64 slice:"; cat /tmp/no-intel.txt; exit 1
+          fi
+          if grep -a -v 'arm64' /tmp/macho-universal.txt > /tmp/no-arm.txt \
+             && [ -s /tmp/no-arm.txt ]; then
+            echo "ERROR: binaries without an arm64 slice:"; cat /tmp/no-arm.txt; exit 1
+          fi
+          echo "OK: all ${total} Mach-O files carry both x86_64 and arm64"
+          echo "--- sample ---"
+          head -8 /tmp/macho-universal.txt
           ls -lh RoastArtisan-mac-universal-*.dmg
 
       - uses: actions/upload-artifact@v4
