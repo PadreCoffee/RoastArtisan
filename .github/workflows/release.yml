@@ -173,6 +173,49 @@ jobs:
       - name: Fuse thin dependencies into universal2 wheels
         run: python .github/scripts/fuse_universal2.py
 
+      - name: Build a universal2 libusb
+        env:
+          LIBUSB_VERSION: '1.0.30'
+          MACOSX_DEPLOYMENT_TARGET: '13.0'
+        run: |
+          set -euo pipefail
+          # PyInstaller picks up the Homebrew libusb (pyusb's backend) and puts it
+          # in Contents/Frameworks. The runner's Homebrew build is arm64-only, so
+          # without this the bundle would look universal while its USB backend
+          # only worked on Apple silicon. Build a fat libusb and replace it.
+          curl -fsSLO "https://github.com/libusb/libusb/releases/download/v${LIBUSB_VERSION}/libusb-${LIBUSB_VERSION}.tar.bz2"
+          tar xjf "libusb-${LIBUSB_VERSION}.tar.bz2"
+          cd "libusb-${LIBUSB_VERSION}"
+          ./configure --prefix=/tmp/libusb-u2 --disable-dependency-tracking \
+            CFLAGS="-arch arm64 -arch x86_64" \
+            LDFLAGS="-arch arm64 -arch x86_64"
+          make -j3
+          make install
+          FAT=/tmp/libusb-u2/lib/libusb-1.0.dylib
+          lipo -info "$FAT"
+          lipo -archs "$FAT" | grep -qw arm64
+          lipo -archs "$FAT" | grep -qw x86_64
+
+          replaced=0
+          for candidate in \
+              "$(brew --prefix libusb 2>/dev/null || echo /nonexistent)/lib/libusb-1.0.dylib" \
+              "$(brew --prefix 2>/dev/null || echo /nonexistent)/lib/libusb-1.0.dylib"; do
+            [ -f "$candidate" ] || continue
+            real=$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$candidate")
+            # keep the original install name so nothing that links against it breaks
+            orig_id=$(otool -D "$real" | tail -n 1)
+            install_name_tool -id "$orig_id" "$FAT" 2>/dev/null || true
+            cp -f "$FAT" "$real"
+            echo "replaced $real"
+            lipo -info "$real"
+            replaced=1
+          done
+          if [ "$replaced" -eq 0 ]; then
+            echo "ERROR: no Homebrew libusb found to replace; PyInstaller would " \
+                 "collect an unknown copy. Investigate before shipping."
+            exit 1
+          fi
+
       - name: Export build environment
         run: |
           PURELIB=$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
