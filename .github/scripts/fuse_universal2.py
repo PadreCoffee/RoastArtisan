@@ -30,6 +30,14 @@ from pathlib import Path
 
 MACHO_SUFFIXES = ('.so', '.dylib')
 
+# Build-time tooling that never ends up inside the bundle.  delocate in
+# particular ships single-architecture Mach-O *test fixtures* that can never be
+# fused (its wheel is py3-none-any), so scanning it would deadlock the check.
+IGNORED_DISTRIBUTIONS = {'delocate', 'pyinstaller', 'pyinstaller-hooks-contrib',
+                         'setuptools', 'wheel', 'pip'}
+# Test data inside otherwise-fine distributions is likewise never collected.
+IGNORED_PATH_PARTS = ('/tests/', '/test/', '/testing/')
+
 # pip needs an explicit set of platform tags when downloading for a foreign
 # architecture.  pip picks the best match out of the list it is given.
 ARM64_PLATFORMS = [
@@ -63,10 +71,13 @@ def thin_distributions(site_packages: Path) -> dict[str, str]:
         files = dist.files or []
         name = dist.metadata['Name']
         version = dist.version
-        if not name:
+        if not name or name.lower() in IGNORED_DISTRIBUTIONS:
             continue
         for rel in files:
-            if not str(rel).endswith(MACHO_SUFFIXES):
+            rel_posix = '/' + str(rel).replace('\\', '/')
+            if not rel_posix.endswith(MACHO_SUFFIXES):
+                continue
+            if any(part in rel_posix for part in IGNORED_PATH_PARTS):
                 continue
             path = Path(dist.locate_file(rel))
             if not path.is_file():
