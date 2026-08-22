@@ -458,7 +458,7 @@ for subdir, _dirs, files in os.walk('.', followlinks=False):
 ####
 
 
-dist_name = r'RoastArtisan-mac-' + VERSION + r'.dmg'
+dist_name = r'RoastArtisan-mac-silicon-' + VERSION + r'.dmg'
 os.chdir('..')
 os.system(r'rm ' + dist_name)
 os.system(r'hdiutil create ' + dist_name + r' -volname "RoastArtisan" -fs HFS+ -srcfolder "dist"')
