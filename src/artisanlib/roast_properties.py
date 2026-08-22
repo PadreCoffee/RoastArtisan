@@ -626,8 +626,10 @@ class editGraphDlg(ArtisanResizeablDialog):
         # propulated by selecting a recent roast from the popup via recentRoastActivated()
         self.template_file:str|None = None
         self.template_name:str|None = None
-        # seed from currently loaded background so dialog reflects existing reference selection
-        self.template_uuid:str|None = self.aw.qmc.backgroundUUID if self.aw.qmc.backgroundUUID else None
+        # seed from currently loaded background so dialog reflects existing reference selection.
+        # Normalise here so equality tests against the (normalised) fetched reference ids in
+        # _applyTemplatesToCombo cannot fail on UUID text format alone (dashed vs bare hex).
+        self.template_uuid:str|None = plus.util.normalizeUUID(self.aw.qmc.backgroundUUID)
         self.org_template_uuid:str|None = self.template_uuid  # snapshot for Cancel / clear-detection in accept()
         # Tracks whether the current template_uuid denotes a genuine CLOUD REFERENCE (эталон)
         # versus a manual/recent-roast background. template_uuid is shared by the reference
@@ -1346,6 +1348,10 @@ class editGraphDlg(ArtisanResizeablDialog):
         # be reverted by a later coffee/blend title refresh (updateTitle).
         self.reference_auto_title:str|None = None
         self.user_updated_coffee_or_blend:bool = False # this is set if user changed once either the coffee or blend popup selection. Only after this, changes to the plus coffee/blend selections are persisted on leaving the dialog with OK not to overwrite existing selections if coffees/blends become unvable in the selected store
+        # one-shot: set when the user picks a coffee/blend, consumed by the next _applyTemplatesToCombo
+        # to auto-select that coffee/blend's reference (first as the cloud orders them) and pull its
+        # name into the title. Never set on a pure open, so opening the dialog overwrites nothing.
+        self._select_reference_after_fetch:bool = False
         self.plus_store_selected:str|None = None # holds the hr_id of the store of the selected coffee or blend
         self.plus_store_selected_label:str|None = None # the label of the selected store
         self.plus_coffee_selected:str|None = None # holds the hr_id of the selected coffee
@@ -2449,6 +2455,8 @@ class editGraphDlg(ArtisanResizeablDialog):
         prev_blend_label = self.plus_blend_selected_label
         self.user_updated_coffee_or_blend = True # on leaving the dialog with OK the new selection will be persisted
         if n < 1 or self.plus_coffees is None:
+            # coffee deselected — nothing to auto-select a reference from
+            self._select_reference_after_fetch = False
             self.defaultCoffeeData()
             self.plus_store_selected = None
             self.plus_store_selected_label = None
@@ -2478,6 +2486,9 @@ class editGraphDlg(ArtisanResizeablDialog):
             else:
                 self.pus_amount_selected = None
             self.plus_amount_replace_selected = None
+            # a new coffee is selected: once its references arrive, auto-select the coffee's
+            # reference (rule 1) instead of leaving «Без эталона», and retitle from it
+            self._select_reference_after_fetch = True
             self.fillCoffeeData(selected_coffee,prev_coffee_label,prev_blend_label)
         self.checkWeightIn()
         self.updatePlusSelectedLine()
@@ -2499,6 +2510,8 @@ class editGraphDlg(ArtisanResizeablDialog):
         prev_blend_label = self.plus_blend_selected_label
         self.user_updated_coffee_or_blend = True # on leaving the dialog with OK the new selection will be persisted
         if n < 1 or self.plus_blends is None:
+            # blend deselected — nothing to auto-select a reference from
+            self._select_reference_after_fetch = False
             self.defaultCoffeeData()
             self.plus_store_selected = None
             self.plus_store_selected_label = None
@@ -2536,6 +2549,9 @@ class editGraphDlg(ArtisanResizeablDialog):
             self.plus_blend_selected_spec['ingredients'] = ingredients
             self.plus_amount_selected = plus.stock.getBlendMaxAmount(selected_blend)
             self.plus_amount_replace_selected = plus.stock.getBlendReplaceMaxAmount(selected_blend)
+            # a new blend is selected: once its references arrive, auto-select the blend's
+            # reference (rule 1) instead of leaving «Без эталона», and retitle from it
+            self._select_reference_after_fetch = True
             self.fillBlendData(selected_blend,prev_coffee_label,prev_blend_label)
 
         self.checkWeightIn()
@@ -2573,18 +2589,11 @@ class editGraphDlg(ArtisanResizeablDialog):
         coffee_hr_id:str|None = self.plus_coffee_selected
         blend_hr_id:str|None = (self.plus_blend_selected_spec.get('hr_id') if self.plus_blend_selected_spec is not None else None)
         _log.info('populateTemplateCombo: coffee=%s blend=%s remote=%s', coffee_hr_id, blend_hr_id, plus.config.remote_profile_fetch_enabled())
-        if not (coffee_hr_id or blend_hr_id):
-            # nothing selected — show empty disabled combo and clear any prior template
-            self.template_uuid = None
-            self.template_file = None
-            self.plus_templates = []
-            self.plus_templates_combo.blockSignals(True)
-            self.plus_templates_combo.clear()
-            self.plus_templates_combo.addItem('Без эталона')
-            self.plus_templates_combo.setEnabled(False)
-            self.plus_templates_combo.blockSignals(False)
-            self._updateSnapshotBlock()
-            return
+        # NOTE (rule 5): even with NO coffee/blend selected we still fetch — with the machine
+        # only — so the references that are unbound or bound to this machine remain offered and
+        # the control stays ENABLED (the backend applies no coffee/blend narrowing when neither
+        # is passed). We must NOT hard-clear template_uuid here: a loaded reference has to survive
+        # the open (rule 4); _applyTemplatesToCombo decides whether the current selection stays.
         if plus.config.remote_profile_fetch_enabled():
             # fetch from dedicated references API in background thread
             machine:str = self.aw.qmc.roastertype_setup.strip()
@@ -2658,9 +2667,32 @@ class editGraphDlg(ArtisanResizeablDialog):
                 if t.get('uuid') == self.template_uuid:
                     selected_idx = i + 1
                     break
+        # rule 1 (coffee/blend selection): a user pick with references available but none yet
+        # resolved -> auto-select the coffee/blend's reference. With several, take the first as
+        # the cloud orders them (lot-matched, then newest). One-shot, consumed here so a later
+        # background refetch does not re-drive a selection the user may have since changed.
+        auto_selected_label:str|None = None
+        if self._select_reference_after_fetch:
+            self._select_reference_after_fetch = False
+            if selected_idx == 0 and templates:
+                first = templates[0]
+                uuid_str:str|None = first.get('uuid') or None
+                if uuid_str:
+                    self.template_uuid = uuid_str
+                    self.template_file = plus.register.getPath(self.template_uuid)
+                    self.template_is_reference = True
+                    selected_idx = 1
+                    auto_selected_label = (first.get('label') or '').strip() or None
         self.plus_templates_combo.setCurrentIndex(selected_idx)
         self.plus_templates_combo.setEnabled(len(templates) > 0)
         self.plus_templates_combo.blockSignals(False)
+        # rule 1 (automatic path): the index was set under blocked signals, so
+        # templateSelectionChanged did not fire and the title was not updated. Mirror TITLE-1's
+        # explicit updateTitle on the blocked completed-roast branch and pull the auto-selected
+        # reference's name into the title EXPLICITLY — only when a reference was actually
+        # auto-selected, so rules 2/3 (no reference -> title unchanged) stay untouched.
+        if auto_selected_label:
+            self._setTitleFromReference(auto_selected_label)
         self._updateSnapshotBlock()
 
     @pyqtSlot(int)
