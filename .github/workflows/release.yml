@@ -1,0 +1,455 @@
+# ABOUT
+# Build the RoastArtisan release artifacts on a version tag and publish them to
+# a GitHub Release.
+#
+#   RoastArtisan-mac-silicon-<VER>.dmg    arm64 only          (src/artisan-mac.spec)
+#   RoastArtisan-mac-universal-<VER>.dmg  arm64 + x86_64      (src/artisan-mac_universal.spec)
+#   RoastArtisan-win-<VER>.zip            x86_64 onedir       (src/artisan-win-local.spec)
+#
+# All builds are UNSIGNED and UNNOTARIZED.  macOS Gatekeeper and Windows
+# SmartScreen will warn on first launch; this is stated in the release body.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to publish the release under (defaults to the pushed tag)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  # Kept in one place so the three build jobs stay in lockstep.
+  PYTHON_VERSION: '3.13'
+  # python.org universal2 framework build, used only by the universal job.
+  PYTHON_UNIVERSAL2_VERSION: '3.13.11'
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1. macOS arm64 (Apple silicon) .dmg
+  # ---------------------------------------------------------------------------
+  build-mac-silicon:
+    name: mac-silicon (arm64 dmg)
+    runs-on: macos-latest   # macos-latest is an Apple silicon (arm64) runner
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # requirements.txt already pins pyinstaller for sys_platform=='darwin'
+          pip install -r src/requirements.txt
+          pip install pyinstaller
+          python -c "import PyQt6, sys; print('PyQt6 ok', sys.version)"
+
+      - name: Export build environment
+        run: |
+          PURELIB=$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
+          echo "PYTHON_V=${PYTHON_VERSION}"                >> "$GITHUB_ENV"
+          echo "QT_PATH=${PURELIB}/PyQt6/Qt6"              >> "$GITHUB_ENV"
+          echo "PYUIC=pyuic6"                              >> "$GITHUB_ENV"
+          echo "PYLUPDATE=./pylupdate6pro.py"              >> "$GITHUB_ENV"
+          # lrelease ships in the qt6-applications wheel pulled in by qt6-tools
+          chmod -R +x "${PURELIB}/qt6_applications/Qt/bin" || true
+
+      - name: Stamp git revision
+        run: |
+          GIT_VERSION=$(git rev-parse --verify --short HEAD)
+          sed -i '' -e "s/__revision__ = '.*'/__revision__ = '${GIT_VERSION}'/" src/artisanlib/__init__.py
+          grep __revision__ src/artisanlib/__init__.py
+
+      - name: Build derived files (ui, translations, help)
+        working-directory: src
+        run: |
+          chmod +x build-derived.sh pylupdate6pro.py
+          ./build-derived.sh
+
+      - name: Run PyInstaller (artisan-mac.spec)
+        working-directory: src
+        env:
+          # read by the spec for LSMinimumSystemVersion; deliberately not set
+          # workflow-wide so it cannot skew pip's wheel platform-tag matching
+          MACOSX_DEPLOYMENT_TARGET: '13.0'
+        run: pyinstaller -y --log-level=INFO artisan-mac.spec
+
+      - name: Verify architecture of the built bundle
+        working-directory: src
+        run: |
+          set -euo pipefail
+          BIN=dist/RoastArtisan.app/Contents/MacOS/RoastArtisan
+          file "$BIN"
+          lipo -info "$BIN"
+          lipo -archs "$BIN" | grep -qw arm64
+          # every Mach-O in the bundle must be runnable on arm64
+          find dist/RoastArtisan.app -type f -print0 | xargs -0 file \
+            | grep -a 'Mach-O' | grep -av '(for architecture' > /tmp/macho-silicon.txt
+          echo "Mach-O files in bundle: $(wc -l < /tmp/macho-silicon.txt)"
+          if grep -a 'Mach-O' /tmp/macho-silicon.txt | grep -av 'arm64'; then
+            echo "ERROR: the above binaries have no arm64 slice"
+            exit 1
+          fi
+          ls -lh RoastArtisan-mac-silicon-*.dmg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-silicon-dmg
+          path: src/RoastArtisan-mac-silicon-*.dmg
+          if-no-files-found: error
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # 2. macOS universal2 (arm64 + x86_64) .dmg
+  # ---------------------------------------------------------------------------
+  # HOW UNIVERSAL2 IS ACHIEVED
+  #
+  # artisan-mac_universal.spec sets target_arch='universal2'.  PyInstaller only
+  # accepts that when *every* Mach-O binary it collects already carries both
+  # slices, so this job builds a genuinely universal environment rather than
+  # merging two finished .app bundles with lipo afterwards:
+  #
+  #   a) the interpreter is the python.org universal2 *framework* build
+  #      (actions/setup-python only ships single-architecture macOS builds);
+  #   b) dependencies that still publish universal2 wheels (PyQt6,
+  #      PyQt6-WebEngine, python-snap7, protobuf, lxml, ...) are installed as-is;
+  #   c) dependencies that only publish thin arm64 / x86_64 wheels (numpy, scipy,
+  #      matplotlib, pillow, pydantic-core, PyYAML, psutil, python-bidi, ...) are
+  #      downloaded for both architectures and fused into real universal2 wheels
+  #      with `delocate-merge`, then reinstalled -- see
+  #      .github/scripts/fuse_universal2.py;
+  #   d) PyInstaller then performs a normal, native universal2 build.
+  #
+  # The lipo-merge-two-bundles fallback is deliberately NOT used: it would have
+  # to lipo the PyInstaller bootloader, which carries an appended CArchive that
+  # lipo is not guaranteed to preserve, i.e. it risks shipping a broken app.
+  build-mac-universal:
+    name: mac-universal (universal2 dmg)
+    runs-on: macos-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install python.org universal2 framework Python
+        run: |
+          set -euo pipefail
+          PKG="python-${PYTHON_UNIVERSAL2_VERSION}-macos11.pkg"
+          curl -fsSLO "https://www.python.org/ftp/python/${PYTHON_UNIVERSAL2_VERSION}/${PKG}"
+          sudo installer -pkg "${PKG}" -target /
+          PYBIN="/Library/Frameworks/Python.framework/Versions/${PYTHON_VERSION}/bin"
+          echo "${PYBIN}" >> "$GITHUB_PATH"
+          "${PYBIN}/python3" -VV
+          "${PYBIN}/python3" -c "import sysconfig; print('platform:', sysconfig.get_platform())"
+          # sanity: the interpreter binary itself must be fat
+          lipo -info "$(readlink -f "${PYBIN}/python3")" || lipo -info "${PYBIN}/python3"
+
+      - name: Create universal2 virtualenv
+        run: |
+          set -euo pipefail
+          /Library/Frameworks/Python.framework/Versions/${PYTHON_VERSION}/bin/python3 -m venv "$HOME/venv-u2"
+          echo "$HOME/venv-u2/bin" >> "$GITHUB_PATH"
+
+      - name: Install build dependencies
+        run: |
+          set -euo pipefail
+          python -VV
+          python -c "import sysconfig; assert 'universal2' in sysconfig.get_platform(), sysconfig.get_platform()"
+          python -m pip install --upgrade pip
+          pip install -r src/requirements.txt
+          pip install pyinstaller delocate
+
+      - name: Fuse thin dependencies into universal2 wheels
+        run: python .github/scripts/fuse_universal2.py
+
+      - name: Build a universal2 libusb
+        env:
+          LIBUSB_VERSION: '1.0.30'
+          MACOSX_DEPLOYMENT_TARGET: '13.0'
+        run: |
+          set -euo pipefail
+          # PyInstaller picks up the Homebrew libusb (pyusb's backend) and puts it
+          # in Contents/Frameworks. The runner's Homebrew build is arm64-only, so
+          # without this the bundle would look universal while its USB backend
+          # only worked on Apple silicon. Build a fat libusb and replace it.
+          curl -fsSLO "https://github.com/libusb/libusb/releases/download/v${LIBUSB_VERSION}/libusb-${LIBUSB_VERSION}.tar.bz2"
+          tar xjf "libusb-${LIBUSB_VERSION}.tar.bz2"
+          cd "libusb-${LIBUSB_VERSION}"
+          ./configure --prefix=/tmp/libusb-u2 --disable-dependency-tracking \
+            CFLAGS="-arch arm64 -arch x86_64" \
+            LDFLAGS="-arch arm64 -arch x86_64"
+          make -j3
+          make install
+          FAT=/tmp/libusb-u2/lib/libusb-1.0.dylib
+          lipo -info "$FAT"
+          lipo -archs "$FAT" | grep -qw arm64
+          lipo -archs "$FAT" | grep -qw x86_64
+
+          replaced=0
+          for candidate in \
+              "$(brew --prefix libusb 2>/dev/null || echo /nonexistent)/lib/libusb-1.0.dylib" \
+              "$(brew --prefix 2>/dev/null || echo /nonexistent)/lib/libusb-1.0.dylib"; do
+            [ -f "$candidate" ] || continue
+            real=$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$candidate")
+            # keep the original install name so nothing that links against it breaks
+            orig_id=$(otool -D "$real" | tail -n 1)
+            install_name_tool -id "$orig_id" "$FAT" 2>/dev/null || true
+            cp -f "$FAT" "$real"
+            echo "replaced $real"
+            lipo -info "$real"
+            replaced=1
+          done
+          if [ "$replaced" -eq 0 ]; then
+            echo "ERROR: no Homebrew libusb found to replace; PyInstaller would " \
+                 "collect an unknown copy. Investigate before shipping."
+            exit 1
+          fi
+
+      - name: Export build environment
+        run: |
+          PURELIB=$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
+          echo "PYTHON_V=${PYTHON_VERSION}"                >> "$GITHUB_ENV"
+          echo "QT_PATH=${PURELIB}/PyQt6/Qt6"              >> "$GITHUB_ENV"
+          echo "PYUIC=pyuic6"                              >> "$GITHUB_ENV"
+          echo "PYLUPDATE=./pylupdate6pro.py"              >> "$GITHUB_ENV"
+          chmod -R +x "${PURELIB}/qt6_applications/Qt/bin" || true
+
+      - name: Stamp git revision
+        run: |
+          GIT_VERSION=$(git rev-parse --verify --short HEAD)
+          sed -i '' -e "s/__revision__ = '.*'/__revision__ = '${GIT_VERSION}'/" src/artisanlib/__init__.py
+
+      - name: Build derived files (ui, translations, help)
+        working-directory: src
+        run: |
+          chmod +x build-derived.sh pylupdate6pro.py
+          ./build-derived.sh
+
+      - name: Run PyInstaller (artisan-mac_universal.spec)
+        working-directory: src
+        env:
+          MACOSX_DEPLOYMENT_TARGET: '13.0'
+        run: pyinstaller -y --log-level=INFO artisan-mac_universal.spec
+
+      - name: Verify the bundle really is universal2
+        working-directory: src
+        run: |
+          set -euo pipefail
+          BIN=dist/RoastArtisan.app/Contents/MacOS/RoastArtisan
+          file "$BIN"
+          lipo -info "$BIN"
+          lipo -archs "$BIN" | grep -qw arm64
+          lipo -archs "$BIN" | grep -qw x86_64
+
+          # Exhaustive check: EVERY Mach-O file shipped inside the .app must
+          # carry both slices, otherwise the bundle only appears universal.
+          find dist/RoastArtisan.app -type f -print0 | xargs -0 file \
+            | grep -a 'Mach-O' | grep -av '(for architecture' > /tmp/macho-universal.txt
+          total=$(wc -l < /tmp/macho-universal.txt)
+          echo "Mach-O files in bundle: ${total}"
+          if [ "${total}" -lt 100 ]; then
+            echo "ERROR: implausibly few Mach-O files found; the check is not working"
+            exit 1
+          fi
+          if grep -a -v 'universal binary with 2 architectures' /tmp/macho-universal.txt \
+             > /tmp/macho-thin.txt && [ -s /tmp/macho-thin.txt ]; then
+            echo "ERROR: the following binaries are not universal2:"
+            cat /tmp/macho-thin.txt
+            exit 1
+          fi
+          if grep -a -v 'x86_64' /tmp/macho-universal.txt > /tmp/no-intel.txt \
+             && [ -s /tmp/no-intel.txt ]; then
+            echo "ERROR: binaries without an x86_64 slice:"; cat /tmp/no-intel.txt; exit 1
+          fi
+          if grep -a -v 'arm64' /tmp/macho-universal.txt > /tmp/no-arm.txt \
+             && [ -s /tmp/no-arm.txt ]; then
+            echo "ERROR: binaries without an arm64 slice:"; cat /tmp/no-arm.txt; exit 1
+          fi
+          echo "OK: all ${total} Mach-O files carry both x86_64 and arm64"
+          echo "--- sample ---"
+          head -8 /tmp/macho-universal.txt
+          ls -lh RoastArtisan-mac-universal-*.dmg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-universal-dmg
+          path: src/RoastArtisan-mac-universal-*.dmg
+          if-no-files-found: error
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # 3. Windows x86_64 onedir, zipped
+  # ---------------------------------------------------------------------------
+  build-windows:
+    name: windows (onedir zip)
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install build dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r src/requirements.txt
+          # requirements.txt excludes pyinstaller on Windows; the version lives in
+          # a comment that AppVeyor parses, so parse the same line here.
+          $ver = (Select-String -Path src/requirements.txt `
+                    -Pattern "pyinstaller==([\d\.]*).*platform_system='Windows'" -List
+                 ).Matches.Groups[1].Value
+          Write-Host "pyinstaller version from requirements.txt: $ver"
+          if (-not $ver) { throw "could not determine pyinstaller version" }
+          pip install "pyinstaller==$ver"
+
+      - name: Export build environment
+        shell: pwsh
+        run: |
+          $prefix = python -c "import sys; print(sys.prefix)"
+          $purelib = python -c "import sysconfig; print(sysconfig.get_paths()['purelib'])"
+          # PYTHON_PATH is what artisan-win-local.spec and build-derived-win.bat expect
+          "PYTHON_PATH=$prefix"                                 | Out-File -FilePath $env:GITHUB_ENV -Append
+          "PYQT=6"                                              | Out-File -FilePath $env:GITHUB_ENV -Append
+          "PYUIC=pyuic6.exe"                                    | Out-File -FilePath $env:GITHUB_ENV -Append
+          # QT_PATH only feeds build-derived-win.bat's lrelease.exe lookup, which
+          # lives in the qt6-applications wheel, not in PyQt6.
+          "QT_PATH=$purelib\qt6_applications\Qt"                | Out-File -FilePath $env:GITHUB_ENV -Append
+          "QT_TRANSL=$purelib\PyQt6\Qt6\translations"           | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Download vc_redist.x64.exe
+        shell: pwsh
+        run: |
+          # artisan-win-local.spec copies ..\vc_redist.x64.exe into the onedir and
+          # treats a missing file as fatal.
+          curl.exe -L -o vc_redist.x64.exe https://aka.ms/vs/17/release/vc_redist.x64.exe
+          if (-not (Test-Path vc_redist.x64.exe)) { throw "vc_redist download failed" }
+
+      - name: Stamp git revision and generate version_info-win.txt
+        shell: pwsh
+        working-directory: src
+        run: |
+          $git = git rev-parse --verify --short HEAD
+          (Get-Content artisanlib/__init__.py) `
+            -replace "__revision__ = '.*'", "__revision__ = '$git'" |
+            Out-File -Encoding ascii newfile
+          Move-Item -Force newfile artisanlib/__init__.py
+
+          $year = (Get-Date).year
+          (Get-Content version-metadata.yml) -replace 'yyyy', "$year" |
+            Out-File -Encoding ascii newfile
+          Move-Item -Force newfile version-metadata.yml
+
+          $version = python -c "import artisanlib; print(artisanlib.__version__)"
+          $build   = python -c "import artisanlib; print(artisanlib.__build__)"
+          "ARTISAN_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+          create-version-file version-metadata.yml --outfile version_info-win.txt --version "$version.$build"
+          if (-not (Test-Path version_info-win.txt)) { throw "version_info-win.txt not generated" }
+
+      - name: Build derived files (ui, translations, help)
+        shell: cmd
+        working-directory: src
+        run: call build-derived-win.bat
+
+      - name: Run PyInstaller (artisan-win-local.spec)
+        shell: cmd
+        working-directory: src
+        run: pyinstaller -y --log-level=INFO artisan-win-local.spec
+
+      - name: Zip the onedir distribution
+        shell: pwsh
+        working-directory: src
+        run: |
+          $zip = "RoastArtisan-win-$env:ARTISAN_VERSION.zip"
+          # 7z is preinstalled and handles the ~1 GB tree far better than Compress-Archive
+          7z a -tzip -mx=5 "$zip" ".\dist\RoastArtisan" | Select-Object -Last 5
+          if (-not (Test-Path $zip)) { throw "zip not produced" }
+          Get-Item $zip | Format-List Name, Length
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-zip
+          path: src/RoastArtisan-win-*.zip
+          if-no-files-found: error
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # 4. Publish
+  # ---------------------------------------------------------------------------
+  release:
+    name: publish release
+    needs: [build-mac-silicon, build-mac-universal, build-windows]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+          merge-multiple: true
+
+      - name: List assets
+        run: ls -lh assets
+
+      - name: Create or update the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TAG="${{ inputs.tag || github.ref_name }}"
+          echo "publishing to tag: ${TAG}"
+
+          cat > release-notes.md <<'NOTES'
+          ## RoastArtisan release
+
+          | Platform | Asset |
+          | --- | --- |
+          | macOS (Apple silicon) | `RoastArtisan-mac-silicon-<version>.dmg` |
+          | macOS (Intel + Apple silicon, universal2) | `RoastArtisan-mac-universal-<version>.dmg` |
+          | Windows x64 | `RoastArtisan-win-<version>.zip` |
+
+          ### These builds are unsigned
+
+          The macOS `.dmg` files are **not code-signed and not notarized**, and the
+          Windows `.zip` is **not signed**. Your operating system will warn you the
+          first time you open the app:
+
+          * **macOS / Gatekeeper** — "RoastArtisan cannot be opened because the
+            developer cannot be verified". Right-click (or Control-click) the app in
+            Finder, choose **Open**, then confirm; or allow it under
+            *System Settings → Privacy & Security*.
+          * **Windows / SmartScreen** — "Windows protected your PC". Choose
+            **More info → Run anyway**. The Windows build is a plain folder: unzip it
+            and run `RoastArtisan.exe`.
+
+          Verify the download before running it if you obtained it from anywhere other
+          than this Releases page.
+          NOTES
+
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            echo "release exists; updating notes"
+            gh release edit "${TAG}" --notes-file release-notes.md
+          else
+            gh release create "${TAG}" \
+              --draft \
+              --title "RoastArtisan ${TAG}" \
+              --notes-file release-notes.md
+          fi
+
+          gh release upload "${TAG}" assets/* --clobber
+          gh release view "${TAG}" --json name,isDraft,assets
