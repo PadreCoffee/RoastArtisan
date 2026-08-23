@@ -109,7 +109,7 @@ from PyQt6.QtWidgets import (QApplication, QWidget, QMessageBox, QLabel, QMainWi
                          QInputDialog, QGroupBox, QLineEdit,
                          QSizePolicy, QVBoxLayout, QHBoxLayout, QPushButton,
                          QLCDNumber, QSpinBox, QComboBox,
-                         QSlider,
+                         QSlider, QCheckBox,
                          QColorDialog, QFrame, QScrollArea, QProgressDialog,
                          QStyleFactory, QMenuBar, QMenu, QLayout, QDockWidget)
 from PyQt6.QtGui import (QScreen, QPageLayout, QAction, QImageReader, QWindow,
@@ -216,6 +216,7 @@ from artisanlib.util import (appFrozen, uchr, decodeLocal, decodeLocalStrict, en
         eventtime2string, toDim)
 
 from artisanlib.qtsingleapplication import QtSingleApplication
+from artisanlib import update_check
 
 
 
@@ -1361,6 +1362,30 @@ class EventActionThread(QThread):
         self.aw.eventaction_internal(self.action, self.command, self.eventtype)
 
 
+# fetches the latest GitHub release off the GUI thread; result (manual flag, response dict or None) is
+# marshalled back via ApplicationWindow.checkUpdateResultSignal, which is a QueuedConnection across threads
+class UpdateCheckThread(QThread):
+
+    def __init__(self, aw:'ApplicationWindow', manual:bool) -> None:
+        super().__init__()
+        self.aw:ApplicationWindow = aw
+        self.manual:bool = manual
+
+    @override
+    def run(self) -> None:
+        response:dict[str, Any]|None = None
+        try:
+            import requests
+            r = requests.get('https://api.github.com/repos/PadreCoffee/RoastArtisan/releases/latest', timeout=(2,4))
+            if r.status_code != 204 and r.headers.get('content-type', '').strip().startswith('application/json'):
+                json_response = r.json()
+                if isinstance(json_response, dict) and 'tag_name' in json_response:
+                    response = json_response
+        except Exception as ex: # pylint: disable=broad-except
+            _log.error('UpdateCheckThread request failed: %s', ex)
+        self.aw.checkUpdateResultSignal.emit(self.manual, response)
+
+
 #########################################################################################################
 
 # applies comma2dot as fixup to automatically turn numbers like "1,2" into valid numbers like "1.0" and the empty entry into "0.0"
@@ -1422,6 +1447,7 @@ class ApplicationWindow(QMainWindow):
     singleShotPhidgetsPulseOFF = pyqtSignal(int,int,str) # signal to be called from the eventaction thread to realise Phidgets pulse via QTimer in the main thread
     singleShotPhidgetsPulseOFFSerial = pyqtSignal(int,int,str,str)
     updatePlusStatusSignal = pyqtSignal() # can be called from another thread or a QTimer to trigger to update the plus icon status
+    checkUpdateResultSignal = pyqtSignal(bool, object) # emitted by UpdateCheckThread with (manual, GitHub release response dict or None)
     setTitleSignal = pyqtSignal(str,bool) # can be called from another thread or a QTimer to set the profile title in the main GUI thread
     sendmessageSignal = pyqtSignal(str,bool,str)
     openPropertiesSignal = pyqtSignal()
@@ -1469,7 +1495,7 @@ class ApplicationWindow(QMainWindow):
 
     __slots__ = [ 'locale_str', 'app', 'superusermode', 'sample_loop_running', 'time_stopped', 'plus_account', 'plus_account_id', 'plus_remember_credentials', 'plus_email', 'plus_server_url', 'plus_language', 'plus_subscription', 'percent_decimals',
         'plus_paidUntil', 'plus_rlimit', 'plus_used', 'plus_readonly', 'plus_user_id', 'appearance', 'mpl_fontproperties', 'full_screen_mode_active', 'processingKeyEvent', 'quickEventShortCut',
-        'eventaction_running_threads', 'curFile', 'MaxRecentFiles', 'recentFileActs', 'recentSettingActs',
+        'eventaction_running_threads', 'updateCheckThread', 'curFile', 'MaxRecentFiles', 'recentFileActs', 'recentSettingActs',
         'recentThemeActs', 'applicationDirectory', 'helpdialog', 'redrawTimer', 'lastLoadedProfile', 'lastLoadedBackground', 'LargeScaleLCDsFlag', 'largeScaleLCDs_dialog',
         'analysisresultsanno', 'segmentresultsanno', 'schedule_window', 'scheduleFlag', 'scheduled_items_uuids', 'largeLCDs_dialog', 'LargeLCDsFlag', 'largeDeltaLCDs_dialog', 'LargeDeltaLCDsFlag', 'largePIDLCDs_dialog',
         'LargePIDLCDsFlag', 'largeExtraLCDs_dialog', 'LargeExtraLCDsFlag', 'largePhasesLCDs_dialog', 'LargePhasesLCDsFlag', 'WebLCDs', 'WebLCDsPort', 'weblcds_server',
@@ -1602,6 +1628,7 @@ class ApplicationWindow(QMainWindow):
         self.pdf_rendering:bool = False # True while PDF is rendered by QWebEngineView
 
         self.eventaction_running_threads:list[EventActionThread] = []
+        self.updateCheckThread:UpdateCheckThread|None = None # holds the currently running UpdateCheckThread, if any
 
         #############################  Define variables that need to exist before calling settingsload()
         self.curFile:str|None = None
@@ -4353,11 +4380,13 @@ class ApplicationWindow(QMainWindow):
 
 #PLUS
         self.updatePlusStatusSignal.connect(self.updatePlusStatusSlot)
+        self.checkUpdateResultSignal.connect(self.checkUpdateResultSlot)
 
         QTimer.singleShot(2000,self.donate)
 
         QTimer.singleShot(0, self.logStartupTime)
         QTimer.singleShot(500, self.updateBadge)
+        QTimer.singleShot(3000, self.autoCheckUpdate)
 
         self.zoomInShortcut = QShortcut(QKeySequence.StandardKey.ZoomIn, self)
         self.zoomInShortcut.activated.connect(self.zoomIn)
@@ -24800,47 +24829,109 @@ class ApplicationWindow(QMainWindow):
     @pyqtSlot()
     @pyqtSlot(bool)
     def checkUpdate(self, _:bool = False) -> None:
-        update_url = '<a href="https://artisan-scope.org">https://artisan-scope.org</a>'
-        update_str = QApplication.translate('About', 'There was a problem retrieving the latest version information.  Please check your Internet connection, try again later, or check manually.')
-        import json
-        import json.decoder
-        try:
-            import requests
-            r = requests.get('https://api.github.com/repos/artisan-roaster-scope/artisan/releases/latest', timeout=(2,4))
-            if r.status_code != 204 and r.headers['content-type'].strip().startswith('application/json'):
-                response = r.json()
-                if 'tag_name' in response:
-                    tag_name = r.json()['tag_name']
-                    match = re.search(r'[\d\.]+',tag_name)
-                    if match is not None:
-                        latest = match.group(0)
-                        if latest > __version__:
-                            update_str = QApplication.translate('About', 'A new release is available.')
-                            update_str += '<br/><a href="https://github.com/artisan-roaster-scope/artisan/blob/master/wiki/ReleaseHistory.md">'
-                            update_str +=  QApplication.translate('About', 'Show Change list')
-                            update_str += '<br/><a href="https://github.com/artisan-roaster-scope/artisan/releases/tag/' + str(tag_name) + '">'
-                            update_str +=  QApplication.translate('About', 'Download Release') + ' ' + str(tag_name)
-                        elif latest == __version__ :
-                            update_str = QApplication.translate('About', 'You are using the latest release.')
-                        elif latest < __version__:
-                            update_str = QApplication.translate('About', 'You are using a beta continuous build.')
-                            update_str += '<br/><br/>' + QApplication.translate('About', 'You will see a notice here once a new official release is available.')
-        except json.decoder.JSONDecodeError as e:
-            if not e.doc:
-                _log.error('Empty response in checkUpdate.')
-            else:
-                _log.error("Decoding error at char %s (line %s, col %s): '%s'", e.pos, e.lineno, e.colno, e.doc)
-        except ValueError:
-            _log.error('checkUpdate response content is not valid JSON')
-        except Exception as ex: # pylint: disable=broad-except
-            _log.exception(ex)
-            _a, _b, exc_tb = sys.exc_info()
-            self.qmc.adderror((QApplication.translate('Error Message','Exception:') + ' checkUpdate() {0}').format(str(ex)),getattr(exc_tb, 'tb_lineno', '?'))
+        # manual "Check for Updates": always shows a result, ignoring the 24h rate-limit and the skipped-version setting
+        self._startUpdateCheckThread(manual=True)
 
+    @pyqtSlot()
+    @pyqtSlot(bool)
+    def autoCheckUpdate(self, _:bool = False) -> None:
+        # rate-limited (at most once/24h), silent-on-failure startup check; never blocks or delays startup
+        try:
+            settings = QSettings()
+            auto_enabled = True
+            if settings.contains('autocheckupdate'):
+                auto_enabled = toBool(settings.value('autocheckupdate'))
+            if not auto_enabled:
+                return
+            last_check = 0
+            if settings.contains('lastupdatecheck'):
+                last_check = toInt(settings.value('lastupdatecheck'))
+            if libtime.time() - last_check < 24 * 60 * 60:
+                return
+            self._startUpdateCheckThread(manual=False)
+        except Exception as ex: # pylint: disable=broad-except
+            _log.error('autoCheckUpdate failed: %s', ex)
+
+    def _startUpdateCheckThread(self, manual:bool) -> None:
+        if self.updateCheckThread is not None:
+            return # a check is already in flight
+        self.updateCheckThread = UpdateCheckThread(self, manual)
+        self.updateCheckThread.finished.connect(self.updateCheckThread.deleteLater)
+        self.updateCheckThread.start()
+
+    # receives (manual, GitHub release response dict or None) from UpdateCheckThread, marshalled onto the GUI thread
+    @pyqtSlot(bool, object)
+    def checkUpdateResultSlot(self, manual:bool, response:object) -> None:
+        self.updateCheckThread = None
+        settings = QSettings()
+        try:
+            response_dict = response if isinstance(response, dict) else None
+            if response_dict is not None and 'tag_name' in response_dict:
+                tag_name = str(response_dict['tag_name'])
+                if update_check.is_newer(tag_name, __version__):
+                    skip_version = toString(settings.value('skipupdateversion')) if settings.contains('skipupdateversion') else ''
+                    if manual or tag_name != skip_version:
+                        self._showNewUpdateDialog(response_dict, tag_name)
+                elif manual:
+                    self._showUpToDateDialog()
+            elif manual:
+                self._showUpdateCheckErrorDialog()
+        except Exception as ex: # pylint: disable=broad-except
+            _log.error('checkUpdateResultSlot failed: %s', ex)
+        finally:
+            # the auto-check rate limit is keyed off completed checks, success or failure, to avoid hammering the API
+            if not manual:
+                settings.setValue('lastupdatecheck', int(libtime.time()))
+                settings.sync()
+
+    def _showUpdateCheckErrorDialog(self) -> None:
         box = QMessageBox(self)
         box.about(self,
                 QApplication.translate('About', 'Update status'),
-                f"""<p>{update_str}</p>{update_url}""")
+                '<p>' + QApplication.translate('About', 'There was a problem retrieving the latest version information.  Please check your Internet connection, try again later, or check manually.') + '</p>')
+
+    def _showUpToDateDialog(self) -> None:
+        box = QMessageBox(self)
+        box.about(self,
+                QApplication.translate('About', 'Update status'),
+                '<p>' + QApplication.translate('About', 'You are using the latest release.') + '</p>')
+
+    def _showNewUpdateDialog(self, response:dict, tag_name:str) -> None:
+        html_url = str(response.get('html_url') or 'https://github.com/PadreCoffee/RoastArtisan/releases')
+        assets = response.get('assets') or []
+        download_url = update_check.select_asset(assets, platform.system(), platform.machine())
+        os_label = {'Windows': 'Windows', 'Darwin': 'macOS'}.get(platform.system(), platform.system())
+
+        settings = QSettings()
+        auto_enabled = True
+        if settings.contains('autocheckupdate'):
+            auto_enabled = toBool(settings.value('autocheckupdate'))
+
+        box = QMessageBox(self)
+        box.setWindowTitle(QApplication.translate('About', 'Update status'))
+        box.setTextFormat(Qt.TextFormat.RichText)
+        box.setText('<p>' + QApplication.translate('About', 'A new release is available ({0}).').format(tag_name) + '</p>')
+        checkbox = QCheckBox(QApplication.translate('About', 'Check for updates automatically'), box)
+        checkbox.setChecked(auto_enabled)
+        box.setCheckBox(checkbox)
+
+        download_button = (box.addButton(QApplication.translate('About', 'Download for {0}').format(os_label), QMessageBox.ButtonRole.ActionRole)
+                            if download_url is not None else None)
+        release_page_button = box.addButton(QApplication.translate('About', "All files / what's new"), QMessageBox.ButtonRole.ActionRole)
+        skip_button = box.addButton(QApplication.translate('About', 'Skip this version'), QMessageBox.ButtonRole.ActionRole)
+        box.addButton(QApplication.translate('About', 'Later'), QMessageBox.ButtonRole.RejectRole)
+
+        box.exec()
+
+        settings.setValue('autocheckupdate', checkbox.isChecked())
+        clicked = box.clickedButton()
+        if download_button is not None and clicked is download_button:
+            QDesktopServices.openUrl(QUrl(download_url, QUrl.ParsingMode.TolerantMode))
+        elif clicked is release_page_button:
+            QDesktopServices.openUrl(QUrl(html_url, QUrl.ParsingMode.TolerantMode))
+        elif clicked is skip_button:
+            settings.setValue('skipupdateversion', tag_name)
+        settings.sync()
 
     def applicationscreenshot(self) -> None:
         imag = self.grab()
