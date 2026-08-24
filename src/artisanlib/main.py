@@ -1362,7 +1362,7 @@ class EventActionThread(QThread):
         self.aw.eventaction_internal(self.action, self.command, self.eventtype)
 
 
-# fetches the latest GitHub release off the GUI thread; result (manual flag, response dict or None) is
+# fetches the cloud update manifest off the GUI thread; result (manual flag, response dict or None) is
 # marshalled back via ApplicationWindow.checkUpdateResultSignal, which is a QueuedConnection across threads
 class UpdateCheckThread(QThread):
 
@@ -1376,10 +1376,12 @@ class UpdateCheckThread(QThread):
         response:dict[str, Any]|None = None
         try:
             import requests
-            r = requests.get('https://api.github.com/repos/PadreCoffee/RoastArtisan/releases/latest', timeout=(2,4))
-            if r.status_code != 204 and r.headers.get('content-type', '').strip().startswith('application/json'):
+            # served as application/octet-stream (it shares its nginx location with the
+            # installers) so the body is parsed as JSON without checking Content-Type
+            r = requests.get('https://roastlocal.ru/client/latest.json', timeout=(2,4))
+            if r.status_code == 200:
                 json_response = r.json()
-                if isinstance(json_response, dict) and 'tag_name' in json_response:
+                if isinstance(json_response, dict) and 'version' in json_response and isinstance(json_response.get('downloads'), dict):
                     response = json_response
         except Exception as ex: # pylint: disable=broad-except
             _log.error('UpdateCheckThread request failed: %s', ex)
@@ -1447,7 +1449,7 @@ class ApplicationWindow(QMainWindow):
     singleShotPhidgetsPulseOFF = pyqtSignal(int,int,str) # signal to be called from the eventaction thread to realise Phidgets pulse via QTimer in the main thread
     singleShotPhidgetsPulseOFFSerial = pyqtSignal(int,int,str,str)
     updatePlusStatusSignal = pyqtSignal() # can be called from another thread or a QTimer to trigger to update the plus icon status
-    checkUpdateResultSignal = pyqtSignal(bool, object) # emitted by UpdateCheckThread with (manual, GitHub release response dict or None)
+    checkUpdateResultSignal = pyqtSignal(bool, object) # emitted by UpdateCheckThread with (manual, cloud manifest dict or None)
     setTitleSignal = pyqtSignal(str,bool) # can be called from another thread or a QTimer to set the profile title in the main GUI thread
     sendmessageSignal = pyqtSignal(str,bool,str)
     openPropertiesSignal = pyqtSignal()
@@ -24859,19 +24861,19 @@ class ApplicationWindow(QMainWindow):
         self.updateCheckThread.finished.connect(self.updateCheckThread.deleteLater)
         self.updateCheckThread.start()
 
-    # receives (manual, GitHub release response dict or None) from UpdateCheckThread, marshalled onto the GUI thread
+    # receives (manual, cloud manifest dict or None) from UpdateCheckThread, marshalled onto the GUI thread
     @pyqtSlot(bool, object)
     def checkUpdateResultSlot(self, manual:bool, response:object) -> None:
         self.updateCheckThread = None
         settings = QSettings()
         try:
             response_dict = response if isinstance(response, dict) else None
-            if response_dict is not None and 'tag_name' in response_dict:
-                tag_name = str(response_dict['tag_name'])
-                if update_check.is_newer(tag_name, __version__):
+            if response_dict is not None and 'version' in response_dict:
+                version = str(response_dict['version'])
+                if update_check.is_newer(version, __version__):
                     skip_version = toString(settings.value('skipupdateversion')) if settings.contains('skipupdateversion') else ''
-                    if manual or tag_name != skip_version:
-                        self._showNewUpdateDialog(response_dict, tag_name)
+                    if manual or version != skip_version:
+                        self._showNewUpdateDialog(response_dict, version)
                 elif manual:
                     self._showUpToDateDialog()
             elif manual:
@@ -24896,10 +24898,9 @@ class ApplicationWindow(QMainWindow):
                 QApplication.translate('About', 'Update status'),
                 '<p>' + QApplication.translate('About', 'You are using the latest release.') + '</p>')
 
-    def _showNewUpdateDialog(self, response:dict, tag_name:str) -> None:
-        html_url = str(response.get('html_url') or 'https://github.com/PadreCoffee/RoastArtisan/releases')
-        assets = response.get('assets') or []
-        download_url = update_check.select_asset(assets, platform.system(), platform.machine())
+    def _showNewUpdateDialog(self, response:dict, version:str) -> None:
+        downloads = response.get('downloads') or {}
+        download_url = update_check.select_download(downloads, platform.system(), platform.machine())
         os_label = {'Windows': 'Windows', 'Darwin': 'macOS'}.get(platform.system(), platform.system())
 
         settings = QSettings()
@@ -24910,14 +24911,16 @@ class ApplicationWindow(QMainWindow):
         box = QMessageBox(self)
         box.setWindowTitle(QApplication.translate('About', 'Update status'))
         box.setTextFormat(Qt.TextFormat.RichText)
-        box.setText('<p>' + QApplication.translate('About', 'A new release is available ({0}).').format(tag_name) + '</p>')
+        text = '<p>' + QApplication.translate('About', 'A new release is available ({0}).').format(version) + '</p>'
+        if download_url is None:
+            text += '<p>' + QApplication.translate('About', 'There is no build for this system.') + '</p>'
+        box.setText(text)
         checkbox = QCheckBox(QApplication.translate('About', 'Check for updates automatically'), box)
         checkbox.setChecked(auto_enabled)
         box.setCheckBox(checkbox)
 
         download_button = (box.addButton(QApplication.translate('About', 'Download for {0}').format(os_label), QMessageBox.ButtonRole.ActionRole)
                             if download_url is not None else None)
-        release_page_button = box.addButton(QApplication.translate('About', "All files / what's new"), QMessageBox.ButtonRole.ActionRole)
         skip_button = box.addButton(QApplication.translate('About', 'Skip this version'), QMessageBox.ButtonRole.ActionRole)
         box.addButton(QApplication.translate('About', 'Later'), QMessageBox.ButtonRole.RejectRole)
 
@@ -24927,10 +24930,8 @@ class ApplicationWindow(QMainWindow):
         clicked = box.clickedButton()
         if download_button is not None and clicked is download_button:
             QDesktopServices.openUrl(QUrl(download_url, QUrl.ParsingMode.TolerantMode))
-        elif clicked is release_page_button:
-            QDesktopServices.openUrl(QUrl(html_url, QUrl.ParsingMode.TolerantMode))
         elif clicked is skip_button:
-            settings.setValue('skipupdateversion', tag_name)
+            settings.setValue('skipupdateversion', version)
         settings.sync()
 
     def applicationscreenshot(self) -> None:

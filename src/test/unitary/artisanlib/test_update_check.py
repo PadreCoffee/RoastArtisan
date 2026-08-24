@@ -1,6 +1,6 @@
 """Unit tests for artisanlib.update_check (pure helpers, no Qt, no network)."""
 
-from artisanlib.update_check import is_newer, parse_version, select_asset
+from artisanlib.update_check import is_newer, parse_version, select_download
 
 
 def test_parse_version_plain() -> None:
@@ -41,40 +41,33 @@ def test_is_newer_malformed_is_false() -> None:
     assert is_newer('4.0.10', 'not-a-version') is False
 
 
-def _asset(name: str) -> dict:
-    return {'name': name, 'browser_download_url': f'https://example.com/{name}'}
+_DOWNLOADS = {
+    'mac-silicon': 'https://roastlocal.ru/dl/mac-silicon',
+    'mac-universal': 'https://roastlocal.ru/dl/mac-universal',
+    'win': 'https://roastlocal.ru/dl/win',
+}
 
 
-def test_select_asset_windows() -> None:
-    assets = [_asset('RoastArtisan-win-4.0.10.zip'), _asset('RoastArtisan-mac-universal-4.0.10.dmg')]
-    assert select_asset(assets, 'Windows', 'AMD64') == 'https://example.com/RoastArtisan-win-4.0.10.zip'
+def test_select_download_windows() -> None:
+    assert select_download(_DOWNLOADS, 'Windows', 'AMD64') == 'https://roastlocal.ru/dl/win'
 
 
-def test_select_asset_mac_arm64_picks_silicon() -> None:
-    assets = [
-        _asset('RoastArtisan-mac-silicon-4.0.10.dmg'),
-        _asset('RoastArtisan-mac-universal-4.0.10.dmg'),
-    ]
-    assert select_asset(assets, 'Darwin', 'arm64') == 'https://example.com/RoastArtisan-mac-silicon-4.0.10.dmg'
+def test_select_download_mac_arm64_picks_silicon() -> None:
+    assert select_download(_DOWNLOADS, 'Darwin', 'arm64') == 'https://roastlocal.ru/dl/mac-silicon'
 
 
-def test_select_asset_mac_x86_64_picks_universal() -> None:
-    assets = [
-        _asset('RoastArtisan-mac-silicon-4.0.10.dmg'),
-        _asset('RoastArtisan-mac-universal-4.0.10.dmg'),
-    ]
-    assert select_asset(assets, 'Darwin', 'x86_64') == 'https://example.com/RoastArtisan-mac-universal-4.0.10.dmg'
+def test_select_download_mac_x86_64_picks_universal() -> None:
+    assert select_download(_DOWNLOADS, 'Darwin', 'x86_64') == 'https://roastlocal.ru/dl/mac-universal'
 
 
-def test_select_asset_mac_unknown_arch_picks_universal() -> None:
-    assets = [
-        _asset('RoastArtisan-mac-silicon-4.0.10.dmg'),
-        _asset('RoastArtisan-mac-universal-4.0.10.dmg'),
-    ]
-    assert select_asset(assets, 'Darwin', 'ppc') == 'https://example.com/RoastArtisan-mac-universal-4.0.10.dmg'
+def test_select_download_mac_unknown_arch_picks_universal() -> None:
+    assert select_download(_DOWNLOADS, 'Darwin', 'ppc') == 'https://roastlocal.ru/dl/mac-universal'
 
 
-def test_select_asset_no_match_returns_none() -> None:
-    assets = [_asset('RoastArtisan-win-4.0.10.zip')]
-    assert select_asset(assets, 'Linux', 'x86_64') is None
-    assert select_asset([], 'Windows', 'AMD64') is None
+def test_select_download_unknown_system_returns_none() -> None:
+    assert select_download(_DOWNLOADS, 'Linux', 'x86_64') is None
+
+
+def test_select_download_missing_key_returns_none() -> None:
+    assert select_download({'mac-universal': 'https://roastlocal.ru/dl/mac-universal'}, 'Windows', 'AMD64') is None
+    assert select_download({}, 'Darwin', 'arm64') is None

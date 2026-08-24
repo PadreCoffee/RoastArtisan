@@ -102,7 +102,7 @@ else:
     QT_TRANSL = os.environ.get('QT_TRANSL') or os.path.join(PYTHON, 'Lib', 'site-packages', 'PyQt6', 'Qt6', 'translations')
 
 NAME = 'RoastArtisan'
-TARGET = 'dist\\' + NAME + '\\'
+TARGET = 'dist\\'
 PYTHON_PACKAGES = PYTHON + r'\Lib\site-packages'
 if os.environ.get('APPVEYOR'):
     PYQT_QT = PYTHON_PACKAGES + r'\PyQt' + PYQT + r'\Qt'
@@ -145,6 +145,12 @@ datas = collect_data_files('bleak', subdir=r'backends\winrt')
 datas += collect_data_files('certifi')
 
 binaries = collect_dynamic_libs('bleak')
+# onefile mode has no on-disk _internal folder to copy DLLs into after the build
+# (everything is packed into the .exe and extracted to a temp dir at runtime), so
+# these two manually-collected DLLs -- previously copied post-build -- are embedded
+# here instead, at the same relative locations the yoctopuce/snap7 packages expect
+binaries.append((os.path.join(YOCTO_BIN, 'yapi64.dll'), r'yoctopuce\cdll'))
+binaries.append((os.path.join(SNAP7_BIN, 'snap7.dll'), '.'))
 block_cipher = None
 
 a = Analysis(['artisan.py'],
@@ -164,22 +170,19 @@ pyz = PYZ(a.pure, a.zipped_data,cipher=block_cipher)
 
 exe = EXE(pyz,
           a.scripts,
-          exclude_binaries=True,
+          a.binaries,
+          a.zipfiles,
+          a.datas,
+          [],
           name=NAME,
           debug=False,
           strip=False, # =True fails
           upx=True, # not installed
+          upx_exclude=[],
+          runtime_tmpdir=None,
           icon='roastartisan.ico',
           version='version_info-win.txt',
           console=False) # was True
-
-coll = COLLECT(exe,
-               a.binaries,
-               a.zipfiles,
-               a.datas,
-               strip=False, # =True fails
-               upx=True, # not installed
-               name=NAME)
 
 
 ###################################
@@ -243,13 +246,9 @@ for tr in [
     copy_file(QT_TRANSL + '\\' + tr, TARGET + 'translations',False)
 
 
-# YOCTO HACK BEGIN: manually copy over the dlls
-make_dir(TARGET + r'_internal\yoctopuce\cdll')
-copy_file(YOCTO_BIN + r'\yapi64.dll', TARGET + r'_internal\yoctopuce\cdll')
-# YOCTO HACK END
-
-# copy Snap7 lib
-copy_file(SNAP7_BIN + r'\snap7.dll', TARGET + r'_internal')
+# NOTE: yoctopuce's yapi64.dll and snap7's snap7.dll are no longer copied here --
+# onefile mode has no on-disk _internal folder for them to land in after the build,
+# so they're embedded directly into the .exe via Analysis(binaries=...) above instead.
 
 for fn in [
     'roastartisan.png',  # in-app window icon (artisanlib.main loads roastartisan.png)
@@ -313,125 +312,132 @@ xcopy_files(r'includes\Icons', TARGET + 'Icons')
 ###################################
 # Remove unneeded files and folders
 ###################################
-# remove unused translations of unused Qt modules
+# NOTE: onefile mode has no on-disk _internal folder after the build (everything is
+# packed into the .exe and extracted to a temp dir at runtime), so none of this
+# post-build trimming has anything to operate on any more and the whole section is
+# skipped below. The Qt translations, babel locale-data, and unused Qt/Quick modules
+# listed here all still end up embedded in the .exe, which is expected to make it
+# noticeably larger than the old trimmed onedir folder was.
 rootdir = f'{TARGET}_internal'
-SUPPORTED_LANGUAGES = ['ar', 'cs', 'da', 'de','el','en','es','fa','fi','fr','gd', 'he','hu','id','it','ja','ko','lv', 'nl','no','pl','pt_BR','pt','sk', 'sv','th','tr','uk','vi','zh_CN','zh_TW']
+if os.path.isdir(rootdir):
+    SUPPORTED_LANGUAGES = ['ar', 'cs', 'da', 'de','el','en','es','fa','fi','fr','gd', 'he','hu','id','it','ja','ko','lv', 'nl','no','pl','pt_BR','pt','sk', 'sv','th','tr','uk','vi','zh_CN','zh_TW']
 
-qt_trans_prefix_keep = {
-    'qtbase',
-    'qt'
-}
-qt_trans_file_keep = {
-    'en-US.pak'
-}
-qt_trans_prefix_delete = {
-    'qt_help'
-}
+    qt_trans_prefix_keep = {
+        'qtbase',
+        'qt'
+    }
+    qt_trans_file_keep = {
+        'en-US.pak'
+    }
+    qt_trans_prefix_delete = {
+        'qt_help'
+    }
 
-logging.info(">>>>> Removing unneeded Qt translation files")
-for qt_dir in [r'PyQt5\Qt5\translations', r'PyQt6\Qt6\translations']:
-    qt = rootdir + '\\' + qt_dir
-    for root, _, files in os.walk(qt):
+    logging.info(">>>>> Removing unneeded Qt translation files")
+    for qt_dir in [r'PyQt5\Qt5\translations', r'PyQt6\Qt6\translations']:
+        qt = rootdir + '\\' + qt_dir
+        for root, _, files in os.walk(qt):
+            for file in files:
+                if (any(file.startswith(f'{x}_') for x in qt_trans_prefix_delete) or
+                        not ( (any(file.startswith(f'{x}_') for x in qt_trans_prefix_keep) and any(file.endswith(f'_{x}.qm') for x in SUPPORTED_LANGUAGES)) or
+                             any(file == f'{x}' for x in qt_trans_file_keep))):
+                    file_path = os.path.join(root, file)
+                    del_file(file_path, True)
+                    #logging.info(file_path)
+
+    logging.info(">>>>> Removing unneeded language support from babel")
+    for root, _, files in os.walk(rootdir + r'\babel\locale-data'):
         for file in files:
-            if (any(file.startswith(f'{x}_') for x in qt_trans_prefix_delete) or
-                    not ( (any(file.startswith(f'{x}_') for x in qt_trans_prefix_keep) and any(file.endswith(f'_{x}.qm') for x in SUPPORTED_LANGUAGES)) or
-                         any(file == f'{x}' for x in qt_trans_file_keep))):
+            if (file.endswith('.dat') and
+                    file != 'root.dat' and not (file.startswith('zh') and file.endswith('.dat')) and
+                    (('_' not in file and file.split('.')[0] not in SUPPORTED_LANGUAGES) or
+                        ('_' in file and file.split('.')[0] not in SUPPORTED_LANGUAGES))):
                 file_path = os.path.join(root, file)
                 del_file(file_path, True)
                 #logging.info(file_path)
 
-logging.info(">>>>> Removing unneeded language support from babel")
-for root, _, files in os.walk(rootdir + r'\babel\locale-data'):
-    for file in files:
-        if (file.endswith('.dat') and
-                file != 'root.dat' and not (file.startswith('zh') and file.endswith('.dat')) and
-                (('_' not in file and file.split('.')[0] not in SUPPORTED_LANGUAGES) or
-                    ('_' in file and file.split('.')[0] not in SUPPORTED_LANGUAGES))):
-            file_path = os.path.join(root, file)
-            del_file(file_path, True)
-            #logging.info(file_path)
+    # remove unneeded files and folders from Windows
+    logging.info(">>>>> Removing unneeded files")
+    for fn in [
+        r'_internal\PyQt6\Qt6\bin\Qt6Multimedia.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6MultimediaQuick.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6PdfQuick.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6PositioningQuick.dll',
+        #r'_internal\PyQt6\Qt6\bin\Qt6QmlWorkerScript.dll',  # required for pyqt6 v6.8+
+        r'_internal\PyQt6\Qt6\bin\Qt6Quick3D.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6Quick3DAssetImport.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6Quick3DAssetUtils.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6Quick3DEffects.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6Quick3DHelpers.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6Quick3DHelpersImpl.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6Quick3DParticles.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6Quick3DPhysics.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6Quick3DPhysicsHelpers.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6Quick3DRuntimeRender.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6Quick3DSpatialAudio.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6Quick3DUtils.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2Basic.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2BasicStyleImpl.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2Fusion.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2FusionStyleImpl.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2Imagine.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2ImagineStyleImpl.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2Impl.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2Material.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2MaterialStyleImpl.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2Universal.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2UniversalStyleImpl.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickDialogs2.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickDialogs2QuickImpl.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickDialogs2Utils.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickLayouts.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickParticles.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickShapes.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickTemplates2.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickTest.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickTimeline.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6QuickTimelineBlendTrees.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6RemoteObjects.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6RemoteObjectsQml.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6Sensors.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6SensorsQuick.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6SerialPort.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6ShaderTools.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6SpatialAudio.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6Test.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6TextToSpeech.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6WebChannelQuick.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6WebEngineQuick.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6WebEngineQuickDelegatesQml.dll',
+        r'_internal\PyQt6\Qt6\bin\Qt6WebSockets.dll',
+        r'_internal\PyQt6\Qt6\plugins\platforms\qminimal.dll',
+        r'_internal\PyQt6\Qt6\plugins\platforms\qoffscreen.dll',
+        r'_internal\PyQt6\Qt6\plugins\imageformats\qicns.dll',
+        r'_internal\PyQt6\Qt6\plugins\imageformats\qtga.dll',
+        r'_internal\PyQt6\Qt6\plugins\imageformats\qtiff.dll',
+        r'_internal\PyQt6\Qt6\plugins\imageformats\qwebp.dll',
+        ]:
+        del_file(f'{TARGET}{fn}', True)
 
-# remove unneeded files and folders from Windows
-logging.info(">>>>> Removing unneeded files")
-for fn in [
-    r'_internal\PyQt6\Qt6\bin\Qt6Multimedia.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6MultimediaQuick.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6PdfQuick.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6PositioningQuick.dll',
-    #r'_internal\PyQt6\Qt6\bin\Qt6QmlWorkerScript.dll',  # required for pyqt6 v6.8+
-    r'_internal\PyQt6\Qt6\bin\Qt6Quick3D.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6Quick3DAssetImport.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6Quick3DAssetUtils.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6Quick3DEffects.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6Quick3DHelpers.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6Quick3DHelpersImpl.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6Quick3DParticles.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6Quick3DPhysics.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6Quick3DPhysicsHelpers.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6Quick3DRuntimeRender.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6Quick3DSpatialAudio.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6Quick3DUtils.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2Basic.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2BasicStyleImpl.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2Fusion.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2FusionStyleImpl.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2Imagine.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2ImagineStyleImpl.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2Impl.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2Material.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2MaterialStyleImpl.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2Universal.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickControls2UniversalStyleImpl.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickDialogs2.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickDialogs2QuickImpl.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickDialogs2Utils.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickLayouts.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickParticles.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickShapes.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickTemplates2.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickTest.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickTimeline.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6QuickTimelineBlendTrees.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6RemoteObjects.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6RemoteObjectsQml.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6Sensors.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6SensorsQuick.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6SerialPort.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6ShaderTools.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6SpatialAudio.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6Test.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6TextToSpeech.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6WebChannelQuick.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6WebEngineQuick.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6WebEngineQuickDelegatesQml.dll',
-    r'_internal\PyQt6\Qt6\bin\Qt6WebSockets.dll',
-    r'_internal\PyQt6\Qt6\plugins\platforms\qminimal.dll',
-    r'_internal\PyQt6\Qt6\plugins\platforms\qoffscreen.dll',
-    r'_internal\PyQt6\Qt6\plugins\imageformats\qicns.dll',
-    r'_internal\PyQt6\Qt6\plugins\imageformats\qtga.dll',
-    r'_internal\PyQt6\Qt6\plugins\imageformats\qtiff.dll',
-    r'_internal\PyQt6\Qt6\plugins\imageformats\qwebp.dll',
-    ]:
-    del_file(f'{TARGET}{fn}', True)
+    logging.info(">>>>> Removing unneeded folders")
+    for dp in [
+        r'_internal\PyQt6\Qt6\plugins\generic',
+        r'_internal\PyQt6\Qt6\plugins\networkinformation',
+        r'_internal\PyQt6\Qt6\plugins\position',
+        r'_internal\PyQt6\Qt6\plugins\tls',
+        r'_internal\PyQt6\Qt6\qml',
+        r'_internal\matplotlib\mpl-data\sample_data',
+        ]:
+        remove_dir(f'{TARGET}{dp}', True)
 
 # The api-ms-win*.dll files are generated on Appveyer CI and are not required
+# (safe to keep unguarded: os.walk over TARGET is a no-op if nothing matches)
 for root, _, files in os.walk(TARGET):
     for file in files:
         if (file.startswith('api-ms-win')):
             file_path = os.path.join(root, file)
             del_file(file_path, True)
-
-logging.info(">>>>> Removing unneeded folders")
-for dp in [
-    r'_internal\PyQt6\Qt6\plugins\generic',
-    r'_internal\PyQt6\Qt6\plugins\networkinformation',
-    r'_internal\PyQt6\Qt6\plugins\position',
-    r'_internal\PyQt6\Qt6\plugins\tls',
-    r'_internal\PyQt6\Qt6\qml',
-    r'_internal\matplotlib\mpl-data\sample_data',
-    ]:
-    remove_dir(f'{TARGET}{dp}', True)
 
 
 ###################################

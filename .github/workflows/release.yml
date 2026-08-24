@@ -4,10 +4,16 @@
 #
 #   RoastArtisan-mac-silicon-<VER>.dmg    arm64 only          (src/artisan-mac.spec)
 #   RoastArtisan-mac-universal-<VER>.dmg  arm64 + x86_64      (src/artisan-mac_universal.spec)
-#   RoastArtisan-win-<VER>.zip            x86_64 onedir       (src/artisan-win-local.spec)
+#   RoastArtisan-win-<VER>.exe            x86_64 onefile      (src/artisan-win-local.spec)
 #
 # All builds are UNSIGNED and UNNOTARIZED.  macOS Gatekeeper and Windows
 # SmartScreen will warn on first launch; this is stated in the release body.
+#
+# After the three builds, a publish-to-cloud job PUTs each artifact to its slot on
+# https://roastlocal.ru and POSTs the build version to /client/publish, so
+# RoastArtisan's own in-app update check (artisanlib/update_check.py) can offer it.
+# The GitHub Release created below is kept only as a private build archive -- end
+# users never see this repo or its Releases page.
 
 name: Release
 
@@ -289,12 +295,14 @@ jobs:
           retention-days: 7
 
   # ---------------------------------------------------------------------------
-  # 3. Windows x86_64 onedir, zipped
+  # 3. Windows x86_64, onefile .exe
   # ---------------------------------------------------------------------------
   build-windows:
-    name: windows (onedir zip)
+    name: windows (onefile exe)
     runs-on: windows-latest
     timeout-minutes: 90
+    outputs:
+      artisan_version: ${{ steps.stamp.outputs.version }}
     steps:
       - uses: actions/checkout@v6
 
@@ -341,6 +349,7 @@ jobs:
           if (-not (Test-Path vc_redist.x64.exe)) { throw "vc_redist download failed" }
 
       - name: Stamp git revision and generate version_info-win.txt
+        id: stamp
         shell: pwsh
         working-directory: src
         run: |
@@ -358,6 +367,7 @@ jobs:
           $version = python -c "import artisanlib; print(artisanlib.__version__)"
           $build   = python -c "import artisanlib; print(artisanlib.__build__)"
           "ARTISAN_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           create-version-file version-metadata.yml --outfile version_info-win.txt --version "$version.$build"
           if (-not (Test-Path version_info-win.txt)) { throw "version_info-win.txt not generated" }
 
@@ -371,20 +381,19 @@ jobs:
         working-directory: src
         run: pyinstaller -y --log-level=INFO artisan-win-local.spec
 
-      - name: Zip the onedir distribution
+      - name: Rename the onefile executable
         shell: pwsh
         working-directory: src
         run: |
-          $zip = "RoastArtisan-win-$env:ARTISAN_VERSION.zip"
-          # 7z is preinstalled and handles the ~1 GB tree far better than Compress-Archive
-          7z a -tzip -mx=5 "$zip" ".\dist\RoastArtisan" | Select-Object -Last 5
-          if (-not (Test-Path $zip)) { throw "zip not produced" }
-          Get-Item $zip | Format-List Name, Length
+          $exe = "RoastArtisan-win-$env:ARTISAN_VERSION.exe"
+          if (-not (Test-Path "dist\RoastArtisan.exe")) { throw "dist\RoastArtisan.exe not produced" }
+          Move-Item "dist\RoastArtisan.exe" $exe
+          Get-Item $exe | Format-List Name, Length
 
       - uses: actions/upload-artifact@v4
         with:
-          name: windows-zip
-          path: src/RoastArtisan-win-*.zip
+          name: windows-exe
+          path: src/RoastArtisan-win-*.exe
           if-no-files-found: error
           retention-days: 7
 
@@ -415,18 +424,22 @@ jobs:
           echo "publishing to tag: ${TAG}"
 
           cat > release-notes.md <<'NOTES'
-          ## RoastArtisan release
+          ## RoastArtisan release (private build archive)
+
+          This repo is not the distribution channel: end users get updates through
+          RoastArtisan's own in-app update check, backed by the roastlocal.ru cloud
+          manifest. These assets exist here only as a build record.
 
           | Platform | Asset |
           | --- | --- |
           | macOS (Apple silicon) | `RoastArtisan-mac-silicon-<version>.dmg` |
           | macOS (Intel + Apple silicon, universal2) | `RoastArtisan-mac-universal-<version>.dmg` |
-          | Windows x64 | `RoastArtisan-win-<version>.zip` |
+          | Windows x64 | `RoastArtisan-win-<version>.exe` |
 
           ### These builds are unsigned
 
           The macOS `.dmg` files are **not code-signed and not notarized**, and the
-          Windows `.zip` is **not signed**. Your operating system will warn you the
+          Windows `.exe` is **not signed**. Your operating system will warn you the
           first time you open the app:
 
           * **macOS / Gatekeeper** — "RoastArtisan cannot be opened because the
@@ -434,11 +447,11 @@ jobs:
             Finder, choose **Open**, then confirm; or allow it under
             *System Settings → Privacy & Security*.
           * **Windows / SmartScreen** — "Windows protected your PC". Choose
-            **More info → Run anyway**. The Windows build is a plain folder: unzip it
-            and run `RoastArtisan.exe`.
+            **More info → Run anyway**. The Windows build is a single onefile
+            executable: just run `RoastArtisan-win-<version>.exe`.
 
           Verify the download before running it if you obtained it from anywhere other
-          than this Releases page.
+          than the official RoastArtisan cloud.
           NOTES
 
           if gh release view "${TAG}" >/dev/null 2>&1; then
@@ -453,3 +466,106 @@ jobs:
 
           gh release upload "${TAG}" assets/* --clobber
           gh release view "${TAG}" --json name,isDraft,assets
+
+  # ---------------------------------------------------------------------------
+  # 5. Publish to the roastlocal.ru cloud (this is what the client's in-app
+  #    update check actually reads -- see artisanlib/update_check.py). The
+  #    GitHub Release above is a private build archive; end users never see it.
+  # ---------------------------------------------------------------------------
+  publish-cloud:
+    name: publish to roastlocal.ru cloud
+    needs: [build-mac-silicon, build-mac-universal, build-windows]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUD_BASE: https://roastlocal.ru/platform/v1/client
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+          merge-multiple: true
+
+      - name: List downloaded assets
+        run: ls -lh assets
+
+      - name: Upload mac-silicon artifact
+        env:
+          TOKEN: ${{ secrets.CLIENT_RELEASE_UPLOAD_TOKEN }}
+        run: |
+          set -euo pipefail
+          file=$(ls assets/RoastArtisan-mac-silicon-*.dmg)
+          echo "uploading ${file} -> mac-silicon"
+          code=$(curl -sS -o /tmp/resp.txt -w '%{http_code}' \
+            -X PUT "$CLOUD_BASE/mac-silicon/artifact" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary "@${file}")
+          echo "HTTP ${code}"; cat /tmp/resp.txt
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            echo "::error::mac-silicon upload failed with HTTP ${code}"
+            exit 1
+          fi
+
+      - name: Upload mac-universal artifact
+        env:
+          TOKEN: ${{ secrets.CLIENT_RELEASE_UPLOAD_TOKEN }}
+        run: |
+          set -euo pipefail
+          file=$(ls assets/RoastArtisan-mac-universal-*.dmg)
+          echo "uploading ${file} -> mac-universal"
+          code=$(curl -sS -o /tmp/resp.txt -w '%{http_code}' \
+            -X PUT "$CLOUD_BASE/mac-universal/artifact" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary "@${file}")
+          echo "HTTP ${code}"; cat /tmp/resp.txt
+          if [ "$code" = "413" ]; then
+            # known cloud-side 700 MB cap (being raised to 2 GB separately), not a
+            # bug here -- report and continue without updating this slot
+            echo "::warning::mac-universal upload got HTTP 413 (payload too large) -- known cloud-side upload cap, continuing without updating this slot"
+          elif [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            echo "::error::mac-universal upload failed with HTTP ${code}"
+            exit 1
+          fi
+
+      - name: Upload windows artifact
+        env:
+          TOKEN: ${{ secrets.CLIENT_RELEASE_UPLOAD_TOKEN }}
+        run: |
+          set -euo pipefail
+          file=$(ls assets/RoastArtisan-win-*.exe)
+          echo "uploading ${file} -> win"
+          code=$(curl -sS -o /tmp/resp.txt -w '%{http_code}' \
+            -X PUT "$CLOUD_BASE/win/artifact" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary "@${file}")
+          echo "HTTP ${code}"; cat /tmp/resp.txt
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            echo "::error::win upload failed with HTTP ${code}"
+            exit 1
+          fi
+
+      # published last, deliberately: the manifest must never advertise a
+      # version whose artifacts are not all up yet
+      - name: Publish version
+        env:
+          TOKEN: ${{ secrets.CLIENT_RELEASE_UPLOAD_TOKEN }}
+          VERSION: ${{ needs.build-windows.outputs.artisan_version }}
+        run: |
+          set -euo pipefail
+          if [ -z "${VERSION}" ]; then
+            echo "::error::could not determine build version from the build-windows job output"
+            exit 1
+          fi
+          echo "publishing version: ${VERSION}"
+          code=$(curl -sS -o /tmp/resp.txt -w '%{http_code}' \
+            -X POST "$CLOUD_BASE/publish" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data "{\"version\": \"${VERSION}\"}")
+          echo "HTTP ${code}"; cat /tmp/resp.txt
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            echo "::error::publish failed with HTTP ${code}"
+            exit 1
+          fi
