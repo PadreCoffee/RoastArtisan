@@ -460,5 +460,9 @@ for subdir, _dirs, files in os.walk('.', followlinks=False):
 
 dist_name = r'RoastArtisan-mac-universal-' + VERSION + r'.dmg'
 os.chdir('..')
+# re-sign ad-hoc AFTER all bundle modifications above: they invalidate PyInstaller's ad-hoc
+# signature, which makes macOS report the downloaded app as "damaged". ad-hoc (--sign -) needs no
+# identity/keychain and downgrades "damaged" to the normal unsigned right-click -> Open flow.
+subprocess.check_call('codesign --force --deep --sign - dist/RoastArtisan.app', shell=True)
 os.system(r'rm ' + dist_name)
 os.system(r'hdiutil create ' + dist_name + r' -volname "RoastArtisan" -fs HFS+ -srcfolder "dist"')
