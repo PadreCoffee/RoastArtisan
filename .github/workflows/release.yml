@@ -476,7 +476,9 @@ jobs:
     name: publish to roastlocal.ru cloud
     needs: [build-mac-silicon, build-mac-universal, build-windows]
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # the three artifacts total ~1.75 GB; give the uploads room, and let curl's
+    # stall detection (below) abort a hung connection fast instead of burning this
+    timeout-minutes: 120
     env:
       CLOUD_BASE: https://roastlocal.ru/platform/v1/client
     steps:
@@ -495,7 +497,7 @@ jobs:
           set -euo pipefail
           file=$(ls assets/RoastArtisan-mac-silicon-*.dmg)
           echo "uploading ${file} -> mac-silicon"
-          code=$(curl -sS -o /tmp/resp.txt -w '%{http_code}' \
+          code=$(curl -sS --speed-limit 1024 --speed-time 120 --max-time 5400 -o /tmp/resp.txt -w '%{http_code}' \
             -X PUT "$CLOUD_BASE/mac-silicon/artifact" \
             -H "Authorization: Bearer ${TOKEN}" \
             -H "Content-Type: application/octet-stream" \
@@ -513,7 +515,7 @@ jobs:
           set -euo pipefail
           file=$(ls assets/RoastArtisan-mac-universal-*.dmg)
           echo "uploading ${file} -> mac-universal"
-          code=$(curl -sS -o /tmp/resp.txt -w '%{http_code}' \
+          code=$(curl -sS --speed-limit 1024 --speed-time 120 --max-time 5400 -o /tmp/resp.txt -w '%{http_code}' \
             -X PUT "$CLOUD_BASE/mac-universal/artifact" \
             -H "Authorization: Bearer ${TOKEN}" \
             -H "Content-Type: application/octet-stream" \
@@ -535,7 +537,7 @@ jobs:
           set -euo pipefail
           file=$(ls assets/RoastArtisan-win-*.exe)
           echo "uploading ${file} -> win"
-          code=$(curl -sS -o /tmp/resp.txt -w '%{http_code}' \
+          code=$(curl -sS --speed-limit 1024 --speed-time 120 --max-time 5400 -o /tmp/resp.txt -w '%{http_code}' \
             -X PUT "$CLOUD_BASE/win/artifact" \
             -H "Authorization: Bearer ${TOKEN}" \
             -H "Content-Type: application/octet-stream" \
@@ -559,7 +561,7 @@ jobs:
             exit 1
           fi
           echo "publishing version: ${VERSION}"
-          code=$(curl -sS -o /tmp/resp.txt -w '%{http_code}' \
+          code=$(curl -sS --speed-limit 1024 --speed-time 120 --max-time 5400 -o /tmp/resp.txt -w '%{http_code}' \
             -X POST "$CLOUD_BASE/publish" \
             -H "Authorization: Bearer ${TOKEN}" \
             -H "Content-Type: application/json" \
