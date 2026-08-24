@@ -44,26 +44,17 @@ def is_newer(latest: str, current: str) -> bool:
     return latest_v > current_v
 
 
-def select_asset(assets: list, system: str, machine: str) -> str | None:
-    """Pick the download URL matching this platform from a GitHub release 'assets' list.
+def select_download(downloads: dict, system: str, machine: str) -> str | None:
+    """Pick the download URL matching this platform from the cloud manifest's 'downloads' dict.
 
-    `system`/`machine` are the values of platform.system()/platform.machine().
-    Returns None if nothing matches.
+    `system`/`machine` are the values of platform.system()/platform.machine(). A platform
+    slot with nothing published is absent from `downloads`. Returns None if nothing matches.
     """
     if system == 'Windows':
-        prefix, suffix = 'RoastArtisan-win-', '.zip'
+        key = 'win'
     elif system == 'Darwin':
-        if machine == 'arm64':
-            prefix, suffix = 'RoastArtisan-mac-silicon-', '.dmg'
-        else:
-            # x86_64 or an unrecognized mac arch: the universal build runs everywhere
-            prefix, suffix = 'RoastArtisan-mac-universal-', '.dmg'
+        # x86_64 or an unrecognized mac arch: the universal build runs everywhere
+        key = 'mac-silicon' if machine == 'arm64' else 'mac-universal'
     else:
         return None
-    for asset in assets:
-        name = asset.get('name', '')
-        if name.startswith(prefix) and name.endswith(suffix):
-            url = asset.get('browser_download_url')
-            if url:
-                return url
-    return None
+    return downloads.get(key)
