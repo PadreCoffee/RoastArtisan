@@ -2595,8 +2595,12 @@ class editGraphDlg(ArtisanResizeablDialog):
         # is passed). We must NOT hard-clear template_uuid here: a loaded reference has to survive
         # the open (rule 4); _applyTemplatesToCombo decides whether the current selection stays.
         if plus.config.remote_profile_fetch_enabled():
-            # fetch from dedicated references API in background thread
-            machine:str = self.aw.qmc.roastertype_setup.strip()
+            # fetch from dedicated references API in background thread.
+            # lower-case to match the cloud's machine filter (lower(trim(reference_machine)) == machine)
+            # and the local scheduler path (_getTemplatesFromSchedule); otherwise, with no coffee/blend
+            # selected, the machine filter is the ONLY filter and a case difference hides machine-bound
+            # references (rule 5). With a coffee selected the coffee filter masked this bug.
+            machine:str = self.aw.qmc.roastertype_setup.strip().lower()
             self._template_fetch_gen = getattr(self, '_template_fetch_gen', 0) + 1
             gen:int = self._template_fetch_gen
             self.plus_templates_combo.blockSignals(True)
