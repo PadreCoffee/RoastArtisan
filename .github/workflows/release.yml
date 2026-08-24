@@ -497,7 +497,7 @@ jobs:
           set -euo pipefail
           file=$(ls assets/RoastArtisan-mac-silicon-*.dmg)
           echo "uploading ${file} -> mac-silicon"
-          code=$(curl -sS --speed-limit 1024 --speed-time 120 --max-time 5400 -o /tmp/resp.txt -w '%{http_code}' \
+          code=$(curl -sS --http1.1 --speed-limit 1024 --speed-time 120 --max-time 5400 -o /tmp/resp.txt -w '%{http_code}' \
             -X PUT "$CLOUD_BASE/mac-silicon/artifact" \
             -H "Authorization: Bearer ${TOKEN}" \
             -H "Content-Type: application/octet-stream" \
@@ -515,7 +515,7 @@ jobs:
           set -euo pipefail
           file=$(ls assets/RoastArtisan-mac-universal-*.dmg)
           echo "uploading ${file} -> mac-universal"
-          code=$(curl -sS --speed-limit 1024 --speed-time 120 --max-time 5400 -o /tmp/resp.txt -w '%{http_code}' \
+          code=$(curl -sS --http1.1 --speed-limit 1024 --speed-time 120 --max-time 5400 -o /tmp/resp.txt -w '%{http_code}' \
             -X PUT "$CLOUD_BASE/mac-universal/artifact" \
             -H "Authorization: Bearer ${TOKEN}" \
             -H "Content-Type: application/octet-stream" \
@@ -537,7 +537,7 @@ jobs:
           set -euo pipefail
           file=$(ls assets/RoastArtisan-win-*.exe)
           echo "uploading ${file} -> win"
-          code=$(curl -sS --speed-limit 1024 --speed-time 120 --max-time 5400 -o /tmp/resp.txt -w '%{http_code}' \
+          code=$(curl -sS --http1.1 --speed-limit 1024 --speed-time 120 --max-time 5400 -o /tmp/resp.txt -w '%{http_code}' \
             -X PUT "$CLOUD_BASE/win/artifact" \
             -H "Authorization: Bearer ${TOKEN}" \
             -H "Content-Type: application/octet-stream" \
@@ -561,7 +561,7 @@ jobs:
             exit 1
           fi
           echo "publishing version: ${VERSION}"
-          code=$(curl -sS --speed-limit 1024 --speed-time 120 --max-time 5400 -o /tmp/resp.txt -w '%{http_code}' \
+          code=$(curl -sS --http1.1 --speed-limit 1024 --speed-time 120 --max-time 5400 -o /tmp/resp.txt -w '%{http_code}' \
             -X POST "$CLOUD_BASE/publish" \
             -H "Authorization: Bearer ${TOKEN}" \
             -H "Content-Type: application/json" \
