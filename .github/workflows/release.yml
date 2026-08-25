@@ -4,7 +4,7 @@
 #
 #   RoastArtisan-mac-silicon-<VER>.dmg    arm64 only          (src/artisan-mac.spec)
 #   RoastArtisan-mac-universal-<VER>.dmg  arm64 + x86_64      (src/artisan-mac_universal.spec)
-#   RoastArtisan-win-<VER>.exe            x86_64 onefile      (src/artisan-win-local.spec)
+#   RoastArtisan-win-x64-<VER>-setup.exe  x86_64 NSIS installer (src/artisan-win-local.spec + setup-install3-pi.nsi)
 #
 # All builds are UNSIGNED and UNNOTARIZED.  macOS Gatekeeper and Windows
 # SmartScreen will warn on first launch; this is stated in the release body.
@@ -295,10 +295,10 @@ jobs:
           retention-days: 7
 
   # ---------------------------------------------------------------------------
-  # 3. Windows x86_64, onefile .exe
+  # 3. Windows x86_64, NSIS installer
   # ---------------------------------------------------------------------------
   build-windows:
-    name: windows (onefile exe)
+    name: windows (NSIS installer)
     runs-on: windows-latest
     timeout-minutes: 90
     outputs:
@@ -367,6 +367,7 @@ jobs:
           $version = python -c "import artisanlib; print(artisanlib.__version__)"
           $build   = python -c "import artisanlib; print(artisanlib.__build__)"
           "ARTISAN_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "ARTISAN_BUILD=$build" | Out-File -FilePath $env:GITHUB_ENV -Append
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           create-version-file version-metadata.yml --outfile version_info-win.txt --version "$version.$build"
           if (-not (Test-Path version_info-win.txt)) { throw "version_info-win.txt not generated" }
@@ -381,19 +382,32 @@ jobs:
         working-directory: src
         run: pyinstaller -y --log-level=INFO artisan-win-local.spec
 
-      - name: Rename the onefile executable
+      - name: Verify the onedir build
         shell: pwsh
         working-directory: src
         run: |
-          $exe = "RoastArtisan-win-$env:ARTISAN_VERSION.exe"
-          if (-not (Test-Path "dist\RoastArtisan.exe")) { throw "dist\RoastArtisan.exe not produced" }
-          Move-Item "dist\RoastArtisan.exe" $exe
-          Get-Item $exe | Format-List Name, Length
+          if (-not (Test-Path "dist\RoastArtisan\RoastArtisan.exe")) { throw "dist\RoastArtisan onedir not produced" }
+
+      - name: Install NSIS
+        shell: pwsh
+        run: choco install nsis --no-progress -y
+
+      - name: Build the NSIS installer
+        shell: pwsh
+        working-directory: src
+        run: |
+          $makensis = "C:\Program Files (x86)\NSIS\makensis.exe"
+          if (-not (Test-Path $makensis)) { throw "makensis.exe not found after NSIS install" }
+          & $makensis "/DPRODUCT_VERSION=$env:ARTISAN_VERSION" "/DPRODUCT_BUILD=$env:ARTISAN_BUILD" setup-install3-pi.nsi
+          if ($LASTEXITCODE -ne 0) { throw "makensis failed with exit code $LASTEXITCODE" }
+          $installer = "RoastArtisan-win-x64-$env:ARTISAN_VERSION-setup.exe"
+          if (-not (Test-Path $installer)) { throw "installer $installer not produced" }
+          Get-Item $installer | Format-List Name, Length
 
       - uses: actions/upload-artifact@v4
         with:
-          name: windows-exe
-          path: src/RoastArtisan-win-*.exe
+          name: windows-installer
+          path: src/RoastArtisan-win-x64-*-setup.exe
           if-no-files-found: error
           retention-days: 7
 
@@ -434,7 +448,7 @@ jobs:
           | --- | --- |
           | macOS (Apple silicon) | `RoastArtisan-mac-silicon-<version>.dmg` |
           | macOS (Intel + Apple silicon, universal2) | `RoastArtisan-mac-universal-<version>.dmg` |
-          | Windows x64 | `RoastArtisan-win-<version>.exe` |
+          | Windows x64 | `RoastArtisan-win-x64-<version>-setup.exe` (installer) |
 
           ### These builds are unsigned
 
@@ -447,8 +461,8 @@ jobs:
             Finder, choose **Open**, then confirm; or allow it under
             *System Settings → Privacy & Security*.
           * **Windows / SmartScreen** — "Windows protected your PC". Choose
-            **More info → Run anyway**. The Windows build is a single onefile
-            executable: just run `RoastArtisan-win-<version>.exe`.
+            **More info → Run anyway**, then follow the installer
+            (`RoastArtisan-win-x64-<version>-setup.exe`).
 
           Verify the download before running it if you obtained it from anywhere other
           than the official RoastArtisan cloud.
@@ -535,7 +549,7 @@ jobs:
           TOKEN: ${{ secrets.CLIENT_RELEASE_UPLOAD_TOKEN }}
         run: |
           set -euo pipefail
-          file=$(ls assets/RoastArtisan-win-*.exe)
+          file=$(ls assets/RoastArtisan-win-x64-*-setup.exe)
           echo "uploading ${file} -> win"
           code=$(curl -sS --http1.1 --speed-limit 1024 --speed-time 120 --max-time 5400 -o /tmp/resp.txt -w '%{http_code}' \
             -X PUT "$CLOUD_BASE/win/artifact" \
