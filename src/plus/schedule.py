@@ -26,6 +26,7 @@ import time
 import math
 import datetime
 import json
+import threading
 import functools
 import html
 import textwrap
@@ -39,7 +40,7 @@ from packaging.version import Version
 from PyQt6.QtCore import (Qt, QMimeData, QSettings, pyqtSlot, pyqtSignal, QPoint, QPointF, QLocale, QDate, QDateTime, QSemaphore, QTimer)
 from PyQt6.QtGui import (QDrag, QPixmap, QPainter, QTextLayout, QTextLine, QColor, QFontMetrics, QCursor, QAction, QIcon)
 from PyQt6.QtWidgets import (QDialogButtonBox, QMessageBox, QStackedWidget, QApplication, QWidget, QVBoxLayout, QHBoxLayout, QFrame, QTabWidget,
-        QCheckBox, QGroupBox, QScrollArea, QLabel, QSizePolicy,
+        QCheckBox, QComboBox, QGroupBox, QScrollArea, QLabel, QSizePolicy,
         QGraphicsDropShadowEffect, QPlainTextEdit, QLineEdit, QMenu, QStatusBar, QToolButton)
 
 
@@ -64,6 +65,7 @@ import plus.stock
 import plus.config
 import plus.sync
 import plus.util
+from plus.schedule_references import reference_picker_applies, pick_default_reference_index
 from plus.util import datetime2epoch, epoch2datetime, schedulerLink, epoch2ISO8601, ISO86012epoch, plusLink
 from plus.weight import Display, GreenDisplay, RoastedDisplay, PROCESS_STATE, WeightManager, GreenWeightItem, RoastedWeightItem
 from artisanlib.widgets import ClickableQLabel, ClickableQLineEdit, Splitter
@@ -1911,6 +1913,12 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
 
     register_completed_roast = pyqtSignal()
 
+    # emitted from the background reference-fetch thread; carries the fetch generation,
+    # the schedule item id the fetch was started for, and the fetched reference list.
+    # Applied on the GUI thread by _on_references_ready (see the roast_properties
+    # populateTemplateCombo pattern this mirrors).
+    referencesReady = pyqtSignal(int, str, list)
+
     def __init__(self, parent:'QWidget', aw:'ApplicationWindow', activeTab:int = 0) -> None:
         if aw.get_os()[0] == 'RPi':
             super().__init__(None, aw) # set the parent to None to make Schedule windows on RPi Bookworm non-modal (not blocking the main window)
@@ -1928,6 +1936,13 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
 
         # holds the currently selected remaining DragItem widget if any
         self.selected_remaining_item:DragItem|None = None
+
+        # --- scheduler reference picker (эталоны) state ---
+        # monotonic fetch generation to discard stale background results; the list of
+        # references most recently applied to the strip combo (cloud order preserved).
+        self._reference_fetch_gen:int = 0
+        self._references:list[dict] = []
+        self.referencesReady.connect(self._on_references_ready)
 
         # holds the currently selected completed NoDragItem widget if any
         self.selected_completed_item:NoDragItem|None = None
@@ -2282,7 +2297,33 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
         status_bar.setFixedHeight(20)
         status_bar.addPermanentWidget(self.sync_button)
 
+        # --- scheduler reference picker strip ---
+        # Shown at the top of the To-Do tab only while the selected task has >=2
+        # references. Picking a reference loads it as the chart background (client-side,
+        # not persisted). Kept out of the draggable DragItem card on purpose: the card's
+        # single QHBoxLayout can't host a second row without fragile layout surgery, and a
+        # QComboBox living on the stable window avoids drag/selection interference and the
+        # lifetime hazards of embedding an async control in the frequently-rebuilt cards.
+        # hardcoded Russian to match the existing reference UI (roast_properties uses the
+        # literal 'Без эталона'); RoastArtisan ships Russian-first and these strings are not
+        # in the compiled .qm
+        self.reference_label = QLabel('Эталон')
+        self.reference_combo = QComboBox()
+        self.reference_combo.setToolTip('Загрузить эталон как подложку выбранной задачи')
+        self.reference_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.reference_combo.activated.connect(self._reference_selected)
+        reference_strip_layout = QHBoxLayout()
+        reference_strip_layout.setContentsMargins(9, 4, 9, 4)
+        reference_strip_layout.setSpacing(6)
+        reference_strip_layout.addWidget(self.reference_label)
+        reference_strip_layout.addWidget(self.reference_combo, 1)
+        self.reference_strip = QWidget()
+        self.reference_strip.setLayout(reference_strip_layout)
+        self.reference_strip.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        self.reference_strip.hide()
+
         remaining_splitter_layout = QVBoxLayout()
+        remaining_splitter_layout.addWidget(self.reference_strip)
         remaining_splitter_layout.addWidget(self.remaining_splitter)
         remaining_splitter_layout.addWidget(status_bar)
         remaining_splitter_layout.setContentsMargins(0, 0, 0, 0) # left, top, right, bottom
@@ -3099,6 +3140,83 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
             if self.aw.qmc.flagon and self.aw.qmc.timeindex[6] == 0 and (previous_selected_item_data is None or (previous_selected_item_data != item.data)):
                 # while sampling and DROP not yet set, we update the roast properties on schedule item changes
                 self.set_selected_remaining_item_roast_properties()
+            # offer the reference picker for the newly selected task (async, off the GUI thread).
+            # The server default template (if any) has already been loaded by item.select above;
+            # the picker only lets the user override it and is only shown when >=2 references exist.
+            self._start_reference_fetch(item)
+
+    # --- scheduler reference picker (эталоны) ---
+
+    # Hides and empties the reference strip and bumps the fetch generation so any in-flight
+    # background result is discarded. Called whenever the selection is cleared or replaced.
+    def _reset_reference_strip(self) -> None:
+        self._reference_fetch_gen += 1
+        self._references = []
+        if hasattr(self, 'reference_combo'):
+            self.reference_combo.blockSignals(True)
+            self.reference_combo.clear()
+            self.reference_combo.blockSignals(False)
+        if hasattr(self, 'reference_strip'):
+            self.reference_strip.hide()
+
+    # Kicks off a background fetch of the references for the given task's coffee/blend.
+    # Mirrors roast_properties.populateTemplateCombo: fetch off the GUI thread in a daemon
+    # thread, emit a pyqtSignal, apply on the GUI thread. Does nothing (picker stays hidden,
+    # today's silent single-template load is unchanged) when remote profile fetch is disabled.
+    def _start_reference_fetch(self, item:DragItem) -> None:
+        self._reset_reference_strip()
+        if not plus.config.remote_profile_fetch_enabled():
+            return
+        gen:int = self._reference_fetch_gen
+        item_id:str = item.data.id
+        coffee_hr_id:str|None = item.data.coffee
+        blend_hr_id:str|None = item.data.blend
+        # lower-case to match the cloud machine filter and the roast_properties path (rule-5 fix)
+        machine:str = self.aw.qmc.roastertype_setup.strip().lower()
+        def _fetch() -> None:
+            try:
+                items = plus.stock.getReferencesFromAPI(coffee_hr_id, blend_hr_id, machine or None)
+                self.referencesReady.emit(gen, item_id, items)
+            except Exception as e:  # pylint: disable=broad-except
+                # the window may have been closed before the fetch returned
+                _log.exception(e)
+        threading.Thread(target=_fetch, daemon=True).start()
+
+    @pyqtSlot(int, str, list)
+    def _on_references_ready(self, gen:int, item_id:str, items:list) -> None:
+        try:
+            if gen != self._reference_fetch_gen:
+                return  # stale result from a previous selection
+            if self.selected_remaining_item is None or self.selected_remaining_item.data.id != item_id:
+                return  # selection changed while fetching
+            if not reference_picker_applies(items):
+                # fewer than 2 references -> no dropdown; the single/server template that
+                # item.select already loaded stays as the background (unchanged behaviour)
+                self._reset_reference_strip()
+                return
+            self._references = items
+            default_hex:str|None = (self.selected_remaining_item.data.template.hex
+                if self.selected_remaining_item.data.template is not None else None)
+            default_idx:int = pick_default_reference_index(items, default_hex)
+            self.reference_combo.blockSignals(True)
+            self.reference_combo.clear()
+            for r in items:
+                self.reference_combo.addItem(r.get('label', ''))
+            if default_idx >= 0:
+                self.reference_combo.setCurrentIndex(default_idx)
+            self.reference_combo.blockSignals(False)
+            self.reference_strip.show()
+        except Exception as e:  # pylint: disable=broad-except
+            _log.exception(e)
+
+    @pyqtSlot(int)
+    def _reference_selected(self, index:int) -> None:
+        # user picked a reference -> load it as the chart background. Client-side only:
+        # not persisted, the server scheduled item and its template are never changed.
+        if 0 <= index < len(self._references):
+            uuid_hex:str|None = self._references[index].get('uuid')
+            if uuid_hex:
+                self.aw.loadAndRedrawBackgroundUUID(UUID = uuid_hex, force_reload=False)
 
     @pyqtSlot()
     def prepared_items_changed(self) -> None:
@@ -3261,6 +3379,9 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
                 first_item:DragItem|None = self.drag_remaining.itemAt(0)
                 if first_item is not None:
                     self.select_item(first_item)
+            else:
+                # nothing selectable (e.g. all items filtered out) -> hide the reference picker
+                self._reset_reference_strip()
         # we set the first label width to the maximum first label width of all items
         for first_label in drag_first_labels:
             first_label.setFixedWidth(drag_items_first_label_max_width)
@@ -3308,6 +3429,7 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
             self.setAppBadge(0)
             # clear selection and reset scheduleID
             self.selected_remaining_item = None
+            self._reset_reference_strip()
             if self.aw.qmc.timeindex[6] == 0:
                 # if DROP is not set we clear the ScheduleItem UUID/Date
                 self.aw.qmc.scheduleID = None
@@ -3981,6 +4103,7 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
                     if self.scheduled_items == []:
                         # clear selection and reset scheduleID
                         self.selected_remaining_item = None
+                        self._reset_reference_strip()
                         if self.aw.qmc.timeindex[6] == 0:
                             # if DROP is not set we clear the ScheduleItem UUID/Date
                             self.aw.qmc.scheduleID = None
