@@ -17175,7 +17175,7 @@ class ApplicationWindow(QMainWindow):
             if dout > 0.:
                 computedProfile['roasted_density'] = float2float(dout,1)
 
-            if (self.qmc.density[0] != 0.0 and self.qmc.density[2] != 0.0):
+            if self.qmc.density[0] and self.qmc.density[2]:  # truthy guards None (None != 0.0 is True, so != 0.0 lets None through)
                 setdensity = self.qmc.density[0] /  self.qmc.density[2]
                 setdensity = convertWeight(self.qmc.density[0],weight_units.index(self.qmc.density[1]),0) / convertVolume(self.qmc.density[2],volume_units.index(self.qmc.density[3]),0)
                 computedProfile['set_density'] = float2float(setdensity,1)
@@ -17185,15 +17185,15 @@ class ApplicationWindow(QMainWindow):
             self.qmc.adderror((QApplication.translate('Error Message', 'Exception:') + ' computedProfileInformation() {0}').format(str(ex)),getattr(exc_tb, 'tb_lineno', '?'))
         ######### Humidity / Pressure #########
         try:
-            if self.qmc.moisture_greens != 0.0 and not math.isnan(self.qmc.moisture_greens):
+            if self.qmc.moisture_greens and not math.isnan(self.qmc.moisture_greens):  # truthy short-circuits None before math.isnan()
                 computedProfile['moisture_greens'] = float2float(self.qmc.moisture_greens)
-            if self.qmc.moisture_roasted != 0.0 and not math.isnan(self.qmc.moisture_roasted):
+            if self.qmc.moisture_roasted and not math.isnan(self.qmc.moisture_roasted):
                 computedProfile['moisture_roasted'] = float2float(self.qmc.moisture_roasted)
-            if self.qmc.ambient_humidity != 0.0 and not math.isnan(self.qmc.ambient_humidity):
+            if self.qmc.ambient_humidity and not math.isnan(self.qmc.ambient_humidity):
                 computedProfile['ambient_humidity'] = float2float(self.qmc.ambient_humidity)
-            if self.qmc.ambient_pressure != 0.0 and not math.isnan(self.qmc.ambient_pressure):
+            if self.qmc.ambient_pressure and not math.isnan(self.qmc.ambient_pressure):
                 computedProfile['ambient_pressure'] = float2float(self.qmc.ambient_pressure)
-            if self.qmc.ambientTemp != 0.0 and not math.isnan(self.qmc.ambientTemp):
+            if self.qmc.ambientTemp and not math.isnan(self.qmc.ambientTemp):
                 computedProfile['ambient_temperature'] = float2float(self.qmc.ambientTemp)
         except Exception as ex: # pylint: disable=broad-except
             _log.exception(ex)
