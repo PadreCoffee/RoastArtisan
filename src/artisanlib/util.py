@@ -701,10 +701,10 @@ def float2floatNone(f:float|None, n:int=1) -> float|None:
     return float2float(f,n)
 
 # the int n>=0 specifies the number of digits
-# returns 0 if f is not a number
-def float2float(f:float|str, n:int=1) -> float:
+# returns 0 if f is not a number (None included; plus/scheduler/loaded profiles carry null numeric fields)
+def float2float(f:float|str|None, n:int=1) -> float:
     n = max(n, 0)
-    f = float(f)
+    f = 0.0 if f is None else float(f)
     if n==0:
         if math.isnan(f):
             return 0

@@ -1126,6 +1126,15 @@ def test_float2float(value: float, decimal_places: int, expected_result: float) 
         assert pytest.approx(result, abs=1e-10) == expected_result
 
 
+def test_float2float_none_input() -> None:
+    """float2float must be None-safe: null numeric fields (plus/scheduler/loaded
+    profiles) reach it and it is documented to return 0 for non-numbers."""
+    assert float2float(None) == 0.0
+    assert isinstance(float2float(None), float)
+    assert float2float(None, 0) == 0
+    assert isinstance(float2float(None, 0), int)
+
+
 def test_float2floatNone() -> None:
     """Test float2floatNone function."""
     # Normal values

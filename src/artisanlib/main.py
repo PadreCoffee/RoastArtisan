@@ -16265,15 +16265,15 @@ class ApplicationWindow(QMainWindow):
                 except ValueError:
                     weight_unit_idx = 0
                 self.qmc.weight = (
-                    convertWeight(float(weight[0]), weight_unit_idx, current_weight_unit_idx),
-                    convertWeight(float(weight[1]), weight_unit_idx, current_weight_unit_idx),
+                    convertWeight(toFloat(weight[0]), weight_unit_idx, current_weight_unit_idx),
+                    convertWeight(toFloat(weight[1]), weight_unit_idx, current_weight_unit_idx),
                     self.qmc.weight[2])
             else:
                 self.qmc.weight = (0,0,self.qmc.weight[2])
             #
             if 'defects_weight' in profile:
                 defects = profile['defects_weight']
-                self.qmc.roasted_defects_weight = convertWeight(min(self.qmc.weight[1], max(0.,float(defects))), weight_unit_idx, current_weight_unit_idx)
+                self.qmc.roasted_defects_weight = convertWeight(min(self.qmc.weight[1], max(0.,toFloat(defects))), weight_unit_idx, current_weight_unit_idx)
             else:
                 self.qmc.roasted_defects_weight = 0
             #
@@ -16290,8 +16290,8 @@ class ApplicationWindow(QMainWindow):
                 except ValueError:
                     current_volume_unit_idx = 0
                 self.qmc.volume = (
-                    convertVolume(float(volume[0]), volume_unit_idx, current_volume_unit_idx),
-                    convertVolume(float(volume[1]), volume_unit_idx, current_volume_unit_idx),
+                    convertVolume(toFloat(volume[0]), volume_unit_idx, current_volume_unit_idx),
+                    convertVolume(toFloat(volume[1]), volume_unit_idx, current_volume_unit_idx),
                     self.qmc.volume[2])
             else:
                 self.qmc.volume = (0,0,self.qmc.volume[2])
@@ -16299,12 +16299,12 @@ class ApplicationWindow(QMainWindow):
 
             if 'density' in profile:
                 density = profile['density']
-                self.qmc.density = (float(density[0]),decodeLocalStrict(density[1], 'g'),float(density[2]),decodeLocalStrict(density[3], 'l'))
+                self.qmc.density = (toFloat(density[0]),decodeLocalStrict(density[1], 'g'),toFloat(density[2]),decodeLocalStrict(density[3], 'l'))
             else:
                 self.qmc.density = (0,'g',1,'l')
             if 'density_roasted' in profile:
                 density_roasted = profile['density_roasted']
-                self.qmc.density_roasted = (float(density_roasted[0]),decodeLocalStrict(density_roasted[1], 'g'),float(density_roasted[2]),decodeLocalStrict(density_roasted[3], 'l'))
+                self.qmc.density_roasted = (toFloat(density_roasted[0]),decodeLocalStrict(density_roasted[1], 'g'),toFloat(density_roasted[2]),decodeLocalStrict(density_roasted[3], 'l'))
             else:
                 self.qmc.density_roasted = (0,'g',1,'l')
             if 'roastertype' in profile:
