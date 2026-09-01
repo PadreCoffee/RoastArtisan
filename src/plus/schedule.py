@@ -351,17 +351,22 @@ class CompletedItem(BaseModel):
             if label != self.store_label:
                 updated = True
                 self.store_label = label
-        if 'amount' in profile_data:
+        # skip-on-None (NOT zero): amount/end_weight/defects_weight are non-suppressed server
+        # fields (roast.py) — always sent, possibly as null (a roast never weighed, or the
+        # pre-v3.1.2 defects_weight). A null means "no value", not 0; coercing to 0 here would
+        # set updated=True and overwrite+persist a real weight/estimate as 0 (add_completed).
+        # Mirror applyServerUpdates (sync.py) which guards these exact three fields the same way.
+        if 'amount' in profile_data and profile_data['amount'] is not None:
             amount = float(profile_data['amount'])
             if amount != self.batchsize:
                 updated = True
                 self.batchsize = amount
-        if 'end_weight' in profile_data:
+        if 'end_weight' in profile_data and profile_data['end_weight'] is not None:
             end_weight = float(profile_data['end_weight'])
             if end_weight != self.weight:
                 updated = True
                 self.weight = end_weight
-        if 'defects_weight' in profile_data:
+        if 'defects_weight' in profile_data and profile_data['defects_weight'] is not None:
             defects_weight = float(profile_data['defects_weight'])
             if defects_weight != self.defects_weight:
                 updated = True

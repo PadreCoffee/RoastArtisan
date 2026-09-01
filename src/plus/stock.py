@@ -1831,6 +1831,13 @@ def getReferencesFromAPI(coffee_hr_id:str|None = None, blend_hr_id:str|None = No
                 if r2 is not None and r2.status_code == 200:
                     items2 = r2.json().get('data', {}).get('items', [])
                     result2 = _parseReferenceItems(items2)
+                    # mark these as fallback: they are the machine-wide references, NOT the ones
+                    # bound to this coffee/blend (the filtered fetch returned none). Callers that
+                    # auto-select the selection's own reference must NOT auto-pick from these, or
+                    # they hijack the roast title with an unrelated reference (see
+                    # _applyTemplatesToCombo). The list is still offered for a manual pick (rule 5).
+                    for it in result2:
+                        it['_fallback'] = True
                     _log.info('getReferencesFromAPI fallback -> %d items', len(result2))
                     return result2
     except Exception as e:  # pylint: disable=broad-except

@@ -197,6 +197,41 @@ def test_rule2_coffee_with_no_reference_does_not_force_a_reference_title() -> No
     assert o.reference_auto_title is None
 
 
+def test_rule2_fallback_references_not_auto_selected_blend_keeps_its_name() -> None:
+    # A blend (or coffee) with NO reference bound to it: getReferencesFromAPI's filtered fetch
+    # returns 0, so it retries WITHOUT the coffee/blend filter and returns the machine-wide
+    # references, marked `_fallback`. Those are NOT the blend's own references, so the one-shot
+    # auto-select must NOT fire — otherwise the title is hijacked to an unrelated reference and
+    # that reference is loaded as background. The title must stay the blend name (rule 2), and
+    # the combo must offer the fallback references at «Без эталона» (rule 5) for a manual pick.
+    o = _harness('My Blend', blend_label='My Blend', last_auto_title='My Blend',
+                 template_uuid=None, user_updated=True, select_after_fetch=True,
+                 plus_blend_selected_spec={'hr_id': 'blend-1'})
+    fallback = [{'uuid': 'a' * 32, 'label': 'Unrelated Machine Ref', '_raw': {}, '_fallback': True},
+                {'uuid': 'b' * 32, 'label': 'Another Machine Ref', '_raw': {}, '_fallback': True}]
+    o._applyTemplatesToCombo(fallback)
+    assert o.titleedit.currentText() == 'My Blend'          # NOT hijacked to a fallback reference
+    assert o.plus_templates_combo.currentIndex() == 0        # «Без эталона»
+    assert o.template_uuid is None                           # no reference loaded as background
+    assert o._select_reference_after_fetch is False          # one-shot consumed
+    # rule 5: the fallback references are still offered so the user can pick one by hand
+    items = [o.plus_templates_combo.itemText(i) for i in range(o.plus_templates_combo.count())]
+    assert 'Unrelated Machine Ref' in items
+
+
+def test_rule1_bound_references_still_auto_select_after_the_fallback_guard() -> None:
+    # Guard against over-correction: genuine references bound to the blend/coffee (from the
+    # FILTERED fetch, so NOT marked `_fallback`) must still auto-select and retitle (rule 1).
+    o = _harness('My Blend', blend_label='My Blend', last_auto_title='My Blend',
+                 template_uuid=None, user_updated=True, select_after_fetch=True,
+                 plus_blend_selected_spec={'hr_id': 'blend-1'})
+    bound = [{'uuid': 'c' * 32, 'label': 'Blend Reference #1', '_raw': {}}]
+    o._applyTemplatesToCombo(bound)
+    assert o.plus_templates_combo.currentIndex() == 1
+    assert o.titleedit.currentText() == 'Blend Reference #1'
+    assert o.template_uuid == 'c' * 32
+
+
 def test_rule2_typed_title_survives_a_no_reference_coffee_pick() -> None:
     o = _harness('Моя обжарка', coffee_label='Colombia, El Paraiso',
                  coffee_title_label='El Paraiso', last_auto_title=None,

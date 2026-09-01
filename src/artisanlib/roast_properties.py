@@ -2678,7 +2678,13 @@ class editGraphDlg(ArtisanResizeablDialog):
         auto_selected_label:str|None = None
         if self._select_reference_after_fetch:
             self._select_reference_after_fetch = False
-            if selected_idx == 0 and templates:
+            # only auto-select a reference actually BOUND to the picked coffee/blend. When the
+            # filtered fetch found none, getReferencesFromAPI retried without the coffee/blend
+            # filter and returned the machine-wide references, marked `_fallback`; auto-picking
+            # the first of those hijacks the title with an unrelated reference (and loads it as
+            # background) instead of falling back to the coffee/blend name (rule 2). They are
+            # still offered in the combo for a manual pick (rule 5).
+            if selected_idx == 0 and templates and not templates[0].get('_fallback'):
                 first = templates[0]
                 uuid_str:str|None = first.get('uuid') or None
                 if uuid_str:
