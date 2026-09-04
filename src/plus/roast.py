@@ -388,6 +388,14 @@ def getRoast() -> dict[str, Any]:
         ):
             d['location'] = None
 
+        # cloud lots mode: the roaster picked a specific green-coffee lot. The /aroast CREATE path
+        # reads lot_id from the uploaded body and deducts from that exact lot; omitting it lets the
+        # cloud auto-allocate by priority (default). Only ever set for a single coffee (blends have
+        # no lots); it is NOT part of sync_record_attributes, so it rides the create upload only and
+        # never participates in later diff/update syncs.
+        if aw.qmc.plus_coffee and aw.qmc.plus_lot_id:
+            d['lot_id'] = aw.qmc.plus_lot_id
+
         try:
             # roast_comment is the source of the cloud roast-page Notes field.
             # Send it under both the new 'roast_comment' key and the legacy 'notes'

@@ -1638,6 +1638,7 @@ class tgraphcanvas(QObject):
         self.plus_store_label:str|None = None # holds the plus label of the selected store of the current profile or None
         self.plus_coffee:str|None = None # holds the plus hr_id of the selected coffee of the current profile or None
         self.plus_coffee_label:str|None = None # holds the plus label of the selected coffee of the current profile or None
+        self.plus_lot_id:str|None = None # cloud lots-mode: hr_id/UUID of the green-coffee lot the roaster picked; uploaded as lot_id on /aroast create so the cloud deducts from that exact lot. None -> cloud auto-allocates by priority (default). Only ever set for a single coffee with >1 lot.
         self.plus_blend_spec:Blend|None = None # the plus blend structure [<blend_label>,[[<coffee_label>,<hr_id>,<ratio>],...,[<coffee_label>,<hr_id>,<ratio>]]] # label + ingredients
         self.plus_blend_spec_labels:list[str]|None = None # a list of labels as long as the list of ingredients in self.plus_blend_spec or None
         self.plus_blend_label:str|None = None # holds the plus selected label of the selected blend of the current profile or None
@@ -8038,6 +8039,7 @@ class tgraphcanvas(QObject):
                 self.beans = ''
                 self.plus_store = None
                 self.plus_coffee = None
+                self.plus_lot_id = None
                 self.plus_blend_spec = None
                 # copy setup
                 self.organization = self.organization_setup
