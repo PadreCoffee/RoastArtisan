@@ -109,3 +109,88 @@ def encode_power(pct: float) -> bytes:
     for b in fb:
         x ^= b
     return CTRL_MAGIC + bytes([0x50]) + fb + bytes([x])
+
+
+class Roest(AsyncComm):
+
+    __slots__ = ['_charge_handler', '_dry_handler', '_fcs_handler', '_drop_handler',
+                 '_bt', '_et', '_heat', '_fan', '_rpm', '_drum_temp', '_inlet_temp', '_target',
+                 '_phase', '_crack']
+
+    def __init__(self, host: str = '127.0.0.1', port: int = 8080, serial: 'SerialSettings|None' = None,
+                 connected_handler=None, disconnected_handler=None,
+                 charge_handler=None, dry_handler=None, fcs_handler=None, drop_handler=None) -> None:
+        super().__init__(host, port, serial, connected_handler, disconnected_handler)
+        self._charge_handler = charge_handler
+        self._dry_handler = dry_handler
+        self._fcs_handler = fcs_handler
+        self._drop_handler = drop_handler
+        self._bt: float = -1
+        self._et: float = -1
+        self._heat: float = -1
+        self._fan: float = -1
+        self._rpm: float = -1
+        self._drum_temp: float = -1
+        self._inlet_temp: float = -1
+        self._target: float = -1
+        self._phase: int = -1
+        self._crack: int = -1
+
+    # getters (Artisan reads these each tick; -1 == no value)
+    def getBT(self) -> float: return self._bt
+    def getET(self) -> float: return self._et
+    def getHeat(self) -> float: return self._heat
+    def getFan(self) -> float: return self._fan
+    def getRPM(self) -> float: return self._rpm
+    def getDrumTemp(self) -> float: return self._drum_temp
+    def getInletTemp(self) -> float: return self._inlet_temp
+    def getTarget(self) -> float: return self._target
+
+    @override
+    def reset_readings(self) -> None:
+        self._bt = self._et = self._heat = self._fan = self._rpm = -1
+        self._drum_temp = self._inlet_temp = self._target = -1
+        self._phase = self._crack = -1
+
+    @staticmethod
+    def _num(v: float | None) -> float:
+        return -1 if v is None else v
+
+    def register_reading(self, rec: dict[str, Any]) -> None:
+        self._bt = self._num(rec['bt'])
+        self._et = self._num(rec['et'])
+        self._heat = rec['heat']
+        self._fan = rec['fan']
+        self._rpm = rec['rpm']
+        self._drum_temp = self._num(rec['drum_temp'])
+        self._inlet_temp = self._num(rec['inlet_temp'])
+        self._target = self._num(rec['target'])
+        # NOTE: event emission from rec['phase']/rec['crack'] is added in Task 8
+        # (mapping confirmed on the bench). Keep the fields for that task:
+        self._phase = rec['phase']
+        self._crack = rec['crack']
+
+    @override
+    async def read_msg(self, stream: 'asyncio.StreamReader|IteratorReader') -> None:
+        await stream.readuntil(MAGIC)              # consume through the 2-byte magic
+        rec = await stream.readexactly(RECORD_LEN)
+        xor = await stream.readexactly(1)
+        chk = 0
+        for x in rec:
+            chk ^= x
+        if xor[0] != chk:
+            if self._logging:
+                _log.debug('XOR mismatch, resync')
+            return
+        try:
+            self.register_reading(decode_record(rec))
+        except Exception as e:  # pylint: disable=broad-except
+            if self._logging:
+                _log.debug('decode error: %s', e)
+
+    def send_msg(self, chan: str, value: float) -> None:
+        if chan == 'power':
+            frame = encode_power(value)
+        else:
+            frame = encode(chan, int(clamp(chan, value)))
+        self.send(frame * CTRL_REPEAT)             # 8x burst

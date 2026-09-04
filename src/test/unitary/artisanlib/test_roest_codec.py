@@ -1,8 +1,9 @@
+import asyncio
 import pytest
 import struct
 from artisanlib.roest_device import (
     MAGIC, RECORD_LEN, decode_record, deframe,
-    clamp, encode, encode_power, CTRL_MAGIC,
+    clamp, encode, encode_power, CTRL_MAGIC, Roest,
 )
 
 
@@ -94,3 +95,48 @@ def test_encode_power_8byte_float_xor():
     for c in m[3:7]:
         x ^= c
     assert m[7] == x
+
+
+class _FakeStream:
+    # minimal asyncio.StreamReader stand-in: readuntil(sep)/readexactly(n) over a fixed buffer
+    def __init__(self, data: bytes):
+        self._d = bytearray(data)
+
+    async def readuntil(self, sep: bytes) -> bytes:
+        i = self._d.find(sep)
+        if i < 0:
+            raise asyncio.IncompleteReadError(bytes(self._d), None)
+        end = i + len(sep)
+        out = bytes(self._d[:end])
+        del self._d[:end]
+        return out
+
+    async def readexactly(self, n: int) -> bytes:
+        if len(self._d) < n:
+            raise asyncio.IncompleteReadError(bytes(self._d), n)
+        out = bytes(self._d[:n])
+        del self._d[:n]
+        return out
+
+
+def test_roest_read_msg_populates_getters():
+    rec = _rec(bt=2150, et=1980, heat=55.0, fan=60, rpm=42)
+    r = Roest(serial=None)
+    stream = _FakeStream(b'\x00noise' + _frame(rec))
+    asyncio.run(r.read_msg(stream))
+    assert r.getBT() == 21.5
+    assert r.getET() == 19.8
+    assert r.getHeat() == 55.0
+    assert r.getFan() == 60
+    assert r.getRPM() == 42
+
+
+def test_roest_send_msg_bursts_control(monkeypatch):
+    r = Roest(serial=None)
+    sent = []
+    monkeypatch.setattr(type(r), 'send', lambda _, b: sent.append(b))
+    r.send_msg('drum', 40)
+    assert sent and sent[0] == encode('drum', 40) * 8       # 8x burst
+    sent.clear()
+    r.send_msg('power', 50.0)
+    assert sent[0] == encode_power(50.0) * 8
