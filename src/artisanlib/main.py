@@ -173,6 +173,7 @@ if TYPE_CHECKING:
     from artisanlib.weblcds import WebLCDs, WebGreen, WebRoasted # pylint: disable=unused-import
     from artisanlib.santoker import Santoker # pylint: disable=unused-import
     from artisanlib.santoker_r import SantokerR # pylint: disable=unused-import
+    from artisanlib.roest_device import Roest # pylint: disable=unused-import
     from artisanlib.lebrew import Lebrew_RoastSeeNEXT # pylint: disable=unused-import
     from artisanlib.bluedot import BlueDOT # pylint: disable=unused-import
     from artisanlib.mugma import Mugma # pylint: disable=unused-import
@@ -1511,7 +1512,7 @@ class ApplicationWindow(QMainWindow):
         'userprofilepath', 'printer', 'main_widget', 'defaultdpi', 'dpi', 'qmc', 'HottopControlActive', 'AsyncSamplingTimer', 'wheeldialog',
         'simulator', 'simulatorpath', 'comparator', 'eventsbuttonflag', 'minieventsflags', 'seriallogflag',
         'seriallog', 'ser', 'modbus', 'extraMODBUStemps', 'extraMODBUStx', 's7', 'extraS7tx', 'ws', 'extraser', 'extracomport', 'extrabaudrate',
-        'extrabytesize', 'extraparity', 'extrastopbits', 'extratimeout', 'hottop', 'santokerHost', 'santokerPort', 'santokerSerial', 'santokerBLE', 'santokerEventFlags', 'santoker', 'santokerR', 'lebrew_roastseeNEXT', 'thermoworksBlueDOT', 'fujipid', 'dtapid', 'pidcontrol', 'soundflag', 'recentRoasts', 'maxRecentRoasts',
+        'extrabytesize', 'extraparity', 'extrastopbits', 'extratimeout', 'hottop', 'santokerHost', 'santokerPort', 'santokerSerial', 'santokerBLE', 'santokerEventFlags', 'santoker', 'santokerR', 'roest', 'roestEventFlags', 'lebrew_roastseeNEXT', 'thermoworksBlueDOT', 'fujipid', 'dtapid', 'pidcontrol', 'soundflag', 'recentRoasts', 'maxRecentRoasts',
         'mugmaHost','mugmaPort', 'mugma', 'mugma_default_host', 'shelly_3EMPro_host', 'shelly_PlusPlug_host',
         'kaleido_default_host', 'kaleidoHost', 'kaleidoPort', 'kaleidoSerial', 'kaleidoPID', 'kaleido', 'kaleidoEventFlags', 'colorTrack_mean_window_size', 'colorTrack_median_window_size', 'ikawa',
         'lcdpaletteB', 'lcdpaletteF', 'extraeventsbuttonsflags', 'extraeventslabels', 'extraeventbuttoncolor', 'extraeventsactionstrings',
@@ -1862,6 +1863,10 @@ class ApplicationWindow(QMainWindow):
 
         # Santoker R
         self.santokerR:SantokerR|None = None # holds the Santoker R instance created on connect; reset to None on disconnect
+
+        # Roest (native USB)
+        self.roest:Roest|None = None # holds the Roest instance created on connect; reset to None on disconnect
+        self.roestEventFlags:list[bool] = [False, False, False, False, False, False, False] # CHARGE, DRY, FCs, FCe, SCs, SCe, DROP
 
         # Lebrew RoastSee NEXT
         self.lebrew_roastseeNEXT:Lebrew_RoastSeeNEXT|None = None # holds the Lebrew RoastSeeNEXT instance; reset to None on disconnect
