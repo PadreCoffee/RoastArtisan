@@ -488,8 +488,8 @@ class TestSerialportClass:
             ser = serialport(mock_aw)
 
             # Assert
-            # Should have 201 device functions (indices 0-200)
-            assert len(ser.devicefunctionlist) == 201
+            # Should have 205 device functions (indices 0-204, ids 201-204 are Roest)
+            assert len(ser.devicefunctionlist) == 205
             # All functions should be callable
             for i, func in enumerate(ser.devicefunctionlist):
                 assert callable(func), f"Function at index {i} is not callable"
@@ -625,6 +625,34 @@ class TestSerialportClass:
             assert ser.externalprogram == 'test.py'
             assert ser.externaloutprogram == 'out.py'
             assert not ser.externaloutprogramFlag
+
+
+class _FakeRoest:
+    """Minimal stand-in for a Roest instance exposing the getters comm.py reads."""
+
+    def getET(self) -> float:
+        return 198.0
+
+    def getBT(self) -> float:
+        return 215.0
+
+    def getHeat(self) -> float:
+        return 55.0
+
+    def getFan(self) -> float:
+        return 60.0
+
+    def getRPM(self) -> float:
+        return 75.0
+
+    def getDrumTemp(self) -> float:
+        return 180.0
+
+    def getInletTemp(self) -> float:
+        return 220.0
+
+    def getTarget(self) -> float:
+        return 210.0
 
 
 class TestSerialportDeviceFunctions:
@@ -785,6 +813,150 @@ class TestSerialportDeviceFunctions:
             assert tx == 12345.0
             assert t1 == 40  # slider4 value (t2 in function)
             assert t2 == 30  # slider3 value (t1 in function)
+
+    def test_roest_btet_device_function(self) -> None:
+        """Test Roest_BTET device function returns (ET, BT) from aw.roest getters."""
+        # Arrange
+        with patch('serial.Serial'), patch('artisanlib.comm.QSemaphore'), patch(
+            'artisanlib.comm.platform'
+        ) as mock_platform:
+
+            mock_platform.system.return_value = 'Linux'
+            mock_aw = Mock()
+            mock_aw.qmc.timeclock.elapsedMilli.return_value = 12345.0
+            mock_aw.qmc.mode = 'C'
+            mock_aw.roest = _FakeRoest()
+
+            from artisanlib.comm import serialport
+
+            ser = serialport(mock_aw)
+
+            # Act
+            tx, t1, t2 = ser.Roest_BTET()
+
+            # Assert
+            assert tx == 12345.0
+            assert (t1, t2) == (198.0, 215.0)  # t1=ET, t2=BT
+
+    def test_roest_btet_device_function_fahrenheit(self) -> None:
+        """Test Roest_BTET converts ET/BT to Fahrenheit when aw.qmc.mode == 'F'."""
+        # Arrange
+        with patch('serial.Serial'), patch('artisanlib.comm.QSemaphore'), patch(
+            'artisanlib.comm.platform'
+        ) as mock_platform:
+
+            mock_platform.system.return_value = 'Linux'
+            mock_aw = Mock()
+            mock_aw.qmc.timeclock.elapsedMilli.return_value = 12345.0
+            mock_aw.qmc.mode = 'F'
+            mock_aw.roest = _FakeRoest()
+
+            from artisanlib.comm import serialport
+
+            ser = serialport(mock_aw)
+
+            # Act
+            tx, t1, t2 = ser.Roest_BTET()
+
+            # Assert
+            assert tx == 12345.0
+            assert (t1, t2) == (198.0 * 9.0 / 5.0 + 32.0, 215.0 * 9.0 / 5.0 + 32.0)
+
+    def test_roest_hf_device_function(self) -> None:
+        """Test Roest_HF device function returns (Heat%, Fan%) from aw.roest getters."""
+        # Arrange
+        with patch('serial.Serial'), patch('artisanlib.comm.QSemaphore'), patch(
+            'artisanlib.comm.platform'
+        ) as mock_platform:
+
+            mock_platform.system.return_value = 'Linux'
+            mock_aw = Mock()
+            mock_aw.qmc.timeclock.elapsedMilli.return_value = 12345.0
+            mock_aw.qmc.mode = 'C'
+            mock_aw.roest = _FakeRoest()
+
+            from artisanlib.comm import serialport
+
+            ser = serialport(mock_aw)
+
+            # Act
+            tx, h, f = ser.Roest_HF()
+
+            # Assert
+            assert tx == 12345.0
+            assert (h, f) == (55.0, 60.0)
+
+    def test_roest_rd_device_function(self) -> None:
+        """Test Roest_RD device function returns (RPM, Drum temp); RPM is not temp-converted."""
+        # Arrange
+        with patch('serial.Serial'), patch('artisanlib.comm.QSemaphore'), patch(
+            'artisanlib.comm.platform'
+        ) as mock_platform:
+
+            mock_platform.system.return_value = 'Linux'
+            mock_aw = Mock()
+            mock_aw.qmc.timeclock.elapsedMilli.return_value = 12345.0
+            mock_aw.qmc.mode = 'F'
+            mock_aw.roest = _FakeRoest()
+
+            from artisanlib.comm import serialport
+
+            ser = serialport(mock_aw)
+
+            # Act
+            tx, rpm, drum = ser.Roest_RD()
+
+            # Assert
+            assert tx == 12345.0
+            assert rpm == 75.0  # RPM is not a temperature; no F conversion
+            assert drum == 180.0 * 9.0 / 5.0 + 32.0  # Drum temp converted to F
+
+    def test_roest_it_device_function(self) -> None:
+        """Test Roest_IT device function returns (Inlet temp, Target)."""
+        # Arrange
+        with patch('serial.Serial'), patch('artisanlib.comm.QSemaphore'), patch(
+            'artisanlib.comm.platform'
+        ) as mock_platform:
+
+            mock_platform.system.return_value = 'Linux'
+            mock_aw = Mock()
+            mock_aw.qmc.timeclock.elapsedMilli.return_value = 12345.0
+            mock_aw.qmc.mode = 'C'
+            mock_aw.roest = _FakeRoest()
+
+            from artisanlib.comm import serialport
+
+            ser = serialport(mock_aw)
+
+            # Act
+            tx, inlet, target = ser.Roest_IT()
+
+            # Assert
+            assert tx == 12345.0
+            assert (inlet, target) == (220.0, 210.0)
+
+    def test_roest_readers_none_when_aw_roest_absent(self) -> None:
+        """Test all Roest_* reader methods fall back to (-1, -1) when aw.roest is None."""
+        # Arrange
+        with patch('serial.Serial'), patch('artisanlib.comm.QSemaphore'), patch(
+            'artisanlib.comm.platform'
+        ) as mock_platform:
+
+            mock_platform.system.return_value = 'Linux'
+            mock_aw = Mock()
+            mock_aw.qmc.timeclock.elapsedMilli.return_value = 12345.0
+            mock_aw.qmc.mode = 'C'
+            mock_aw.roest = None
+
+            from artisanlib.comm import serialport
+
+            ser = serialport(mock_aw)
+
+            # Act / Assert
+            for method_name in ('Roest_BTET', 'Roest_HF', 'Roest_RD', 'Roest_IT'):
+                tx, t1, t2 = getattr(ser, method_name)()
+                assert tx == 12345.0
+                assert (t1, t2) == (-1, -1)
 
 
 class TestSerialportPortManagement:
