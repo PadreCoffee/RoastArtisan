@@ -115,7 +115,8 @@ class Roest(AsyncComm):
 
     __slots__ = ['_charge_handler', '_dry_handler', '_fcs_handler', '_drop_handler',
                  '_bt', '_et', '_heat', '_fan', '_rpm', '_drum_temp', '_inlet_temp', '_target',
-                 '_phase', '_crack']
+                 '_phase', '_crack',
+                 '_ev_charge', '_ev_dry', '_ev_fcs', '_ev_drop']
 
     def __init__(self, host: str = '127.0.0.1', port: int = 8080, serial: 'SerialSettings|None' = None,
                  connected_handler=None, disconnected_handler=None,
@@ -135,6 +136,10 @@ class Roest(AsyncComm):
         self._target: float = -1
         self._phase: int = -1
         self._crack: int = -1
+        self._ev_charge: bool = False
+        self._ev_dry: bool = False
+        self._ev_fcs: bool = False
+        self._ev_drop: bool = False
 
     # getters (Artisan reads these each tick; -1 == no value)
     def getBT(self) -> float: return self._bt
@@ -151,10 +156,26 @@ class Roest(AsyncComm):
         self._bt = self._et = self._heat = self._fan = self._rpm = -1
         self._drum_temp = self._inlet_temp = self._target = -1
         self._phase = self._crack = -1
+        self._ev_charge = self._ev_dry = self._ev_fcs = self._ev_drop = False
 
     @staticmethod
     def _num(v: float | None) -> float:
         return -1 if v is None else v
+
+    # BENCH (Task 9): fill these from a labeled roast capture (phase 0-3 + crack u8 at known
+    # CHARGE/DRY/FC/DROP moments). Until then they return False so no mark is ever driven.
+    @staticmethod
+    def _is_charge(rec:dict[str, Any]) -> bool:  # noqa: ARG004
+        return False  # BENCH: confirm mapping (e.g. phase transition into roast)
+    @staticmethod
+    def _is_dry(rec:dict[str, Any]) -> bool:  # noqa: ARG004
+        return False  # BENCH: confirm mapping
+    @staticmethod
+    def _is_fcs(rec:dict[str, Any]) -> bool:  # noqa: ARG004
+        return False  # BENCH: confirm mapping (likely rec['crack'])
+    @staticmethod
+    def _is_drop(rec:dict[str, Any]) -> bool:  # noqa: ARG004
+        return False  # BENCH: confirm mapping
 
     def register_reading(self, rec: dict[str, Any]) -> None:
         self._bt = self._num(rec['bt'])
@@ -165,10 +186,23 @@ class Roest(AsyncComm):
         self._drum_temp = self._num(rec['drum_temp'])
         self._inlet_temp = self._num(rec['inlet_temp'])
         self._target = self._num(rec['target'])
-        # NOTE: event emission from rec['phase']/rec['crack'] is added in Task 8
-        # (mapping confirmed on the bench). Keep the fields for that task:
         self._phase = rec['phase']
         self._crack = rec['crack']
+        # One-shot rising-edge event emission (mirrors Santoker.register_reading).
+        # The mapping stubs (_is_charge/_is_dry/_is_fcs/_is_drop) are bench-gated (Task 9) and
+        # currently always return False, so this structure is wired but fires nothing yet.
+        for detect, prev_attr, handler in (
+                (self._is_charge, '_ev_charge', self._charge_handler),
+                (self._is_dry,    '_ev_dry',    self._dry_handler),
+                (self._is_fcs,    '_ev_fcs',    self._fcs_handler),
+                (self._is_drop,   '_ev_drop',   self._drop_handler)):
+            b = bool(detect(rec))
+            if b and not getattr(self, prev_attr) and handler is not None:
+                try:
+                    handler()
+                except Exception as e:  # pylint: disable=broad-except
+                    _log.exception(e)
+            setattr(self, prev_attr, b)
 
     @override
     async def read_msg(self, stream: 'asyncio.StreamReader|IteratorReader') -> None:

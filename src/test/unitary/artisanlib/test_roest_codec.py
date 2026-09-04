@@ -140,3 +140,57 @@ def test_roest_send_msg_bursts_control(monkeypatch):
     sent.clear()
     r.send_msg('power', 50.0)
     assert sent[0] == encode_power(50.0) * 8
+
+
+def _make_roest_with_handlers() -> tuple[Roest, list, list, list, list]:
+    charges: list = []
+    drys: list = []
+    fcss: list = []
+    drops: list = []
+    r = Roest(serial=None,
+               charge_handler=lambda: charges.append(True),
+               dry_handler=lambda: drys.append(True),
+               fcs_handler=lambda: fcss.append(True),
+               drop_handler=lambda: drops.append(True))
+    return r, charges, drys, fcss, drops
+
+
+def test_register_reading_stub_mapping_is_dormant_no_handler_ever_fires():
+    # BENCH (Task 9): until the phase/crack -> event mapping is confirmed on the bench,
+    # the mapping stubs always return False, so no handler may fire for any input.
+    r, charges, drys, fcss, drops = _make_roest_with_handlers()
+    for phase in range(4):
+        for crack in (0, 1, 2, 3, 99, 200, 255):
+            rec = decode_record(_rec(phase=phase, crack=crack))
+            r.register_reading(rec)
+            # also exercise repeated identical readings (would-be rising edges)
+            r.register_reading(rec)
+    assert charges == []
+    assert drys == []
+    assert fcss == []
+    assert drops == []
+
+
+def test_register_reading_rising_edge_fires_handler_once_per_edge(monkeypatch):
+    # Mechanics-only test: does not depend on the real (bench-gated) mapping.
+    monkeypatch.setattr(Roest, '_is_charge', staticmethod(lambda rec: rec['crack'] == 99))
+    r, charges, drys, fcss, drops = _make_roest_with_handlers()
+
+    high = decode_record(_rec(crack=99))
+    low = decode_record(_rec(crack=0))
+
+    r.register_reading(high)
+    assert len(charges) == 1                 # rising edge: fires
+    r.register_reading(high)
+    assert len(charges) == 1                 # still high: no re-fire on every tick
+    r.register_reading(low)
+    assert len(charges) == 1                 # falling edge: no fire, re-arms
+    r.register_reading(low)
+    assert len(charges) == 1                 # still low: no fire
+    r.register_reading(high)
+    assert len(charges) == 2                 # rising edge again: fires once more
+
+    # other events remain untouched by the monkeypatched _is_charge
+    assert drys == []
+    assert fcss == []
+    assert drops == []
