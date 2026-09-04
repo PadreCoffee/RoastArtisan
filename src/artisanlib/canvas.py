@@ -997,7 +997,11 @@ class tgraphcanvas(QObject):
                        '+Orbiter IT/DT',             #197
                        '+Orbiter Sound/Drum',        #198
                        '+Orbiter Damper/Heater',     #199
-                       '+Orbiter Air/RoR'            #200
+                       '+Orbiter Air/RoR',           #200
+                       'Roest BT/ET',                #201
+                       '+Roest Heat/Fan',            #202
+                       '+Roest RPM/Drum',            #203
+                       '+Roest Inlet/Target'         #204
                        ]
 
         # ADD DEVICE:
@@ -1071,7 +1075,8 @@ class tgraphcanvas(QObject):
             175, # Thermoworks BlueDOT
             176, # Aillio Bullet R2
             194, # +Yocto Meteo Hum/Temp
-            195  # +Yocto Meteo Pressure
+            195, # +Yocto Meteo Pressure
+            201  # Roest BT/ET
         ]
 
         # ADD DEVICE:
@@ -1164,7 +1169,10 @@ class tgraphcanvas(QObject):
             195, # +Yocto Meteo Pressure
             198, # +Orbiter Sound/Drum
             199, # +Orbiter Damper/Heater
-            200  # +Orbiter Air/RoR
+            200, # +Orbiter Air/RoR
+            202, # +Roest Heat/Fan
+            203, # +Roest RPM/Drum
+            204  # +Roest Inlet/Target
         ]
 
         # ADD DEVICE:
