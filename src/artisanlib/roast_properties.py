@@ -1353,6 +1353,13 @@ class editGraphDlg(ArtisanResizeablDialog):
         # to auto-select that coffee/blend's reference (first as the cloud orders them) and pull its
         # name into the title. Never set on a pure open, so opening the dialog overwrites nothing.
         self._select_reference_after_fetch:bool = False
+        # True while populatePlusCoffeeBlendCombos is programmatically seeding the coffee/blend
+        # popups (dialog open, or a store change). The seeding fires coffeeSelectionChanged/
+        # blendSelectionChanged the same way a real user pick does; this flag lets those handlers
+        # suppress their "user pick" side effects (persisting the selection + arming the reference
+        # auto-select) so that OPENING the dialog never re-loads the coffee/blend's reference over a
+        # background the roaster set by hand. A genuine pick (flag False) still arms them (C56 rule 1).
+        self._seeding_combos:bool = False
         self.plus_store_selected:str|None = None # holds the hr_id of the store of the selected coffee or blend
         self.plus_store_selected_label:str|None = None # the label of the selected store
         self.plus_coffee_selected:str|None = None # holds the hr_id of the selected coffee
@@ -2129,6 +2136,7 @@ class editGraphDlg(ArtisanResizeablDialog):
         if self.aw.plus_account is not None:
             try: # this can crash if dialog got closed while this is processed in a different thread!
                 self.plus_popups_set_enabled(False)
+                self._seeding_combos = True # suppress user-pick side effects while seeding the popups (see __init__)
 
                 #---- Stores
 
@@ -2263,6 +2271,7 @@ class editGraphDlg(ArtisanResizeablDialog):
             except Exception as e: # pylint: disable=broad-except
                 _log.exception(e)
             finally:
+                self._seeding_combos = False
                 self.plus_popups_set_enabled(True)
                 self.plus_stores_combo.blockSignals(False)
                 self.plus_coffees_combo.blockSignals(False)
@@ -2476,7 +2485,8 @@ class editGraphDlg(ArtisanResizeablDialog):
         # check for previously selected blend label
         prev_coffee_label = self.plus_coffee_selected_label
         prev_blend_label = self.plus_blend_selected_label
-        self.user_updated_coffee_or_blend = True # on leaving the dialog with OK the new selection will be persisted
+        if not self._seeding_combos: # opening/seeding the popups is not a user pick — see __init__
+            self.user_updated_coffee_or_blend = True # on leaving the dialog with OK the new selection will be persisted
         if n < 1 or self.plus_coffees is None:
             # coffee deselected — nothing to auto-select a reference from
             self._select_reference_after_fetch = False
@@ -2512,7 +2522,8 @@ class editGraphDlg(ArtisanResizeablDialog):
             self.plus_amount_replace_selected = None
             # a new coffee is selected: once its references arrive, auto-select the coffee's
             # reference (rule 1) instead of leaving «Без эталона», and retitle from it
-            self._select_reference_after_fetch = True
+            if not self._seeding_combos: # only a genuine user pick arms the reference auto-select (rule 1), never a pure open
+                self._select_reference_after_fetch = True
             self._updateLotCombo(cd)  # cloud lots mode: show/hide the lot picker for this coffee
             self.fillCoffeeData(selected_coffee,prev_coffee_label,prev_blend_label)
         self.checkWeightIn()
@@ -2533,7 +2544,8 @@ class editGraphDlg(ArtisanResizeablDialog):
         # check for previously selected blend label
         prev_coffee_label = self.plus_coffee_selected_label
         prev_blend_label = self.plus_blend_selected_label
-        self.user_updated_coffee_or_blend = True # on leaving the dialog with OK the new selection will be persisted
+        if not self._seeding_combos: # opening/seeding the popups is not a user pick — see __init__
+            self.user_updated_coffee_or_blend = True # on leaving the dialog with OK the new selection will be persisted
         self._hideLotCombo()  # cloud lots mode: blends have no lots -> no lot picker, no lot_id
         if n < 1 or self.plus_blends is None:
             # blend deselected — nothing to auto-select a reference from
@@ -2577,7 +2589,8 @@ class editGraphDlg(ArtisanResizeablDialog):
             self.plus_amount_replace_selected = plus.stock.getBlendReplaceMaxAmount(selected_blend)
             # a new blend is selected: once its references arrive, auto-select the blend's
             # reference (rule 1) instead of leaving «Без эталона», and retitle from it
-            self._select_reference_after_fetch = True
+            if not self._seeding_combos: # only a genuine user pick arms the reference auto-select (rule 1), never a pure open
+                self._select_reference_after_fetch = True
             self.fillBlendData(selected_blend,prev_coffee_label,prev_blend_label)
 
         self.checkWeightIn()
