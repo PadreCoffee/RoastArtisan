@@ -1,6 +1,7 @@
+import pytest
 import struct
 from artisanlib.roest_device import (
-    MAGIC, RECORD_LEN, FRAME_LEN, decode_record, deframe,
+    MAGIC, RECORD_LEN, decode_record, deframe,
     clamp, encode, encode_power, CTRL_MAGIC,
 )
 
@@ -30,18 +31,22 @@ def test_decode_record_scales_and_none_sentinel():
     assert d['bt'] == 21.5
     assert d['et'] == 19.8
     assert d['drum_temp'] is None          # 0xFFFF -> absent
+    assert d['rtd2'] is None
+    assert d['rtd3'] is None
+    assert d['inlet_temp'] is None
+    assert d['target'] is None
+    assert d['pcb_temperature'] == 40
+    assert d['msec'] == 5000
     assert d['phase'] == 1
+    assert d['crack'] == 0
     assert d['heat'] == 55.0
     assert d['rpm'] == 42
     assert d['fan'] == 60
 
 
 def test_decode_record_wrong_length_raises():
-    try:
+    with pytest.raises(ValueError):
         decode_record(b'\x00' * 10)
-        assert False, 'expected ValueError'
-    except ValueError:
-        pass
 
 
 def test_deframe_extracts_valid_record_and_resyncs_on_noise():
@@ -58,6 +63,13 @@ def test_deframe_drops_bad_xor_and_resyncs():
     buf = bytearray(bad + _frame(rec))
     out = list(deframe(buf))
     assert out == [rec]                                   # bad frame skipped, good one recovered
+
+
+def test_deframe_extracts_multiple_records_in_one_call():
+    r1 = _rec(bt=2000)
+    r2 = _rec(bt=2100)
+    buf = bytearray(_frame(r1) + _frame(r2))
+    assert list(deframe(buf)) == [r1, r2]
 
 
 def test_clamp_ranges():
