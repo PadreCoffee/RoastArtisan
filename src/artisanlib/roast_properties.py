@@ -42,6 +42,7 @@ import plus.controller
 import plus.queue
 import plus.blend
 import plus.register
+import plus.lots
 
 #from artisanlib.suppress_errors import suppress_stdout_stderr
 from artisanlib.util import (deltaLabelUTF8, stringfromseconds,stringtoseconds, toInt, toFloat, abbrevString,
@@ -1357,6 +1358,8 @@ class editGraphDlg(ArtisanResizeablDialog):
         self.plus_coffee_selected:str|None = None # holds the hr_id of the selected coffee
         self.plus_coffee_selected_label:str|None = None # the label of the selected coffee ("<country>, <lot>")
         self.plus_coffee_title_label:str|None = None # lot label only (no country) used to auto-fill the roast title
+        self.plus_lots_current:list[dict[str, Any]] = [] # cloud lots mode: pickable lots of the currently selected coffee (see plus.lots)
+        self.plus_lot_selected:str|None = self.aw.qmc.plus_lot_id # lot_id to upload (None -> cloud auto-allocates by priority); seeded so a prior choice survives a dialog reopen
         self.plus_blend_selected_label:str|None = None # the name of the selected blend
         self.plus_blend_selected_spec:Blend|None = None # holds the blend dict specification of the selected blend
         self.plus_blend_selected_spec_labels:list[str]|None = None # the list of coffee labels of the selected blend specification
@@ -1404,6 +1407,12 @@ class editGraphDlg(ArtisanResizeablDialog):
             self.plus_stores_combo.setToolTip(QApplication.translate('Tooltip','Select a storage location'))
             self.plus_coffees_combo = CoffeesComboBox(self)
             self.plus_coffees_combo.setToolTip(QApplication.translate('Tooltip','Select beans from your inventory'))
+            # cloud lots mode: a per-coffee lot picker, hidden unless the selected coffee has >1 lot
+            self.plusLotslabel = QLabel('<b>' + QApplication.translate('Label', 'Lot') + '</b>')
+            self.plusLotslabel.setToolTip(QApplication.translate('Tooltip','Select which lot this roast draws from'))
+            self.plus_lots_combo = MyQComboBox(self)
+            self.plus_lots_combo.setToolTip(QApplication.translate('Tooltip','Select which lot this roast draws from'))
+            self.plus_lots_combo.currentIndexChanged.connect(self.lotSelectionChanged)
             self.plus_blends_combo = BlendsComboBox(self)
             self.plus_blends_combo.setToolTip(QApplication.translate('Tooltip','Select a blend from your inventory'))
             self.plus_stores_combo.currentIndexChanged.connect(self.storeSelectionChanged)
@@ -1439,17 +1448,31 @@ class editGraphDlg(ArtisanResizeablDialog):
             plusLineStores.setSpacing(5)
             self.plusLineStoresFrame = QFrame()
             self.plusLineStoresFrame.setLayout(plusLineStores)
+            # cloud lots mode: lot picker sits right after the coffee combo, hidden by default
+            self.plus_lots_combo.setMinimumContentsLength(12)
+            self.plus_lots_combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+            plusLineLots = QHBoxLayout()
+            plusLineLots.addSpacing(8)
+            plusLineLots.addWidget(self.plusLotslabel)
+            plusLineLots.addSpacing(4)
+            plusLineLots.addWidget(self.plus_lots_combo)
+            plusLineLots.setContentsMargins(0, 0, 0, 0) # left, top, right, bottom
+            plusLineLots.setSpacing(5)
+            self.plusLineLotsFrame = QFrame()
+            self.plusLineLotsFrame.setLayout(plusLineLots)
+            self.plusLineLotsFrame.setVisible(False)
             plusLine = QHBoxLayout()
-            plusLine.addWidget(self.plus_coffees_combo)
-            plusLine.addSpacing(10)
-            plusLine.addWidget(self.plusBlendslabel)
-            plusLine.addSpacing(4)
-            plusLine.addWidget(self.plus_blends_combo)
-            plusLine.addWidget(self.plus_custom_blend_button)
-            plusLine.addWidget(self.plusLineStoresFrame)
-            plusLine.setStretch(0, 3)
-            plusLine.setStretch(4, 2)
-            plusLine.setStretch(6, 1)
+            plusLine.addWidget(self.plus_coffees_combo)       # 0
+            plusLine.addWidget(self.plusLineLotsFrame)        # 1 (hidden unless coffee has >1 lot)
+            plusLine.addSpacing(10)                            # 2
+            plusLine.addWidget(self.plusBlendslabel)          # 3
+            plusLine.addSpacing(4)                             # 4
+            plusLine.addWidget(self.plus_blends_combo)        # 5
+            plusLine.addWidget(self.plus_custom_blend_button) # 6
+            plusLine.addWidget(self.plusLineStoresFrame)      # 7
+            plusLine.setStretch(0, 3)  # coffee combo
+            plusLine.setStretch(5, 2)  # blend combo
+            plusLine.setStretch(7, 1)  # stores frame
             self.label_origin_flag = QCheckBox(QApplication.translate('CheckBox','Standard bean labels'))
             self.label_origin_flag.setToolTip(QApplication.translate('Tooltip',"Beans are listed as 'origin, name' if ticked, otherwise as 'name, origin'"))
             self.label_origin_flag.setChecked(bool(plus.stock.coffee_label_normal_order))
@@ -2463,6 +2486,7 @@ class editGraphDlg(ArtisanResizeablDialog):
             self.plus_coffee_selected = None
             self.plus_coffee_selected_label = None
             self.plus_coffee_title_label = None
+            self._hideLotCombo()  # cloud lots mode: no coffee -> no lot picker
             self.plus_amount_selected = None
             self.plus_amount_replace_selected = None
             self.updateTitle(prev_coffee_label,prev_blend_label)
@@ -2489,6 +2513,7 @@ class editGraphDlg(ArtisanResizeablDialog):
             # a new coffee is selected: once its references arrive, auto-select the coffee's
             # reference (rule 1) instead of leaving «Без эталона», and retitle from it
             self._select_reference_after_fetch = True
+            self._updateLotCombo(cd)  # cloud lots mode: show/hide the lot picker for this coffee
             self.fillCoffeeData(selected_coffee,prev_coffee_label,prev_blend_label)
         self.checkWeightIn()
         self.updatePlusSelectedLine()
@@ -2509,6 +2534,7 @@ class editGraphDlg(ArtisanResizeablDialog):
         prev_coffee_label = self.plus_coffee_selected_label
         prev_blend_label = self.plus_blend_selected_label
         self.user_updated_coffee_or_blend = True # on leaving the dialog with OK the new selection will be persisted
+        self._hideLotCombo()  # cloud lots mode: blends have no lots -> no lot picker, no lot_id
         if n < 1 or self.plus_blends is None:
             # blend deselected — nothing to auto-select a reference from
             self._select_reference_after_fetch = False
@@ -2557,6 +2583,55 @@ class editGraphDlg(ArtisanResizeablDialog):
         self.checkWeightIn()
         self.updatePlusSelectedLine()
         self.populateTemplateCombo()
+
+    # --- cloud lots mode: per-coffee lot picker (see plus.lots) ---------------------------------
+    def _hideLotCombo(self) -> None:
+        # no coffee / a blend / a coffee with <=1 lot: no lot picker, upload no lot_id (the cloud
+        # auto-allocates by priority = today's behaviour).
+        self.plus_lots_current = []
+        self.plus_lot_selected = None
+        if hasattr(self, 'plus_lots_combo'):
+            self.plus_lots_combo.blockSignals(True)
+            self.plus_lots_combo.clear()
+            self.plus_lots_combo.blockSignals(False)
+            self.plusLineLotsFrame.setVisible(False)
+
+    def _updateLotCombo(self, cd:'plus.stock.Coffee') -> None:
+        # show a lot dropdown ONLY when the selected coffee carries >1 pickable lot (cloud lots
+        # mode). Absent/0/1 lots -> hidden, behaves exactly as today. Labels show
+        # `code · <weight in the roaster's unit> · warehouse`; the first lot (cloud default) is
+        # pre-selected, or a previously chosen lot on reopen.
+        if not hasattr(self, 'plus_lots_combo'):
+            return
+        lots = plus.lots.pickable_lots(cd.get('lots'))
+        if not plus.lots.show_lot_dropdown(lots):
+            self._hideLotCombo()
+            return
+        self.plus_lots_current = lots
+        kg_idx = weight_units.index('Kg')
+        target_idx = self.unitsComboBox.currentIndex()
+        self.plus_lots_combo.blockSignals(True)
+        self.plus_lots_combo.clear()
+        for lot in lots:
+            try:
+                weight_str = render_weight(float(lot.get('weight_kg') or 0), kg_idx, target_idx)
+            except Exception:  # pylint: disable=broad-except
+                weight_str = ''
+            self.plus_lots_combo.addItem(plus.lots.lot_option_label(lot, weight_str))
+        idx = plus.lots.default_lot_index(lots, self.plus_lot_selected)
+        self.plus_lots_combo.setCurrentIndex(idx)
+        self.plus_lots_combo.blockSignals(False)
+        # keep the effective lot_id aligned with the pre-selected index (prior choice survives,
+        # otherwise the default index 0 -> None -> omit lot_id -> auto-allocate)
+        self.plus_lot_selected = plus.lots.selected_lot_id(idx, lots)
+        self.plusLineLotsFrame.setVisible(True)
+
+    @pyqtSlot(int)
+    def lotSelectionChanged(self, idx:int) -> None:
+        # an explicit lot pick is a coffee-related change -> persist it on OK; index 0 (the cloud
+        # default) resolves to None so nothing is uploaded (today's behaviour).
+        self.user_updated_coffee_or_blend = True
+        self.plus_lot_selected = plus.lots.selected_lot_id(idx, self.plus_lots_current)
 
     # fallback: returns normalized template dicts from scheduler (used when remote API is not available)
     def _getTemplatesFromSchedule(self) -> list[dict]:
@@ -6104,10 +6179,12 @@ class editGraphDlg(ArtisanResizeablDialog):
                 self.aw.qmc.plus_coffee_label = self.plus_coffee_selected_label
                 if self.aw.qmc.plus_coffee is None:
                     self.aw.qmc.plus_coffee_label = None
+                    self.aw.qmc.plus_lot_id = None # blend / no coffee: no lot selection
                     self.aw.qmc.plus_blend_label = self.plus_blend_selected_label
                     self.aw.qmc.plus_blend_spec = self.plus_blend_selected_spec
                     self.aw.qmc.plus_blend_spec_labels = self.plus_blend_selected_spec_labels
                 else:
+                    self.aw.qmc.plus_lot_id = self.plus_lot_selected # chosen green-coffee lot (None -> cloud auto-allocates)
                     self.aw.qmc.plus_blend_label = None
                     self.aw.qmc.plus_blend_spec =  None
                     self.aw.qmc.plus_blend_spec_labels = None
