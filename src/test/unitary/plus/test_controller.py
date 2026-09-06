@@ -767,3 +767,64 @@ class TestConnectFunction:
 #
 #            # Assert
 #            mock_login.assert_not_called()  # Should not show login dialog
+
+
+class TestReuploadProfileIfCompleted:
+    """Tests for controller.reuploadProfileIfCompleted().
+
+    Regression guard for the post-DROP/pre-OFF cloud-sync gap: a plain /aroast update carries
+    no curve/event data, so a DROP/curve correction reaches the cloud only via a profile
+    re-upload. reuploadProfileIfCompleted() must re-queue the profile for a synced, completed
+    roast and must NOT do so when disabled, readonly, or the roast lacks CHARGE/DROP/roast_id.
+    """
+
+    @staticmethod
+    def _aw(charge:int = 10, drop:int = 200, readonly:bool = False) -> Mock:
+        aw = Mock()
+        aw.plus_readonly = readonly
+        aw.qmc = Mock()
+        aw.qmc.timeindex = [charge, 0, 0, 0, 0, 0, drop, 0]
+        return aw
+
+    def test_reupload_when_completed_synced_roast(self) -> None:
+        with patch('plus.controller.config') as cfg, patch('plus.controller.queue') as q:
+            cfg.profile_upload_enabled.return_value = True
+            cfg.app_window = self._aw()
+            q.capture_profile_upload_source.return_value = ('/tmp/p.alog', False)
+            controller.reuploadProfileIfCompleted({'roast_id': 'abc'})
+            q.addProfileUpload.assert_called_once_with('abc', '/tmp/p.alog', False)
+
+    def test_no_reupload_when_drop_not_set(self) -> None:
+        with patch('plus.controller.config') as cfg, patch('plus.controller.queue') as q:
+            cfg.profile_upload_enabled.return_value = True
+            cfg.app_window = self._aw(drop=0)
+            controller.reuploadProfileIfCompleted({'roast_id': 'abc'})
+            q.addProfileUpload.assert_not_called()
+
+    def test_no_reupload_when_charge_not_set(self) -> None:
+        with patch('plus.controller.config') as cfg, patch('plus.controller.queue') as q:
+            cfg.profile_upload_enabled.return_value = True
+            cfg.app_window = self._aw(charge=-1)
+            controller.reuploadProfileIfCompleted({'roast_id': 'abc'})
+            q.addProfileUpload.assert_not_called()
+
+    def test_no_reupload_when_disabled(self) -> None:
+        with patch('plus.controller.config') as cfg, patch('plus.controller.queue') as q:
+            cfg.profile_upload_enabled.return_value = False
+            cfg.app_window = self._aw()
+            controller.reuploadProfileIfCompleted({'roast_id': 'abc'})
+            q.addProfileUpload.assert_not_called()
+
+    def test_no_reupload_when_readonly(self) -> None:
+        with patch('plus.controller.config') as cfg, patch('plus.controller.queue') as q:
+            cfg.profile_upload_enabled.return_value = True
+            cfg.app_window = self._aw(readonly=True)
+            controller.reuploadProfileIfCompleted({'roast_id': 'abc'})
+            q.addProfileUpload.assert_not_called()
+
+    def test_no_reupload_when_no_roast_id(self) -> None:
+        with patch('plus.controller.config') as cfg, patch('plus.controller.queue') as q:
+            cfg.profile_upload_enabled.return_value = True
+            cfg.app_window = self._aw()
+            controller.reuploadProfileIfCompleted({})
+            q.addProfileUpload.assert_not_called()
