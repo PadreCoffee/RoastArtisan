@@ -27,7 +27,7 @@ from PyQt6.QtWidgets import QApplication, QMessageBox
 import platform
 import threading
 import logging
-from typing import Final, TYPE_CHECKING
+from typing import Any, Final, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from artisanlib.main import ApplicationWindow # noqa: F401 # pylint: disable=unused-import
@@ -464,6 +464,36 @@ def switchOperator(email: str, server_url: str|None = None) -> bool:
 # otherwise return None
 # this function is called by filesave(), automaticsave(), scheduler:register_roast()
 # it returns the sync_record hash to be added to the saved file
+def reuploadProfileIfCompleted(roast_record:dict[str, Any]) -> None:
+    """Re-queue the current profile so a post-DROP curve/DROP correction reaches the cloud.
+
+    The cloud (re)derives the DROP, first-crack, DRY, TP, DEV and the raw telemetry ONLY from
+    an uploaded profile (POST /roasts/{id}/upload-profile); a plain /aroast update carries none
+    of that. The initial profile upload happens exactly once, on the first DROP, so a DROP/curve
+    correction made after DROP but before OFF (marker move, undo+re-DROP, or a Roast Properties
+    edit) would otherwise never reach the cloud. This runs on every save/finish of a synced,
+    completed roast (CHARGE and DROP set) so the correction lands. Uploads are deduplicated by
+    (roast_id, path, mtime, size) in addProfileUpload(), so an unchanged profile is not re-sent.
+    """
+    try:
+        if not config.profile_upload_enabled():
+            return
+        aw = config.app_window
+        if aw is None or aw.plus_readonly:
+            return
+        roast_id = roast_record.get('roast_id')
+        if not roast_id:
+            return
+        # only for completed roasts: CHARGE (timeindex[0]) and DROP (timeindex[6]) set
+        if aw.qmc.timeindex[0] < 0 or aw.qmc.timeindex[6] <= 0:
+            return
+        profile_path, cleanup_profile_path = queue.capture_profile_upload_source(roast_id)
+        if profile_path is not None:
+            queue.addProfileUpload(roast_id, profile_path, cleanup_profile_path)
+    except Exception as e:  # pylint: disable=broad-except
+        _log.exception(e)
+
+
 def updateSyncRecordHashAndSync() -> str|None:
     try:
         _log.debug('updateSyncRecordHashAndSync()')
@@ -487,6 +517,10 @@ def updateSyncRecordHashAndSync() -> str|None:
                     # we push updates on the sync record back to the server
                     # via the queue
                     queue.addRoast(sync_record)
+                # a plain /aroast update carries no curve/event data, so a DROP/curve correction
+                # made after the initial DROP upload (but before OFF) is otherwise lost on the
+                # cloud; re-queue the corrected profile so the cloud re-derives the DROP from it
+                reuploadProfileIfCompleted(roast_record)
             elif 'roast_id' in roast_record and queue.full_roast_in_queue(
                 roast_record['roast_id']
             ):
