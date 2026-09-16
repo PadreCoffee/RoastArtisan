@@ -29,8 +29,13 @@ _log: Final[logging.Logger] = logging.getLogger(__name__)
 
 # --- telemetry framing/decoding (ported: usb_bridge.deframe + roest_record.decode_record) ---
 MAGIC: Final[bytes] = b'\xA5\x5A'
-RECORD_LEN: Final[int] = 22
-FRAME_LEN: Final[int] = 2 + RECORD_LEN + 1   # magic + record + xor = 25
+RECORD_LEN: Final[int] = 22                        # the ring record proper
+FRAME_PAYLOAD_LEN: Final[int] = RECORD_LEN + 1     # + trailing state0 (roast FSM) byte (patched fw >= 2026-09-06)
+FRAME_LEN: Final[int] = 2 + FRAME_PAYLOAD_LEN + 1  # magic + payload + xor = 26
+
+# state0 (main roast FSM *(0x20000fb8)) -> roast event, fired on the rising edge INTO the value.
+# Bench-confirmed 2026-09-06 (owner walked charge->yellow->crack->drop): 5->6->7->9.
+STATE0_EVENTS: Final[dict[int, str]] = {5: 'CHARGE', 6: 'DRY', 7: 'FC', 9: 'DROP'}
 
 
 def _cC(v: int) -> float | None:
@@ -38,12 +43,14 @@ def _cC(v: int) -> float | None:
 
 
 def decode_record(b: bytes) -> dict[str, Any]:
-    if len(b) != RECORD_LEN:
-        raise ValueError(f'record must be {RECORD_LEN} bytes, got {len(b)}')
+    # accept the bare 22-byte record (legacy fw) or the 23-byte payload (record + state0)
+    if len(b) not in (RECORD_LEN, FRAME_PAYLOAD_LEN):
+        raise ValueError(f'record must be {RECORD_LEN} or {FRAME_PAYLOAD_LEN} bytes, got {len(b)}')
     bt, et, rtd2, rtd3, drum, inlet, target = struct.unpack_from('<7H', b, 0)
     pcb = b[0x0E]
     t_state = struct.unpack_from('<H', b, 0x10)[0]
     packed = struct.unpack_from('<I', b, 0x12)[0]
+    state0 = b[RECORD_LEN] if len(b) == FRAME_PAYLOAD_LEN else None
     return {
         'bt': _cC(bt), 'et': _cC(et), 'rtd2': _cC(rtd2), 'rtd3': _cC(rtd3),
         'drum_temp': _cC(drum), 'inlet_temp': _cC(inlet), 'target': _cC(target),
@@ -54,11 +61,12 @@ def decode_record(b: bytes) -> dict[str, Any]:
         'heat': ((packed >> 8) & 0x3FF) / 10.0,
         'rpm': (packed >> 18) & 0x7F,
         'fan': (packed >> 25) & 0x7F,
+        'state0': state0,   # roast FSM *(0x20000fb8); map via STATE0_EVENTS; None if fw lacks it
     }
 
 
 def deframe(buf: bytearray) -> Iterator[bytes]:
-    """Yield validated 22-byte records from a rolling byte buffer; resync on error."""
+    """Yield validated frame payloads (22-byte record + 1 state0 byte) from a rolling byte buffer; resync on error."""
     while True:
         i = buf.find(MAGIC)
         if i < 0:
@@ -70,14 +78,14 @@ def deframe(buf: bytearray) -> Iterator[bytes]:
         if len(buf) - i < FRAME_LEN:
             del buf[:i]
             return
-        rec = bytes(buf[i + 2:i + 2 + RECORD_LEN])
-        xor = buf[i + 2 + RECORD_LEN]
+        payload = bytes(buf[i + 2:i + 2 + FRAME_PAYLOAD_LEN])
+        xor = buf[i + 2 + FRAME_PAYLOAD_LEN]
         chk = 0
-        for x in rec:
+        for x in payload:
             chk ^= x
         if chk == xor:
             del buf[:i + FRAME_LEN]
-            yield rec
+            yield payload
         else:
             del buf[:i + 1]
 
@@ -116,7 +124,7 @@ class Roest(AsyncComm):
     __slots__ = ['_charge_handler', '_dry_handler', '_fcs_handler', '_drop_handler',
                  '_bt', '_et', '_heat', '_fan', '_rpm', '_drum_temp', '_inlet_temp', '_target',
                  '_phase', '_crack',
-                 '_ev_charge', '_ev_dry', '_ev_fcs', '_ev_drop']
+                 '_ev_charge', '_ev_dry', '_ev_fcs', '_ev_drop', '_prev_state0']
 
     def __init__(self, host: str = '127.0.0.1', port: int = 8080, serial: 'SerialSettings|None' = None,
                  connected_handler=None, disconnected_handler=None,
@@ -140,6 +148,7 @@ class Roest(AsyncComm):
         self._ev_dry: bool = False
         self._ev_fcs: bool = False
         self._ev_drop: bool = False
+        self._prev_state0: int | None = None   # previous state0, for the DROP edge (leaves 7)
 
     # getters (Artisan reads these each tick; -1 == no value)
     def getBT(self) -> float: return self._bt
@@ -157,25 +166,28 @@ class Roest(AsyncComm):
         self._drum_temp = self._inlet_temp = self._target = -1
         self._phase = self._crack = -1
         self._ev_charge = self._ev_dry = self._ev_fcs = self._ev_drop = False
+        self._prev_state0 = None
 
     @staticmethod
     def _num(v: float | None) -> float:
         return -1 if v is None else v
 
-    # BENCH (Task 9): fill these from a labeled roast capture (phase 0-3 + crack u8 at known
-    # CHARGE/DRY/FC/DROP moments). Until then they return False so no mark is ever driven.
+    # Roast-event detection from the roaster FSM byte state0 (bench-confirmed 2026-09-06; see
+    # STATE0_EVENTS). CHARGE/DRY/FC are level predicates on entry into 5/6/7 -- the rising-edge
+    # machinery in register_reading turns each into a one-shot. DROP fires when state0 LEAVES 7
+    # (prev==7 -> 9/10/4/1), robust to a slow USB read dropping the transient 9.
     @staticmethod
-    def _is_charge(rec:dict[str, Any]) -> bool:  # noqa: ARG004
-        return False  # BENCH: confirm mapping (e.g. phase transition into roast)
+    def _is_charge(state0:int|None) -> bool:
+        return state0 == 5
     @staticmethod
-    def _is_dry(rec:dict[str, Any]) -> bool:  # noqa: ARG004
-        return False  # BENCH: confirm mapping
+    def _is_dry(state0:int|None) -> bool:
+        return state0 == 6
     @staticmethod
-    def _is_fcs(rec:dict[str, Any]) -> bool:  # noqa: ARG004
-        return False  # BENCH: confirm mapping (likely rec['crack'])
+    def _is_fcs(state0:int|None) -> bool:
+        return state0 == 7
     @staticmethod
-    def _is_drop(rec:dict[str, Any]) -> bool:  # noqa: ARG004
-        return False  # BENCH: confirm mapping
+    def _is_drop(state0:int|None, prev_state0:int|None) -> bool:
+        return prev_state0 == 7 and state0 in (9, 10, 4, 1)
 
     def register_reading(self, rec: dict[str, Any]) -> None:
         self._bt = self._num(rec['bt'])
@@ -188,36 +200,38 @@ class Roest(AsyncComm):
         self._target = self._num(rec['target'])
         self._phase = rec['phase']
         self._crack = rec['crack']
-        # One-shot rising-edge event emission (mirrors Santoker.register_reading).
-        # The mapping stubs (_is_charge/_is_dry/_is_fcs/_is_drop) are bench-gated (Task 9) and
-        # currently always return False, so this structure is wired but fires nothing yet.
-        for detect, prev_attr, handler in (
-                (self._is_charge, '_ev_charge', self._charge_handler),
-                (self._is_dry,    '_ev_dry',    self._dry_handler),
-                (self._is_fcs,    '_ev_fcs',    self._fcs_handler),
-                (self._is_drop,   '_ev_drop',   self._drop_handler)):
-            b = bool(detect(rec))
+        # One-shot rising-edge event emission (mirrors Santoker.register_reading), driven by the
+        # roaster FSM byte state0. Each detection is a level predicate; the _ev_* flags turn it
+        # into a one-shot on the False->True edge.
+        state0 = rec.get('state0')
+        for detection, prev_attr, handler in (
+                (self._is_charge(state0),                  '_ev_charge', self._charge_handler),
+                (self._is_dry(state0),                     '_ev_dry',    self._dry_handler),
+                (self._is_fcs(state0),                     '_ev_fcs',    self._fcs_handler),
+                (self._is_drop(state0, self._prev_state0), '_ev_drop',   self._drop_handler)):
+            b = bool(detection)
             if b and not getattr(self, prev_attr) and handler is not None:
                 try:
                     handler()
                 except Exception as e:  # pylint: disable=broad-except
                     _log.exception(e)
             setattr(self, prev_attr, b)
+        self._prev_state0 = state0
 
     @override
     async def read_msg(self, stream: 'asyncio.StreamReader|IteratorReader') -> None:
         await stream.readuntil(MAGIC)              # consume through the 2-byte magic
-        rec = await stream.readexactly(RECORD_LEN)
+        payload = await stream.readexactly(FRAME_PAYLOAD_LEN)  # 22-byte record + 1 state0 byte
         xor = await stream.readexactly(1)
         chk = 0
-        for x in rec:
+        for x in payload:
             chk ^= x
         if xor[0] != chk:
             if self._logging:
                 _log.debug('XOR mismatch, resync')
             return
         try:
-            self.register_reading(decode_record(rec))
+            self.register_reading(decode_record(payload))
         except Exception as e:  # pylint: disable=broad-except
             if self._logging:
                 _log.debug('decode error: %s', e)

@@ -1884,7 +1884,9 @@ class ApplicationWindow(QMainWindow):
 
         # Roest (native USB)
         self.roest:Roest|None = None # holds the Roest instance created on connect; reset to None on disconnect
-        self.roestEventFlags:list[bool] = [False, False, False, False, False, False, False] # CHARGE, DRY, FCs, FCe, SCs, SCe, DROP
+        # CHARGE, DRY, FCs, FCe, SCs, SCe, DROP -- auto-mark from the roaster FSM (state0); CHARGE/DRY/FCs/DROP
+        # are the events state0 exposes, so they default ON; FCe/SCs/SCe are not detected (left OFF).
+        self.roestEventFlags:list[bool] = [True, True, True, False, False, False, True]
 
         # Lebrew RoastSee NEXT
         self.lebrew_roastseeNEXT:Lebrew_RoastSeeNEXT|None = None # holds the Lebrew RoastSeeNEXT instance; reset to None on disconnect
