@@ -173,6 +173,7 @@ if TYPE_CHECKING:
     from artisanlib.weblcds import WebLCDs, WebGreen, WebRoasted # pylint: disable=unused-import
     from artisanlib.santoker import Santoker # pylint: disable=unused-import
     from artisanlib.santoker_r import SantokerR # pylint: disable=unused-import
+    from artisanlib.roest_device import Roest # pylint: disable=unused-import
     from artisanlib.lebrew import Lebrew_RoastSeeNEXT # pylint: disable=unused-import
     from artisanlib.bluedot import BlueDOT # pylint: disable=unused-import
     from artisanlib.mugma import Mugma # pylint: disable=unused-import
@@ -1432,6 +1433,23 @@ class MenuShortCutsDisabled:
         return True
 
 
+def _parse_roest_command(c:str) -> tuple[str,float]|None:
+    """Parse an eventaction IO command of the form 'roest(<chan>,<value>)'.
+
+    Returns (chan, value) if chan is one of {'drum','fan','power'} and value parses
+    as a float. Returns None for any other channel (e.g. 'drop' -- the P4/DROP slot
+    is intentionally left unwired as unsafe) as well as for malformed input.
+    """
+    try:
+        args = c[c.index('(')+1:c.rindex(')')].split(',')
+        chan = args[0].strip().lower()
+        if chan in ('drum','fan','power'):
+            return chan, float(args[1])
+        return None
+    except Exception: # pylint: disable=broad-except
+        return None
+
+
 ########################################################################################
 #################### MAIN APPLICATION WINDOW ###########################################
 ########################################################################################
@@ -1475,6 +1493,7 @@ class ApplicationWindow(QMainWindow):
     pidToggleSignal = pyqtSignal()
     notificationsSetEnabledSignal = pyqtSignal(bool)
     santokerSendMessageSignal = pyqtSignal(bytes,int)
+    roestSendMessageSignal = pyqtSignal(str,float)
     kaleidoSendMessageSignal = pyqtSignal(str,str)
     kaleidoSendMessageAwaitSignal = pyqtSignal(str,str,int,int)
     orbiterSendMessageSignal = pyqtSignal(bytes,bytes,bytes,int)
@@ -1511,7 +1530,7 @@ class ApplicationWindow(QMainWindow):
         'userprofilepath', 'printer', 'main_widget', 'defaultdpi', 'dpi', 'qmc', 'HottopControlActive', 'AsyncSamplingTimer', 'wheeldialog',
         'simulator', 'simulatorpath', 'comparator', 'eventsbuttonflag', 'minieventsflags', 'seriallogflag',
         'seriallog', 'ser', 'modbus', 'extraMODBUStemps', 'extraMODBUStx', 's7', 'extraS7tx', 'ws', 'extraser', 'extracomport', 'extrabaudrate',
-        'extrabytesize', 'extraparity', 'extrastopbits', 'extratimeout', 'hottop', 'santokerHost', 'santokerPort', 'santokerSerial', 'santokerBLE', 'santokerEventFlags', 'santoker', 'santokerR', 'lebrew_roastseeNEXT', 'thermoworksBlueDOT', 'fujipid', 'dtapid', 'pidcontrol', 'soundflag', 'recentRoasts', 'maxRecentRoasts',
+        'extrabytesize', 'extraparity', 'extrastopbits', 'extratimeout', 'hottop', 'santokerHost', 'santokerPort', 'santokerSerial', 'santokerBLE', 'santokerEventFlags', 'santoker', 'santokerR', 'roest', 'roestEventFlags', 'lebrew_roastseeNEXT', 'thermoworksBlueDOT', 'fujipid', 'dtapid', 'pidcontrol', 'soundflag', 'recentRoasts', 'maxRecentRoasts',
         'mugmaHost','mugmaPort', 'mugma', 'mugma_default_host', 'shelly_3EMPro_host', 'shelly_PlusPlug_host',
         'kaleido_default_host', 'kaleidoHost', 'kaleidoPort', 'kaleidoSerial', 'kaleidoPID', 'kaleido', 'kaleidoEventFlags', 'colorTrack_mean_window_size', 'colorTrack_median_window_size', 'ikawa',
         'lcdpaletteB', 'lcdpaletteF', 'extraeventsbuttonsflags', 'extraeventslabels', 'extraeventbuttoncolor', 'extraeventsactionstrings',
@@ -1862,6 +1881,12 @@ class ApplicationWindow(QMainWindow):
 
         # Santoker R
         self.santokerR:SantokerR|None = None # holds the Santoker R instance created on connect; reset to None on disconnect
+
+        # Roest (native USB)
+        self.roest:Roest|None = None # holds the Roest instance created on connect; reset to None on disconnect
+        # CHARGE, DRY, FCs, FCe, SCs, SCe, DROP -- auto-mark from the roaster FSM (state0); CHARGE/DRY/FCs/DROP
+        # are the events state0 exposes, so they default ON; FCe/SCs/SCe are not detected (left OFF).
+        self.roestEventFlags:list[bool] = [True, True, True, False, False, False, True]
 
         # Lebrew RoastSee NEXT
         self.lebrew_roastseeNEXT:Lebrew_RoastSeeNEXT|None = None # holds the Lebrew RoastSeeNEXT instance; reset to None on disconnect
@@ -4350,6 +4375,7 @@ class ApplicationWindow(QMainWindow):
         self.pidToggleSignal.connect(self.pidToggle)
         self.notificationsSetEnabledSignal.connect(self.notificationsSetEnabled)
         self.santokerSendMessageSignal.connect(self.santokerSendMessage)
+        self.roestSendMessageSignal.connect(self.roestSendMessage)
         self.kaleidoSendMessageSignal.connect(self.kaleidoSendMessage)
         self.kaleidoSendMessageAwaitSignal.connect(self.kaleidoSendMessageAwait)
         self.orbiterSendMessageSignal.connect(self.orbiterSendMessage)
@@ -9494,6 +9520,7 @@ class ApplicationWindow(QMainWindow):
                     ##  button(): toggles state of current button
                     ##  sleep(s) : sleep for s seconds, s a float
                     ##  santoker(<target>,<value>) : the byte <target> indicates where <value> of type integer should be written to
+                    ##  roest(<chan>,<value>) : sets the Roest control channel <chan> (drum,fan,power) to <value> of type float; other channels (e.g. drop) are logged and ignored
                     ##  kaleido(<target>,<value>) : the <target> string indicates where <value> of type string should be written to
                     ##  shellyrelay(n,b) : switches Shelly plug number <n> ON if b is true or 1, and OFF otherwise
                     #
@@ -9684,6 +9711,17 @@ class ApplicationWindow(QMainWindow):
                                             bts = bytes.fromhex(target)
                                             if len(bts)>0:
                                                 self.santokerSendMessageSignal.emit(bts[0:1], int(round(fv)))
+
+                                ##  roest(<chan>,<value>) : sets the Roest control channel <chan> (drum,fan,power) to <value> of type float; other channels (e.g. drop) are logged and ignored
+                                elif c.startswith('roest'):
+                                    try:
+                                        parsed = _parse_roest_command(c)
+                                        if parsed is not None:
+                                            self.roestSendMessageSignal.emit(*parsed)
+                                        else:
+                                            _log.info('roest command ignored (not wired / unsafe or malformed): %s', c)
+                                    except Exception as e: # pylint: disable=broad-except
+                                        _log.exception(e)
 
                                 ##  kaleido(<target>,<value>) : the <target> string indicates where <value> of type string should be written to
                                 elif c.startswith('kaleido'):
@@ -18174,6 +18212,15 @@ class ApplicationWindow(QMainWindow):
     def santokerSendMessage(self, target:bytes, value:int) -> None:
         if self.santoker is not None:
             self.santoker.send_msg(target,value)
+
+    # roestSendMessage() just sends out the message to the machine without waiting for a response
+    @pyqtSlot(str,float)
+    def roestSendMessage(self, chan:str, value:float) -> None:
+        if self.roest is not None:
+            try:
+                self.roest.send_msg(chan, value)
+            except Exception as e: # pylint: disable=broad-except
+                _log.exception(e)
 
 
     # kaleidoSendMessage() just sends out the message to the machine without waiting for a response

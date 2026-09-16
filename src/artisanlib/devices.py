@@ -4498,6 +4498,27 @@ class DeviceAssignmentDlg(ArtisanResizeablDialog):
                 ##########################
                 ####  DEVICE 200 is +Orbiter Air/RoR but +DEVICE cannot be set as main device
                 ##########################
+                ##########################
+                ####  DEVICE 201 is Roest BT/ET
+                elif meter == 'Roest BT/ET':
+                    self.aw.qmc.device = 201
+                    #self.aw.ser.comport = "COM4"
+                    self.aw.ser.baudrate = 115200
+                    self.aw.ser.bytesize = 8
+                    self.aw.ser.parity= 'N'
+                    self.aw.ser.stopbits = 1
+                    self.aw.ser.timeout = 0.7
+                    message = QApplication.translate('Message','Device set to {0}. Now, choose serial port').format(meter)
+                ##########################
+                ##########################
+                ####  DEVICE 202 is +Roest Heat/Fan but +DEVICE cannot be set as main device
+                ##########################
+                ##########################
+                ####  DEVICE 203 is +Roest RPM/Drum but +DEVICE cannot be set as main device
+                ##########################
+                ##########################
+                ####  DEVICE 204 is +Roest Inlet/Target but +DEVICE cannot be set as main device
+                ##########################
 
 
                 # ADD DEVICE:
@@ -4718,7 +4739,11 @@ class DeviceAssignmentDlg(ArtisanResizeablDialog):
                 8, # 197
                 8, # 198
                 8, # 199
-                8  # 200
+                8, # 200
+                8, # 201 Roest BT/ET (115200,8,'N',1)
+                8, # 202 +Roest Heat/Fan
+                8, # 203 +Roest RPM/Drum
+                8  # 204 +Roest Inlet/Target
                 ]
             #init serial settings of extra devices
             for i, _ in enumerate(self.aw.qmc.extradevices):
@@ -4885,7 +4910,7 @@ class DeviceAssignmentDlg(ArtisanResizeablDialog):
             #open serial conf Dialog
             #if device is not None or not external-program (don't need serial settings config)
             if (self.aw.qmc.device not in self.aw.qmc.nonSerialDevices or (self.aw.qmc.device == 134 and self.aw.santokerSerial) or
-                (self.aw.qmc.device == 138 and self.aw.kaleidoSerial)) and (self.aw.qmc.device != 50) and self.TabWidget.currentIndex() in {0,1,6}:
+                (self.aw.qmc.device == 138 and self.aw.kaleidoSerial) or self.aw.qmc.device == 201) and (self.aw.qmc.device != 50) and self.TabWidget.currentIndex() in {0,1,6}:
                 QTimer.singleShot(700, self.aw.setcommport)
             self.close()
             self.accept()

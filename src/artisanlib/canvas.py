@@ -997,7 +997,11 @@ class tgraphcanvas(QObject):
                        '+Orbiter IT/DT',             #197
                        '+Orbiter Sound/Drum',        #198
                        '+Orbiter Damper/Heater',     #199
-                       '+Orbiter Air/RoR'            #200
+                       '+Orbiter Air/RoR',           #200
+                       'Roest BT/ET',                #201
+                       '+Roest Heat/Fan',            #202
+                       '+Roest RPM/Drum',            #203
+                       '+Roest Inlet/Target'         #204
                        ]
 
         # ADD DEVICE:
@@ -1071,7 +1075,8 @@ class tgraphcanvas(QObject):
             175, # Thermoworks BlueDOT
             176, # Aillio Bullet R2
             194, # +Yocto Meteo Hum/Temp
-            195  # +Yocto Meteo Pressure
+            195, # +Yocto Meteo Pressure
+            201  # Roest BT/ET
         ]
 
         # ADD DEVICE:
@@ -1164,7 +1169,10 @@ class tgraphcanvas(QObject):
             195, # +Yocto Meteo Pressure
             198, # +Orbiter Sound/Drum
             199, # +Orbiter Damper/Heater
-            200  # +Orbiter Air/RoR
+            200, # +Orbiter Air/RoR
+            202, # +Roest Heat/Fan
+            203, # +Roest RPM/Drum
+            204  # +Roest Inlet/Target
         ]
 
         # ADD DEVICE:
@@ -13456,6 +13464,32 @@ class tgraphcanvas(QObject):
                         drop_handler=lambda : (self.markDropSignal.emit(False) if (len(self.aw.santokerEventFlags)>6 and self.aw.santokerEventFlags[6] and self.timeindex[6] == 0) else None))
                     self.aw.santoker.setLogging(self.device_logging)
                     self.aw.santoker.start()
+                elif self.device == 201:
+                    # connect Roest (native USB)
+                    import glob
+                    from artisanlib.roest_device import Roest
+                    roest_port = self.aw.ser.comport
+                    if not roest_port or not os.path.exists(roest_port):
+                        found_roest_ports = sorted(glob.glob('/dev/tty.usbmodem*'))
+                        if found_roest_ports:
+                            roest_port = found_roest_ports[0]
+                    roest_serial = SerialSettings(
+                                port = roest_port,
+                                baudrate = self.aw.ser.baudrate,
+                                bytesize = self.aw.ser.bytesize,
+                                stopbits = self.aw.ser.stopbits,
+                                parity = self.aw.ser.parity,
+                                timeout = self.aw.ser.timeout,
+                                clear_HUPCL = False)
+                    self.aw.roest = Roest(serial=roest_serial,
+                        connected_handler=lambda : self.aw.sendmessageSignal.emit(QApplication.translate('Message', '{} connected').format('Roest'),True,None),
+                        disconnected_handler=lambda : self.aw.sendmessageSignal.emit(QApplication.translate('Message', '{} disconnected').format('Roest'),True,None),
+                        charge_handler=lambda : (self.markChargeDelaySignal.emit(0) if (len(self.aw.roestEventFlags)>0 and self.aw.roestEventFlags[0] and self.timeindex[0] == -1) else None),
+                        dry_handler=lambda : (self.markDRYSignal.emit(False) if (len(self.aw.roestEventFlags)>1 and self.aw.roestEventFlags[1] and self.timeindex[1] == 0) else None),
+                        fcs_handler=lambda : (self.markFCsSignal.emit(False) if (len(self.aw.roestEventFlags)>2 and self.aw.roestEventFlags[2] and self.timeindex[2] == 0) else None),
+                        drop_handler=lambda : (self.markDropSignal.emit(False) if (len(self.aw.roestEventFlags)>6 and self.aw.roestEventFlags[6] and self.timeindex[6] == 0) else None))
+                    self.aw.roest.setLogging(self.device_logging)
+                    self.aw.roest.start()
                 elif self.device == 171:
                     # connect Santoker R
                     from artisanlib.santoker_r import SantokerR
@@ -13644,6 +13678,11 @@ class tgraphcanvas(QObject):
                 if not bool(self.aw.simulator) and self.device == 134 and self.aw.santoker is not None:
                     self.aw.santoker.stop()
                     self.aw.santoker = None
+
+                # disconnect Roest
+                if not bool(self.aw.simulator) and self.device == 201 and self.aw.roest is not None:
+                    self.aw.roest.stop()
+                    self.aw.roest = None
 
                 # disconnect Santoker R
                 if not bool(self.aw.simulator) and self.device == 171 and self.aw.santokerR is not None:

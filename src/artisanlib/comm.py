@@ -575,7 +575,11 @@ class serialport:
                                    self.Orbiter_ITDT,                #197
                                    self.Orbiter_Sound_Drum,          #198
                                    self.Orbiter_Damper_Heater,       #199
-                                   self.Orbiter_Air_RoR              #200
+                                   self.Orbiter_Air_RoR,              #200
+                                   self.Roest_BTET,           #201
+                                   self.Roest_HF,             #202
+                                   self.Roest_RD,             #203
+                                   self.Roest_IT              #204
                                    ]
         #string with the name of the program for device #27
         self.externalprogram:str = 'test.py'
@@ -2068,6 +2072,50 @@ class serialport:
         else:
             t1 = t2 = -1
         return tx,t1,t2 # time, -- (chan2), Drum (chan1)
+
+    def Roest_BTET(self) -> tuple[float,float,float]:
+        tx = self.aw.qmc.timeclock.elapsedMilli()
+        if self.aw.roest is not None:
+            t1 = self.aw.roest.getET()
+            t2 = self.aw.roest.getBT()
+            if self.aw.qmc.mode == 'F':
+                t1 = fromCtoFstrict(t1)
+                t2 = fromCtoFstrict(t2)
+        else:
+            t1 = t2 = -1
+        return tx,t1,t2 # time, ET (chan2), BT (chan1)
+
+    def Roest_HF(self) -> tuple[float,float,float]:
+        tx = self.aw.qmc.timeclock.elapsedMilli()
+        if self.aw.roest is not None:
+            t1 = self.aw.roest.getHeat()
+            t2 = self.aw.roest.getFan()
+        else:
+            t1 = t2 = -1
+        return tx,t1,t2 # time, Heat% (chan2), Fan% (chan1)
+
+    def Roest_RD(self) -> tuple[float,float,float]:
+        tx = self.aw.qmc.timeclock.elapsedMilli()
+        if self.aw.roest is not None:
+            t1 = self.aw.roest.getRPM()
+            t2 = self.aw.roest.getDrumTemp()
+            if self.aw.qmc.mode == 'F':
+                t2 = fromCtoFstrict(t2)
+        else:
+            t1 = t2 = -1
+        return tx,t1,t2 # time, RPM (chan2), Drum temp (chan1)
+
+    def Roest_IT(self) -> tuple[float,float,float]:
+        tx = self.aw.qmc.timeclock.elapsedMilli()
+        if self.aw.roest is not None:
+            t1 = self.aw.roest.getInletTemp()
+            t2 = self.aw.roest.getTarget()
+            if self.aw.qmc.mode == 'F':
+                t1 = fromCtoFstrict(t1)
+                t2 = fromCtoFstrict(t2)
+        else:
+            t1 = t2 = -1
+        return tx,t1,t2 # time, Inlet temp (chan2), Target (chan1)
 
     def Santoker_IB(self) -> tuple[float,float,float]:
         tx = self.aw.qmc.timeclock.elapsedMilli()
