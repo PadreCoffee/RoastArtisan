@@ -58,6 +58,57 @@ from uic import MeasureDialog # pyright: ignore[attr-defined] # pylint: disable=
 
 _log: Final[logging.Logger] = logging.getLogger(__name__)
 
+
+# --- snapshot block dates (how current are the green measurement and the reference) ---
+
+# date fields looked up (in this order) on a snapshot / reference item delivered by the cloud
+_SNAPSHOT_DATE_KEYS:Final[tuple[str, ...]] = ('measured_at', 'taken_at', 'snapshot_at', 'roasted_at', 'roast_date', 'date', 'updated_at', 'created_at')
+
+
+def _fmt_date_value(v:object) -> str|None:
+    import datetime
+    try:
+        if isinstance(v, bool) or v is None:
+            return None
+        if isinstance(v, (int, float)):
+            ts = float(v) / (1000.0 if v > 1e11 else 1.0)   # epoch in ms or s
+            return datetime.datetime.fromtimestamp(ts).strftime('%d.%m.%Y')
+        if isinstance(v, str) and v.strip():
+            txt = v.strip().replace('Z', '+00:00')
+            try:
+                return datetime.datetime.fromisoformat(txt).strftime('%d.%m.%Y')
+            except ValueError:
+                return datetime.date.fromisoformat(txt[:10]).strftime('%d.%m.%Y')
+    except Exception: # pylint: disable=broad-except
+        return None
+    return None
+
+
+# returns the first date found (DD.MM.YYYY) among the given dicts, checking _SNAPSHOT_DATE_KEYS in order
+def snapshot_date(*sources:object) -> str|None:
+    for src in sources:
+        if isinstance(src, dict):
+            for key in _SNAPSHOT_DATE_KEYS:
+                if key in src:
+                    d = _fmt_date_value(src[key])
+                    if d is not None:
+                        return d
+    return None
+
+
+# roast date (DD.MM.YYYY) of a cached reference profile, read cheaply from its 'roastisodate' entry
+def reference_profile_date(path:str|None) -> str|None:
+    import os
+    import re
+    if not path or not os.path.isfile(path):
+        return None
+    try:
+        with open(path, encoding='utf-8') as f:
+            m = re.search(r"['\"]roastisodate['\"]\s*:\s*['\"](\d{4}-\d{2}-\d{2})", f.read())
+        return _fmt_date_value(m.group(1)) if m else None
+    except Exception: # pylint: disable=broad-except
+        return None
+
 from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot, QRegularExpression, QSettings, QTimer, QEvent, QLocale, QSignalBlocker
 from PyQt6.QtGui import QColor, QIntValidator, QRegularExpressionValidator, QKeySequence, QPalette
 from PyQt6.QtWidgets import (QApplication, QWidget, QCheckBox, QComboBox, QDialogButtonBox, QGridLayout,
@@ -949,6 +1000,8 @@ class editGraphDlg(ArtisanResizeablDialog):
         self.weightpercentlabel.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.percent()
         self.weightinedit.editingFinished.connect(self.weightineditChanged)
+        self.weight_in_user_edited:bool = False # True once the roaster typed the weight-in or took it from the scale in this dialog
+        self.weightinedit.textEdited.connect(self.weightInTextEdited) # textEdited fires on user edits only, not on setText()
         self.weightoutedit.editingFinished.connect(self.weightouteditChanged)
         self.unitsComboBox = QComboBox()
         self.unitsComboBox.setToolTip(QApplication.translate('Tooltip', 'weight unit'))
@@ -2972,6 +3025,9 @@ class editGraphDlg(ArtisanResizeablDialog):
         grid.setContentsMargins(8, 4, 8, 4)
         header_current = QLabel('<b>Текущий</b>')
         header_reference = QLabel('<b>Эталон</b>')
+        # dated in _updateSnapshotBlock: when the current measurement / the reference were taken
+        self._snapshot_header_current = header_current
+        self._snapshot_header_reference = header_reference
         header_delta = QLabel('<b>Δ</b>')
         for c, w in enumerate((QLabel(''), header_current, header_reference, header_delta)):
             w.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -3048,11 +3104,29 @@ class editGraphDlg(ArtisanResizeablDialog):
             return '#b58900'  # amber
         return '#dc322f'  # red
 
+    # dates make it clear how current the compared values are: the green measurement date (cloud
+    # current_snapshot) and the reference date (cloud reference data, else the cached reference profile)
+    def _updateSnapshotHeaders(self, cur:dict|None, ref:dict|None) -> None:
+        if not hasattr(self, '_snapshot_header_current'):
+            return
+        cur_date = snapshot_date(cur)
+        self._snapshot_header_current.setText('<b>Текущий</b>' + (f'<br><small>замер {cur_date}</small>' if cur_date else ''))
+        ref_date:str|None = None
+        if self.template_uuid:
+            raw:dict|None = None
+            for t in self.plus_templates:
+                if t.get('uuid') == self.template_uuid:
+                    raw = t.get('_raw') if isinstance(t.get('_raw'), dict) else None
+                    break
+            ref_date = snapshot_date(ref, raw) or reference_profile_date(self.template_file or plus.register.getPath(self.template_uuid))
+        self._snapshot_header_reference.setText('<b>Эталон</b>' + (f'<br><small>{ref_date}</small>' if ref_date else ''))
+
     def _updateSnapshotBlock(self) -> None:
         if not hasattr(self, '_snapshot_value_labels'):
             return
         cur = self._getCurrentSnapshot()
         ref = self._getReferenceSnapshot()
+        self._updateSnapshotHeaders(cur, ref)
         incomplete = bool(cur and cur.get('incomplete'))
         self._snapshot_incomplete_label.setVisible(incomplete)
         has_reference = ref is not None
@@ -4988,8 +5062,13 @@ class editGraphDlg(ArtisanResizeablDialog):
         self.volumedialog.show()
         self.volumedialog.setFixedSize(self.volumedialog.size())
 
+    @pyqtSlot(str)
+    def weightInTextEdited(self, _:str) -> None:
+        self.weight_in_user_edited = True
+
     @pyqtSlot(bool)
     def inWeight(self, _:bool, overwrite:bool = False) -> None:
+        self.weight_in_user_edited = True # a weight taken from the scale is set by the roaster
         QTimer.singleShot(1,lambda : self.setWeight(self.weightinedit,self.bean_density_in_edit,self.moisture_greens_edit,overwrite))
 
     @pyqtSlot(bool)
@@ -6257,6 +6336,9 @@ class editGraphDlg(ArtisanResizeablDialog):
         w1 = min(w0,w1)
         self.aw.qmc.roasted_defects_weight = min(self.aw.qmc.roasted_defects_weight,w0)
         self.aw.qmc.weight = (w0,w1,w2)
+        if self.weight_in_user_edited:
+            # a hand-set weight must survive the reference (re)load below and the scheduler
+            self.aw.qmc.weight_manually_set = True
 
 
         #update volume

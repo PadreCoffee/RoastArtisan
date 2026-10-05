@@ -3011,6 +3011,12 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
                 _log.error(e)
         return res
 
+    # takes the schedule item weight (in kg) over as the green weight of the current roast, unless the roaster
+    # set this roast's weight by hand in Roast Properties: a manual weight always wins
+    def apply_schedule_item_weight(self, schedule_item_weight:float, weight_unit_idx:int) -> None:
+        if not self.aw.qmc.weight_manually_set:
+            self.aw.qmc.weight = (convertWeight(schedule_item_weight, 1, weight_unit_idx), self.aw.qmc.weight[1], self.aw.qmc.weight[2])
+
     # sets the items values as properties of the current roast and links it back to this schedule item
     def set_roast_properties(self, item:ScheduledItem, overwrite_nondefault_title:bool=True) -> None:
         self.aw.qmc.scheduleID = item.id
@@ -3024,7 +3030,7 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
         # we take the next prepared item weight if any, else the planned batch size from the item
         weight_unit_idx:int = weight_units.index(self.aw.qmc.weight[2])
         schedule_item_weight = (prepared[0] if len(prepared)>0 else item.weight)
-        self.aw.qmc.weight = (convertWeight(schedule_item_weight, 1, weight_unit_idx), self.aw.qmc.weight[1], self.aw.qmc.weight[2])
+        self.apply_schedule_item_weight(schedule_item_weight, weight_unit_idx)
         # initialize all aplus properties
         self.aw.qmc.plus_store = None
         self.aw.qmc.plus_store_label = None
