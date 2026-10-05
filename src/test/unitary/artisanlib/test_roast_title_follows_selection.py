@@ -67,6 +67,8 @@ def _harness(title='', *, coffee_label=None, coffee_title_label=None, blend_labe
     """Stand-in carrying a REAL MyQComboBox wired to the REAL slots, with the real
     editGraphDlg title/template methods bound to it."""
     o = types.SimpleNamespace()
+    o.weight_in_user_edited = False
+    o._applyReferenceWeight = lambda: None  # reference batch-weight fill is covered by test_reference_weight_autofill
     o.titleedit = _FakeTitleEdit(title)
     o.plus_coffee_selected_label = coffee_label
     o.plus_coffee_title_label = coffee_title_label
