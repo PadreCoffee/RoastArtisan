@@ -292,7 +292,7 @@ class tgraphcanvas(QObject):
         'backgroundReproduce', 'backgroundReproduceBeep', 'backgroundPlaybackEvents', 'backgroundPlaybackDROP', 'Betypes', 'backgroundFlavors', 'flavorbackgroundflag',
         'E1backgroundtimex', 'E2backgroundtimex', 'E3backgroundtimex', 'E4backgroundtimex', 'E1backgroundvalues', 'E2backgroundvalues', 'E3backgroundvalues',
         'E4backgroundvalues', 'l_backgroundeventtype1dots', 'l_backgroundeventtype2dots', 'l_backgroundeventtype3dots', 'l_backgroundeventtype4dots',
-        'DeltaETBflag', 'DeltaBTBflag', 'clearBgbeforeprofileload', 'setBatchSizeFromBackground', 'hideBgafterprofileload', 'heating_types', 'operator', 'organization', 'roastertype', 'roastersize', 'roasterheating', 'drumspeed',
+        'DeltaETBflag', 'DeltaBTBflag', 'clearBgbeforeprofileload', 'setBatchSizeFromBackground', 'weight_manually_set', 'hideBgafterprofileload', 'heating_types', 'operator', 'organization', 'roastertype', 'roastersize', 'roasterheating', 'drumspeed',
         'organization_setup', 'operator_setup', 'roastertype_setup', 'roastersize_setup', 'roastersize_setup_default', 'roasterheating_setup', 'roasterheating_setup_default', 'drumspeed_setup', 'last_batchsize', 'machinesetup_energy_ratings',
         'machinesetup', 'roastingnotes', 'cuppingnotes', 'roastdate', 'roastepoch', 'roastepoch_timeout', 'lastroastepoch', 'batchcounter', 'batchsequence', 'batchprefix', 'neverUpdateBatchCounter',
         'roastbatchnr', 'roastbatchprefix', 'roastbatchpos', 'roasttzoffset', 'roastUUID', 'scheduleID', 'scheduleDate', 'plus_default_store', 'plus_store', 'plus_store_label', 'plus_coffee',
@@ -1582,6 +1582,9 @@ class tgraphcanvas(QObject):
         self.DeltaBTBflag:bool = True
         self.clearBgbeforeprofileload:bool = False
         self.setBatchSizeFromBackground:bool = False
+        # True once the roaster set this roast's green weight by hand (typed it or took it from the scale in
+        # Roast Properties); while set, neither a background/reference load nor the scheduler overwrite it
+        self.weight_manually_set:bool = False
         self.hideBgafterprofileload:bool = False
 
         self.heating_types: Final[list[str]] = [
@@ -4678,6 +4681,24 @@ class tgraphcanvas(QObject):
             return float(numpy.average(numpy.array(temp_trail)))
 
     # returns true after BT passed the TP
+    # a turning point only counts for the CURRENT charge: an index recorded at/before the current CHARGE
+    # (left over from an undone or re-marked CHARGE) or while no CHARGE is set is dropped, so that the TP
+    # gets detected (and marked) again for the actual charge
+    def invalidateStaleTP(self) -> None:
+        if self.TPalarmtimeindex is not None and (self.timeindex[0] < 0 or self.TPalarmtimeindex <= self.timeindex[0]):
+            self.TPalarmtimeindex = None
+            self.afterTP = False
+
+    # autoDRY/autoFCs only fire on a genuine rise from the turning point of the current charge: BT at TP must
+    # be below the phase threshold and BT now at/above it. Reaching the temperature alone (e.g. right after
+    # CHARGE while BT is still high, with a stale/early TP) never marks an event.
+    def autoPhaseMarkReached(self, threshold:float, bt_now:float) -> bool:
+        tp = self.TPalarmtimeindex
+        if tp is None or self.timeindex[0] < 0 or tp <= self.timeindex[0] or tp >= len(self.temp2):
+            return False
+        bt_tp = self.temp2[tp]
+        return bt_tp not in (-1, None) and bt_tp < threshold <= bt_now
+
     def checkTPalarmtime(self) -> bool:
         seconds_since_CHARGE = int(self.timex[-1]-self.timex[self.timeindex[0]])
         # if v[-1] is the current temperature then check if
@@ -5150,6 +5171,9 @@ class tgraphcanvas(QObject):
                         if self.ETprojectFlag or self.BTprojectFlag:
                             self.updateProjection()
 
+                        # a TP left over from an undone/re-marked CHARGE must not count for the current charge
+                        self.invalidateStaleTP()
+
                         # autodetect CHARGE event
                         # only if BT > 77C/170F
                         if self.autoChargeIdx == 0 and self.autoChargeFlag and self.autoCHARGEenabled and self.timeindex[0] < 0 and length_of_qmc_timex >= 5 and \
@@ -5191,11 +5215,11 @@ class tgraphcanvas(QObject):
                                 self.autoDropIdx = length_of_qmc_timex - b
                                 self.markDropSignal.emit(False)
                         #check for autoDRY: # only after CHARGE and TP and before FCs if not yet set
-                        if self.autoDRYflag and self.autoDRYenabled and self.TPalarmtimeindex and self.timeindex[0] > -1 and not self.timeindex[1] and not self.timeindex[2] and sample_temp2[-1] >= self.phases[1]:
+                        if self.autoDRYflag and self.autoDRYenabled and self.timeindex[0] > -1 and not self.timeindex[1] and not self.timeindex[2] and self.autoPhaseMarkReached(self.phases[1], sample_temp2[-1]):
                             # if DRY event not yet set check for BT exceeding Dry-max as specified in the phases dialog
                             self.markDRYSignal.emit(False) # queued
                         #check for autoFCs: # only after CHARGE and TP and before FCe if not yet set
-                        if self.autoFCsFlag and self.autoFCsenabled and self.TPalarmtimeindex and self.timeindex[0] > -1 and not self.timeindex[2] and not self.timeindex[3] and sample_temp2[-1] >= self.phases[2]:
+                        if self.autoFCsFlag and self.autoFCsenabled and self.timeindex[0] > -1 and not self.timeindex[2] and not self.timeindex[3] and self.autoPhaseMarkReached(self.phases[2], sample_temp2[-1]):
                             # after DRY (if FCs event not yet set) check for BT exceeding FC-min as specified in the phases dialog
                             self.markFCsSignal.emit(False) # queued
 
@@ -8060,6 +8084,7 @@ class tgraphcanvas(QObject):
                 self.restoreEnergyLoadDefaults()
                 self.restoreEnergyProtocolDefaults()
                 #
+                self.weight_manually_set = False # properties are reset for a new roast: the weight is no longer the roaster's
                 if (self.backgroundprofile is not None and 'weight' in self.backgroundprofile and
                     self.setBatchSizeFromBackground and self.aw.schedule_window is None):
                     self.weight = (float(self.backgroundprofile['weight'][0]),0,str(self.backgroundprofile['weight'][2]))
@@ -13792,6 +13817,7 @@ class tgraphcanvas(QObject):
 #            QApplication.processEvents()  # solves the issue (but is more general as the MPL flush_events (takes ~1sec)
 
             # we autosave after full redraw after OFF to have the optional generated PDF containing all information
+            cur_file_before_autosave = self.aw.curFile
             if len(self.timex) > 2 and self.autosaveflag != 0:
                 try:
                     _log.info('[greyscreen] OffMonitorCloseDown: automaticsave() begin')
@@ -13799,6 +13825,8 @@ class tgraphcanvas(QObject):
                     _log.info('[greyscreen] OffMonitorCloseDown: automaticsave() end')
                 except Exception as e: # pylint: disable=broad-except
                     _log.exception(e)
+            if len(self.timex) > 2:
+                self.syncRoastToCloudIfNotAutosaved(cur_file_before_autosave)
 
             # Stopgap for the "grey screen" blank-canvas bug: the cloud-sync / upload-queue
             # completion above (automaticsave -> updateSyncRecordHashAndSync -> addRoast, and
@@ -13846,11 +13874,25 @@ class tgraphcanvas(QObject):
             self.adderror((QApplication.translate('Error Message', 'Exception:') + ' OffMonitorCloseDown() {0}').format(str(ex)),getattr(exc_tb, 'tb_lineno', '?'))
         _log.debug('MODE: OffMonitorCloseDown DONE')
 
+    # The cloud sync on OFF (updateSyncRecordHashAndSync: /aroast diff incl. weight + profile re-upload) used to
+    # run only inside a successful automaticsave(). If autosave is off or its path does not exist on this
+    # machine, nothing reached the cloud on OFF and changes made after DROP were lost. If the roast was not
+    # written to a new file by the autosave, we sync it directly (a successful autosave already synced).
+    def syncRoastToCloudIfNotAutosaved(self, cur_file_before_autosave:str|None) -> None:
+        if self.aw.curFile and self.aw.curFile != cur_file_before_autosave:
+            return
+        try:
+            import plus.controller
+            plus.controller.updateSyncRecordHashAndSync()
+        except Exception as e: # pylint: disable=broad-except
+            _log.exception(e)
+
     def OffMonitor(self, respectAlwaysON:bool = True) -> None:
         _log.info('MODE: OFF MONITOR')
         if self.flagon:
             try:
                 # reset
+                self.weight_manually_set = False # the roast is finished; a manual weight applies to this roast only
                 self.plus_beans_reminder_on_start = True # ensure that for the next recording the corresponding warning is shown if beans are not specified for plus
 
                 # activate "Stopping Mode" to ensure that sample() is not resetting the timer now (independent of the flagstart state)

@@ -14447,6 +14447,16 @@ class ApplicationWindow(QMainWindow):
 
     # Loads background profile
     # NOTE: this does NOT set the self.qmc.background flag to make the loaded background visible.
+    # the batch size of a loaded background profile is taken over as the current green weight only if
+    #  - setBatchSizeFromBackground is ticked
+    #  - no foreground profile is loaded (or we are sampling)
+    #  - scheduler is not active
+    #  - the roaster did not set this roast's weight by hand: a manual weight always wins (Roast Properties
+    #    reloads the reference on every OK, which used to silently replace the typed weight)
+    def batchSizeFromBackgroundAllowed(self) -> bool:
+        return bool(self.qmc.setBatchSizeFromBackground and (self.qmc.flagon or not self.curFile) and
+                    self.schedule_window is None and not self.qmc.weight_manually_set)
+
     def loadbackground(self, filename:str) -> None:
         f:QFile|None = None
         try:
@@ -14670,11 +14680,8 @@ class ApplicationWindow(QMainWindow):
                 if not self.curFile and len(self.qmc.timex) < 10: # if no foreground is loaded, autoadjustAxis
                     self.autoAdjustAxis(True)
 
-                # set current batch size from this background profile if
-                #  - setBatchSizeFromBackground is ticked
-                #  - no foreground profile is loaded
-                #  - scheduler is not active
-                if self.qmc.setBatchSizeFromBackground and (self.qmc.flagon or not self.curFile) and self.schedule_window is None:
+                # set current batch size from this background profile (see batchSizeFromBackgroundAllowed)
+                if self.batchSizeFromBackgroundAllowed():
                     self.qmc.weight = (profile['weight'][0],self.qmc.weight[1],profile['weight'][2])
 
 
