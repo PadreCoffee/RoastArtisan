@@ -96,6 +96,36 @@ def snapshot_date(*sources:object) -> str|None:
     return None
 
 
+# green batch weight (weight-in, unit) bound to a cached reference profile, read cheaply from its 'weight'
+# entry ([in, out, unit]); None if the file is missing or carries no weight
+def reference_profile_weight(path:str|None) -> tuple[float, str]|None:
+    import os
+    import re
+    if not path or not os.path.isfile(path):
+        return None
+    try:
+        with open(path, encoding='utf-8') as f:
+            m = re.search(r"['\"]weight['\"]\s*:\s*\[\s*([-+0-9.eE]+)\s*,\s*[-+0-9.eE]+\s*,\s*['\"](\w+)['\"]", f.read())
+        if m is None:
+            return None
+        w = float(m.group(1))
+        unit = m.group(2)
+        if w <= 0:
+            return None
+        return w, ('Kg' if unit.lower() == 'kg' else unit)
+    except Exception: # pylint: disable=broad-except
+        return None
+
+
+# the roast's "weight set by hand" mark after OK in Roast Properties: typing the weight-in (or taking it
+# from the scale) sets it; it survives as long as the reference is unchanged; changing the reference drops
+# it so the new reference's weight applies again
+def next_weight_manual_flag(typed:bool, was_manual:bool, reference_changed:bool) -> bool:
+    if typed:
+        return True
+    return was_manual and not reference_changed
+
+
 # roast date (DD.MM.YYYY) of a cached reference profile, read cheaply from its 'roastisodate' entry
 def reference_profile_date(path:str|None) -> str|None:
     import os
@@ -597,6 +627,7 @@ class editGraphDlg(ArtisanResizeablDialog):
     readScaleSignal = pyqtSignal()
     referencesReady = pyqtSignal(int, list)  # (generation, items) — emitted from background fetch thread
     referenceDetailReady = pyqtSignal(str, dict)  # (uuid, detail item) — emitted from the detail fetch thread
+    referenceWeightReady = pyqtSignal(str, float, str)  # (uuid, weight-in, unit) — emitted from the reference profile fetch thread
 
     # if start_recording_on_exit is set, on leaving the dialog with OK, the recording is started in case plus is connected and beans have been set
     # and the flags "Open on CHARGE" and "Open on DROP" are not set
@@ -1002,6 +1033,7 @@ class editGraphDlg(ArtisanResizeablDialog):
         self.weightinedit.editingFinished.connect(self.weightineditChanged)
         self.weight_in_user_edited:bool = False # True once the roaster typed the weight-in or took it from the scale in this dialog
         self.weightinedit.textEdited.connect(self.weightInTextEdited) # textEdited fires on user edits only, not on setText()
+        self.referenceWeightReady.connect(self._onReferenceWeightReady)
         self.weightoutedit.editingFinished.connect(self.weightouteditChanged)
         self.unitsComboBox = QComboBox()
         self.unitsComboBox.setToolTip(QApplication.translate('Tooltip', 'weight unit'))
@@ -2846,9 +2878,61 @@ class editGraphDlg(ArtisanResizeablDialog):
             self._setTitleFromReference(auto_selected_label)
         self._updateSnapshotBlock()
 
+    # the reference's batch weight is taken over only if "set batch size from background" is on, the roast
+    # is sampling or no saved profile is loaded, and the scheduler (which sets its own weight) is inactive
+    def _referenceWeightAllowed(self) -> bool:
+        return bool(self.aw.qmc.setBatchSizeFromBackground and (self.aw.qmc.flagon or not self.aw.curFile) and
+                    self.aw.schedule_window is None)
+
+    # fills the weight-in field with the selected reference's batch weight unless the roaster typed the weight
+    # (in this dialog after the last reference change, or for this roast with the reference unchanged)
+    def _setWeightInFromReference(self, weight:float, unit:str) -> None:
+        if self.weight_in_user_edited:
+            return
+        if self.aw.qmc.weight_manually_set and self.template_uuid == self.org_template_uuid:
+            return
+        if not self._referenceWeightAllowed():
+            return
+        try:
+            src_idx = weight_units.index(unit) if unit in weight_units else weight_units.index('Kg')
+            w = convertWeight(weight, src_idx, self.unitsComboBox.currentIndex())
+            self.weightinedit.setText(f'{float2floatWeightVolume(w):g}')
+            self.percent()
+        except Exception as e: # pylint: disable=broad-except
+            _log.exception(e)
+
+    # takes over the weight of the selected reference: from its cached profile right away, otherwise the
+    # profile is fetched in the background (it is also needed on OK) and the weight applied when it arrives
+    def _applyReferenceWeight(self) -> None:
+        uuid_str = self.template_uuid
+        if not uuid_str or not self._referenceWeightAllowed() or self.weight_in_user_edited:
+            return
+        if self.aw.qmc.weight_manually_set and uuid_str == self.org_template_uuid:
+            return
+        rw = reference_profile_weight(self.template_file or plus.register.getPath(uuid_str))
+        if rw is not None:
+            self._setWeightInFromReference(*rw)
+            return
+        def _fetch() -> None:
+            path = self.aw.fetchRemoteBackgroundProfile(uuid_str)
+            fetched = reference_profile_weight(path)
+            if fetched is not None:
+                self.referenceWeightReady.emit(uuid_str, fetched[0], fetched[1])
+        threading.Thread(target=_fetch, daemon=True).start()
+
+    @pyqtSlot(str, float, str)
+    def _onReferenceWeightReady(self, uuid_str:str, weight:float, unit:str) -> None:
+        try:
+            if uuid_str == self.template_uuid:   # still the selected reference
+                self.template_file = plus.register.getPath(uuid_str)
+                self._setWeightInFromReference(weight, unit)
+        except Exception as e:  # pylint: disable=broad-except
+            _log.exception(e)  # dialog may have been closed before the callback fired
+
     @pyqtSlot(int)
     def templateSelectionChanged(self, n:int) -> None:
         prev_reference_title:str|None = self.reference_auto_title
+        prev_template_uuid:str|None = self.template_uuid
         reference_label:str|None = None
         if n > 0 and self.plus_templates and n - 1 < len(self.plus_templates):
             t = self.plus_templates[n - 1]
@@ -2875,6 +2959,10 @@ class editGraphDlg(ArtisanResizeablDialog):
             # (_applyAutoTitle clears reference_auto_title as it is not a reference title anymore)
             self._applyAutoTitle(self._autoTitleCandidate())
         self._updateSnapshotBlock()
+        if self.template_uuid is not None and self.template_uuid != prev_template_uuid:
+            # a different reference: its batch weight applies again, even over a weight typed before
+            self.weight_in_user_edited = False
+        self._applyReferenceWeight()
 
     @pyqtSlot(int)
     def templateReactivated(self, n:int) -> None:
@@ -6336,9 +6424,10 @@ class editGraphDlg(ArtisanResizeablDialog):
         w1 = min(w0,w1)
         self.aw.qmc.roasted_defects_weight = min(self.aw.qmc.roasted_defects_weight,w0)
         self.aw.qmc.weight = (w0,w1,w2)
-        if self.weight_in_user_edited:
-            # a hand-set weight must survive the reference (re)load below and the scheduler
-            self.aw.qmc.weight_manually_set = True
+        # a hand-set weight survives the reference (re)load below and the scheduler; changing the reference
+        # drops the mark so the new reference's weight applies again
+        self.aw.qmc.weight_manually_set = next_weight_manual_flag(self.weight_in_user_edited,
+            self.aw.qmc.weight_manually_set, self.template_uuid != self.org_template_uuid)
 
 
         #update volume

@@ -14504,6 +14504,7 @@ class tgraphcanvas(QObject):
     def OffRecorder(self, autosave:bool = True, enableButton:bool = True) -> None:
         _log.info('MODE: STOP RECORDING')
         try:
+            self.weight_manually_set = False # the roast is finished; a manual weight applies to this roast only
             # mark DROP if not yet set (and DROP not undone), at least 5min roast time and CHARGE is set and either autoDROP is active or DROP button is hidden
             if self.timeindex[6] == 0 and self.timeindex[0] != -1 and self.autoDROPenabled and (self.autoDropFlag or not self.buttonvisibility[6]):
                 start = self.timex[self.timeindex[0]]
