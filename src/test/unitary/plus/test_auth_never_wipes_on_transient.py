@@ -8,6 +8,7 @@ ambiguous raises a connection error, so callers keep the account ON and retry (l
 """
 
 import sys
+from typing import Any
 import types
 
 import pytest
@@ -15,18 +16,18 @@ import requests
 from PyQt6.QtWidgets import QApplication
 
 try:  # another test module may have replaced QApplication with a mock in sys.modules
-    _app = QApplication.instance() or QApplication(sys.argv)
+    _app: object = QApplication.instance() or QApplication(sys.argv)
 except Exception:  # pylint: disable=broad-except
     _app = None
 
 import artisanlib.main  # noqa: E402,F401
 
-import plus.config as config  # noqa: E402
-import plus.connection as connection  # noqa: E402
+from plus import config  # noqa: E402
+from plus import connection  # noqa: E402
 
 
 class _Resp:
-    def __init__(self, status: int, headers: dict, body=None) -> None:
+    def __init__(self, status: int, headers: dict[str, str], body=None) -> None:
         self.status_code = status
         self.headers = headers
         self._body = body
@@ -37,7 +38,7 @@ class _Resp:
 
 @pytest.fixture
 def env(monkeypatch):
-    deleted: list = []
+    deleted: list[Any] = []
     import keyring
     monkeypatch.setattr(keyring, 'delete_password', lambda *a: deleted.append(a))
     monkeypatch.setattr(keyring, 'get_password', lambda *a: 'secret')

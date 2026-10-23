@@ -283,13 +283,6 @@ ignore_missing_imports = true
 module = "uic.*"
 follow_imports = 'skip'
 
-# TEMPORARY: these modules are being changed in a parallel branch; the remaining
-# type errors there (plus.queue/plus.controller: arg-type, plus.schedule: type-arg)
-# are to be fixed after that merge, then this override removed.
-[[tool.mypy.overrides]]
-module = ["plus.queue", "plus.controller", "plus.schedule"]
-disable_error_code = ["arg-type", "type-arg"]
-
 # RoastArtisan regression tests (not from upstream Artisan). They drive production methods with
 # duck-typed fakes (types.SimpleNamespace / small stand-in classes passed as `self` or as an
 # argument), so arg-type is expected there; their test functions and helpers are not fully
@@ -314,6 +307,9 @@ module = [
     "test_set_token_force",
     "test_stock_guard",
     "test_switch_operator",
+    "test_auth_never_wipes_on_transient",
+    "test_outbox_never_drops",
+    "test_sync_silent_losses",
 ]
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
@@ -352,8 +348,6 @@ target-version = "py312"
 
 [tool.ruff.lint.per-file-ignores]
 "uic/*.py" = ["UP004", "F401", "ARG002"]
-# plus/controller.py is being changed in parallel; fix its `import plus.operators as operators` later
-"plus/controller.py" = ["PLR0402"]
 # test doubles (lambdas/mocks) must mirror the real call signatures, so unused args are expected
 "test/**/*.py" = ["ARG001", "ARG005"]
 

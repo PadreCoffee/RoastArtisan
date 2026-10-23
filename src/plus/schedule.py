@@ -1952,7 +1952,7 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
         # monotonic fetch generation to discard stale background results; the list of
         # references most recently applied to the strip combo (cloud order preserved).
         self._reference_fetch_gen:int = 0
-        self._references:list[dict] = []
+        self._references:list[dict[str, Any]] = []
         self.referencesReady.connect(self._on_references_ready)
 
         # holds the currently selected completed NoDragItem widget if any
@@ -3202,7 +3202,7 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
         threading.Thread(target=_fetch, daemon=True).start()
 
     @pyqtSlot(int, str, list)
-    def _on_references_ready(self, gen:int, item_id:str, items:list) -> None:
+    def _on_references_ready(self, gen:int, item_id:str, items:list[Any]) -> None:
         try:
             if gen != self._reference_fetch_gen:
                 return  # stale result from a previous selection

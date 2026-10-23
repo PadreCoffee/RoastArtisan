@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from artisanlib.main import ApplicationWindow # noqa: F401 # pylint: disable=unused-import
 
 from plus import config, connection, stock, queue, sync, roast, util
-import plus.operators as operators
+from plus import operators
 
 
 _log: Final[logging.Logger] = logging.getLogger(__name__)
@@ -456,7 +456,7 @@ def switchOperator(email: str, server_url: str|None = None) -> bool:
         _log.exception(e)
         ok = False
     if ok:
-        connection.setToken(config.token, connection.getNickname(), force_operator=True)
+        connection.setToken(config.token or '', connection.getNickname(), force_operator=True)
     return ok
 
 

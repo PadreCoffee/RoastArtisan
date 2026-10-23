@@ -1,18 +1,19 @@
 """R5 / R6 / missing comma / send-log: small silent data-loss fixes."""
 
 import sys
+from typing import Any
 import types
 
 from PyQt6.QtWidgets import QApplication
 
 try:  # another test module may have replaced QApplication with a mock in sys.modules
-    _app = QApplication.instance() or QApplication(sys.argv)
+    _app: object = QApplication.instance() or QApplication(sys.argv)
 except Exception:  # pylint: disable=broad-except
     _app = None
 
 import artisanlib.main  # noqa: E402,F401
-import plus.roast as roast  # noqa: E402
-import plus.sync as sync  # noqa: E402
+from plus import roast  # noqa: E402
+from plus import sync  # noqa: E402
 
 
 def _tmp_sync(monkeypatch, tmp_path):
@@ -48,10 +49,10 @@ def test_missing_sync_record_never_sends_the_estimate_to_the_cloud(monkeypatch) 
     # R6: an item without sync record is marked measured locally only; the estimate is never POSTed as end_weight
     import plus.connection
     import plus.schedule as sch
-    sent: list = []
+    sent: list[Any] = []
     monkeypatch.setattr(plus.connection, 'sendData', lambda *a, **k: sent.append(a))
     monkeypatch.setattr(sch, 'add_completed', lambda *a, **k: None)
-    updates: list = []
+    updates: list[Any] = []
     item = types.SimpleNamespace(roastUUID=types.SimpleNamespace(hex='abc'), measured=False,
                                  update_completed_item=lambda aw, ch: updates.append(ch),
                                  model_dump=lambda mode: {'prefix': 'x'})
@@ -63,7 +64,7 @@ def test_missing_sync_record_never_sends_the_estimate_to_the_cloud(monkeypatch) 
 
 def test_send_log_is_disabled(monkeypatch) -> None:
     from artisanlib.main import ApplicationWindow
-    msgs: list = []
+    msgs: list[Any] = []
     aw = types.SimpleNamespace(sendmessage=msgs.append)
     ApplicationWindow.sendLog(aw)   # must not compose / open any e-mail
     assert msgs and 'disabled' in str(msgs[0]).lower()
@@ -84,16 +85,16 @@ def test_schedule_cache_save_keeps_other_accounts(tmp_path) -> None:
 
 
 def test_switch_operator_rederives_server_urls(monkeypatch) -> None:
-    import plus.config as config
-    import plus.connection as connection
-    import plus.controller as controller
+    from plus import config
+    from plus import connection
+    from plus import controller
     monkeypatch.setattr(connection, 'clearCredentials', lambda **k: None)
     monkeypatch.setattr(connection, 'authentify', lambda: False)
     aw = types.SimpleNamespace(plus_server_url=None, plus_account=None, plus_email=None,
                                sendmessage=lambda *a, **k: None, updatePlusStatusSignal=types.SimpleNamespace(emit=lambda: None))
     monkeypatch.setattr(config, 'app_window', aw)
-    seen: list = []
-    monkeypatch.setattr(config, 'set_server_base_url', lambda url: seen.append(url))
+    seen: list[Any] = []
+    monkeypatch.setattr(config, 'set_server_base_url', seen.append)
     controller.switchOperator('b@example.com', 'https://other.example')
     assert seen == ['https://other.example']
 
@@ -121,5 +122,5 @@ def test_cache_after_diff_upload_merges_into_previous_record() -> None:
     _reset_cache()
     sync.setSyncRecordFromSent({'roast_id': 'r1', 'amount': 10.0, 'end_weight': 8.4, 'date': 'd'}, full_record=True)
     sync.setSyncRecordFromSent({'roast_id': 'r1', 'end_weight': 8.5}, full_record=False)
-    assert sync.cached_sync_record['amount'] == 10.0 and sync.cached_sync_record['end_weight'] == 8.5
+    assert sync.cached_sync_record is not None and sync.cached_sync_record['amount'] == 10.0 and sync.cached_sync_record['end_weight'] == 8.5
     _reset_cache()

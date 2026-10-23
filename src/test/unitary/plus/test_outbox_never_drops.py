@@ -9,17 +9,18 @@ file next to the outbox (plus a message to the roaster).
 
 import json
 import sys
+from typing import Any
 import types
 
 from PyQt6.QtWidgets import QApplication
 
 try:  # another test module may have replaced QApplication with a mock in sys.modules
-    _app = QApplication.instance() or QApplication(sys.argv)
+    _app: object = QApplication.instance() or QApplication(sys.argv)
 except Exception:  # pylint: disable=broad-except
     _app = None
 
 import artisanlib.main  # noqa: E402,F401
-import plus.config as config  # noqa: E402
+from plus import config  # noqa: E402
 import plus.queue as q  # noqa: E402
 
 
@@ -39,7 +40,7 @@ def test_backoff_grows_and_is_capped() -> None:
     delays = [q.transient_backoff(i) for i in range(12)]
     assert delays[0] == config.queue_retry_delay
     assert delays[1] == 2 * config.queue_retry_delay
-    assert all(a <= b for a, b in zip(delays, delays[1:]))
+    assert all(a <= b for a, b in zip(delays, delays[1:], strict=False))
     assert max(delays) == config.queue_transient_max_delay
 
 
@@ -50,7 +51,7 @@ def test_items_are_never_discarded_by_age() -> None:
 
 def test_dead_letter_keeps_every_failed_item(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(q, 'queue_path', str(tmp_path))
-    msgs: list = []
+    msgs: list[Any] = []
     monkeypatch.setattr(config, 'app_window', types.SimpleNamespace(sendmessage=lambda m, *a, **k: msgs.append(m)))
     item1 = {'url': 'u', 'verb': 'POST', 'data': {'roast_id': 'r1', 'modified_at': '2026-10-23T10:00:00.000Z'}}
     item2 = {'url': 'u', 'verb': 'POST', 'data': {'roast_id': 'r2'}}
@@ -82,14 +83,14 @@ class _FakeQueue:
     def __init__(self, items):
         self.items = list(items)
         self.done = 0
-        self.put_back: list = []
+        self.put_back: list[Any] = []
 
     def qsize(self):
         return len(self.items)
 
     def get(self):
         if not self.items:
-            raise _Stop()
+            raise _Stop
         return self.items.pop(0)
 
     def task_done(self):
@@ -120,13 +121,13 @@ def _run(monkeypatch, tmp_path, items, responses):
     monkeypatch.setattr(qm, 'queue_path', str(tmp_path))
     monkeypatch.setattr(config, 'app_window', types.SimpleNamespace(sendmessage=lambda *a, **k: None,
                                                                     updatePlusStatusSignal=types.SimpleNamespace(emit=lambda: None)))
-    sleeps: list = []
+    sleeps: list[Any] = []
     monkeypatch.setattr(qm.time, 'sleep', sleeps.append)
     monkeypatch.setattr(qm.controller, 'connect', lambda **k: None)
     monkeypatch.setattr(qm.controller, 'is_connected', lambda: True)
     monkeypatch.setattr(qm.controller, 'disconnect', lambda **k: None)
     seq = list(responses)
-    sent: list = []
+    sent: list[Any] = []
     def send(url, data, verb):
         sent.append(data.get('roast_id'))
         return _Resp(seq.pop(0))

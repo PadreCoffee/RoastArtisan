@@ -36,7 +36,7 @@ import requests.models
 import json
 import json.decoder
 import logging
-from typing import Final, Any, TYPE_CHECKING
+from typing import Final, Any, TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     import persistqueue # pylint: disable=unused-import
@@ -85,7 +85,7 @@ def dead_letter_path() -> str:
 
 # keeps an outbox item that finally could not be delivered (rejected, or failing for too long) in a JSON file
 # next to the outbox queue instead of dropping it, so it can be inspected and re-sent later
-def dead_letter(item:dict[str, Any], reason:str, status:int|None = None) -> None:
+def dead_letter(item:Any, reason:str, status:int|None = None) -> None:
     path = dead_letter_path()
     try:
         entries:list[Any] = []
@@ -239,7 +239,7 @@ def capture_profile_upload_source(roast_id:str) -> tuple[str|None, bool]:
             suffix=f'.{config.profile_ext}',
         )
         os.close(fd)
-        serialize(tmp_path, profile)
+        serialize(tmp_path, cast(dict[str, Any], profile))
         return tmp_path, True
     except Exception as e:  # pylint: disable=broad-except
         _log.exception(e)
