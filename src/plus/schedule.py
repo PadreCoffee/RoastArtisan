@@ -3151,6 +3151,8 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
             if self.aw.qmc.flagon and self.aw.qmc.timeindex[6] == 0 and (previous_selected_item_data is None or (previous_selected_item_data != item.data)):
                 # while sampling and DROP not yet set, we update the roast properties on schedule item changes
                 self.set_selected_remaining_item_roast_properties()
+                # a schedule item whose coffee has no stock left cannot be started with it (before CHARGE)
+                self.aw.qmc.applyRoastStockGuard()
             # offer the reference picker for the newly selected task (async, off the GUI thread).
             # The server default template (if any) has already been loaded by item.select above;
             # the picker only lets the user override it and is only shown when >=2 references exist.
