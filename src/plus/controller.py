@@ -445,7 +445,8 @@ def switchOperator(email: str, server_url: str|None = None) -> bool:
     connection.clearCredentials(remove_from_keychain=False)
     if server_url is not None:
         aw.plus_server_url = server_url
-        config.server_url = server_url
+        # also re-derives the auth/API URLs; setting only config.server_url left them pointing at the old server
+        config.set_server_base_url(server_url)
     aw.plus_account = email
     aw.plus_email = email
     config.passwd = None  # force reload from keyring for the new account in authentify()

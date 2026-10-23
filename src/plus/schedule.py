@@ -451,19 +451,32 @@ def total_roasting_time(rtimes:list[float|None]) -> float:
 
 
 # save completed roasts data to local file cache
+# per-account JSON cache write: read ALL accounts' data first, replace only this account's entry and write atomically
+# (temp file + rename). Opening with 'w'/'w+' and then reading returned nothing, so every save wiped the data of all
+# other accounts, and a crash during the write left an empty cache file.
+def _save_account_cache(path:str, plus_account_id:str, account_data:Any) -> None:
+    data:dict[str, Any] = {}
+    if os.path.exists(path):
+        try:
+            with open(path, encoding='utf-8') as f:
+                loaded = json.load(f)
+            if isinstance(loaded, dict):
+                data = loaded
+        except Exception as e:  # pylint: disable=broad-except
+            _log.error(e)
+    data[plus_account_id] = account_data
+    tmp = f'{path}.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=None, separators=(',', ':'), ensure_ascii=False)
+    os.replace(tmp, path)
+
+
 def save_completed(plus_account_id:str|None) -> None:
     _log.debug('save_completed(%s): %s', plus_account_id, len(completed_roasts_cache))
     if plus_account_id is not None:
         try:
             completed_roasts_semaphore.acquire(1)
-            f:TextIO
-            with open(completed_roasts_cache_path, 'w', encoding='utf-8') as f:
-                try:
-                    completed_roasts_cache_data = json.load(f)
-                except Exception:   # pylint: disable=broad-except
-                    completed_roasts_cache_data = {}
-                completed_roasts_cache_data[plus_account_id] = completed_roasts_cache
-                json.dump(completed_roasts_cache_data, f, indent=None, separators=(',', ':'), ensure_ascii=False)
+            _save_account_cache(completed_roasts_cache_path, plus_account_id, completed_roasts_cache)
         except Exception as e:  # pylint: disable=broad-except
             _log.exception(e)
         finally:
@@ -650,14 +663,7 @@ def save_prepared(plus_account_id:str|None) -> None:
     if plus_account_id is not None:
         try:
             prepared_items_semaphore.acquire(1)
-            f:TextIO
-            with open(prepared_items_cache_path, 'w+', encoding='utf-8') as f:
-                try:
-                    prepared_items_cache_data = json.load(f)
-                except Exception:   # pylint: disable=broad-except
-                    prepared_items_cache_data = {}
-                prepared_items_cache_data[plus_account_id] = prepared_items_cache
-                json.dump(prepared_items_cache_data, f, indent=None, separators=(',', ':'), ensure_ascii=False)
+            _save_account_cache(prepared_items_cache_path, plus_account_id, prepared_items_cache)
         except Exception as e:  # pylint: disable=broad-except
             _log.exception(e)
         finally:

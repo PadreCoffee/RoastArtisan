@@ -293,6 +293,37 @@ def setSyncRecordHash(sync_record:dict[str, Any]|None = None, h:str|None = None)
         if sync_record_semaphore.available() < 1:
             sync_record_semaphore.release(1)
 
+# undoes suppress_zero_values() on a record that was sent (None -> 0 / 50), so a record rebuilt from sent data
+# hashes like the same record taken from the roast properties
+def unsuppress_values(record:dict[str, Any]) -> dict[str, Any]:
+    res = dict(record)
+    for key in roast.sync_record_zero_supressed_attributes:
+        if key in res and res[key] is None:
+            res[key] = 0
+    for key in roast.sync_record_fifty_supressed_attributes:
+        if key in res and res[key] is None:
+            res[key] = 50
+    return res
+
+
+# after a successful upload, remembers what the server now has: built from the data actually SENT (a full record,
+# or the previous cached record updated with the sent diff), never from the current roast properties. Taking the
+# live properties (as before) marked edits made between queueing and upload as already synced, so they were never
+# sent; it also read the app state from the outbox worker thread.
+def setSyncRecordFromSent(sent:dict[str, Any], full_record:bool) -> None:
+    # pylint: disable=global-statement
+    global cached_sync_record_hash, cached_sync_record
+    try:
+        sync_record_semaphore.acquire(1)
+        base:dict[str, Any] = {} if full_record or cached_sync_record is None else dict(cached_sync_record)
+        base.update(unsuppress_values(sent))
+        cached_sync_record, cached_sync_record_hash = roast.getSyncRecord(base)
+    except Exception as e:  # pylint: disable=broad-except
+        _log.exception(e)
+    finally:
+        if sync_record_semaphore.available() < 1:
+            sync_record_semaphore.release(1)
+
 # cleared on RESET and potentially on sync
 def clearSyncRecordHash() -> None:
     # pylint: disable=global-statement

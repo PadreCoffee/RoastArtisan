@@ -14,7 +14,10 @@ import pytest
 import requests
 from PyQt6.QtWidgets import QApplication
 
-_app = QApplication.instance() or QApplication(sys.argv)
+try:  # another test module may have replaced QApplication with a mock in sys.modules
+    _app = QApplication.instance() or QApplication(sys.argv)
+except Exception:  # pylint: disable=broad-except
+    _app = None
 
 import artisanlib.main  # noqa: E402,F401
 

@@ -396,9 +396,11 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                         ).format(config.app_display_name)
                                     )  # @UndefinedVariable
                                 self.addSyncItem(item)
-                                sr, h = roast.getSyncRecord()
-                                if util.normalizeUUID(item['data']['roast_id']) == util.normalizeUUID(sr['roast_id']):
-                                    sync.setSyncRecordHash(sync_record=sr, h=h)
+                                # remember what the server has now, from what was SENT (not from the live properties)
+                                aw_loaded = config.app_window
+                                loaded_roast_id = util.normalizeUUID(getattr(getattr(aw_loaded, 'qmc', None), 'roastUUID', None))
+                                if loaded_roast_id is not None and util.normalizeUUID(item['data']['roast_id']) == loaded_roast_id:
+                                    sync.setSyncRecordFromSent(item['data'], is_full_roast_record(item['data']))
 
                                 response = get_response_json(r)
                                 if response:
