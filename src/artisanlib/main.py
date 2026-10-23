@@ -809,12 +809,12 @@ class VMToolbar(NavigationToolbar): # pylint: disable=abstract-method
 
         self.aw.updatePlusStatus(self)
 
-        self.update_view_org = self._update_view # type: ignore[has-type] # ty:ignore[ignore] # Cannot determine type of "_update_view"
+        self.update_view_org = self._update_view # type: ignore[has-type] # ty:ignore[ignore] # Cannot determine type of "_update_view" # pylint: disable=access-member-before-definition
         self._update_view = self.update_view_new # pyright: ignore # Cannot assign to a method  [method-assign]
 
-        self.release_pan_org = self.release_pan
+        self.release_pan_org = self.release_pan # pylint: disable=access-member-before-definition
         self.release_pan = self.release_pan_new # type:ignore[method-assign,misc,unused-ignore] # ty:ignore[unused-ignore]  # Cannot assign to a method  [method-assign]
-        self.release_zoom_org = self.release_zoom
+        self.release_zoom_org = self.release_zoom # pylint: disable=access-member-before-definition
         self.release_zoom = self.release_zoom_new # type:ignore[method-assign,misc,unused-ignore] # ty:ignore[unused-ignore] # Cannot assign to a method  [method-assign]
 
 #        # monkey patch matplotlib figureoptions that links to svg icon by default (crashes Windows Qt4 builds!)
@@ -4608,7 +4608,7 @@ class ApplicationWindow(QMainWindow):
 
     @pyqtSlot()
     def switchToOperator(self, entry:dict) -> None:
-        import plus.controller as plus_controller
+        import plus.controller as plus_controller # pylint: disable=reimported
         from plus import operators
         if operators.has_pin(entry):
             pin, okp = QInputDialog.getText(
@@ -4624,7 +4624,7 @@ class ApplicationWindow(QMainWindow):
             self.sendmessage(QApplication.translate('Plus', 'Operator {0} connected').format(name))
         else:
             # stored password missing/invalid -> fall back to the login dialog (prefill the email)
-            import plus.config as plus_config
+            import plus.config as plus_config # pylint: disable=reimported
             self.plus_account = None
             self.plus_email = entry['email']
             plus_config.passwd = None
@@ -4633,8 +4633,8 @@ class ApplicationWindow(QMainWindow):
 
     @pyqtSlot()
     def addOperator(self) -> None:
-        import plus.controller as plus_controller
-        import plus.config as plus_config
+        import plus.controller as plus_controller # pylint: disable=reimported
+        import plus.config as plus_config # pylint: disable=reimported
         # Adding a new operator needs the login dialog. connect() is a no-op while already
         # connected (and would otherwise silently reuse the active account), so drop the
         # session — keeping every saved password — and clear the active account to force the

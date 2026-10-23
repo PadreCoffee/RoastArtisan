@@ -3,7 +3,8 @@ import logging
 from typing import TYPE_CHECKING
 
 from PyQt6.QtCore import QCoreApplication
-from PyQt6.QtWidgets import (QListWidget, QListWidgetItem, QVBoxLayout, QHBoxLayout,
+from PyQt6.QtWidgets import ( # pylint: disable=unused-import # QWidget is used in a string annotation
+                             QListWidget, QListWidgetItem, QVBoxLayout, QHBoxLayout,
                              QPushButton, QInputDialog, QLineEdit, QMessageBox, QWidget)
 
 from plus import operators

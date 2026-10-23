@@ -195,8 +195,8 @@ def derive_service_base_urls(url: str|None) -> tuple[str, str]:
 
 
 def set_server_base_url(url: str|None) -> None:
-    global server_url, web_base_url, api_base_url, shop_base_url
-    global register_url, reset_passwd_url, auth_url, stock_url, roast_url, lock_schedule_url, notifications_url, profile_upload_url_template, profile_data_url_template, references_url, reference_detail_url_template
+    global server_url, web_base_url, api_base_url, shop_base_url # pylint: disable=global-statement
+    global register_url, reset_passwd_url, auth_url, stock_url, roast_url, lock_schedule_url, notifications_url, profile_upload_url_template, profile_data_url_template, references_url, reference_detail_url_template # pylint: disable=global-statement
 
     web_base_url, api_base_url = derive_service_base_urls(url)
     server_url = web_base_url

@@ -14,7 +14,7 @@
 # warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
 # the GNU General Public License for more details.
 
-import asyncio
+import asyncio # pylint: disable=unused-import # used in a string annotation
 import logging
 import struct
 from collections.abc import Iterator
@@ -23,7 +23,7 @@ from typing import Any, Final, override, TYPE_CHECKING
 if TYPE_CHECKING:
     from artisanlib.atypes import SerialSettings  # pylint: disable=unused-import
 
-from artisanlib.async_comm import AsyncComm, IteratorReader
+from artisanlib.async_comm import AsyncComm, IteratorReader # pylint: disable=unused-import # IteratorReader is used in a string annotation
 
 _log: Final[logging.Logger] = logging.getLogger(__name__)
 

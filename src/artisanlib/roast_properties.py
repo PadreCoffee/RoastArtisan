@@ -2774,7 +2774,7 @@ class editGraphDlg(ArtisanResizeablDialog):
             # selected, the machine filter is the ONLY filter and a case difference hides machine-bound
             # references (rule 5). With a coffee selected the coffee filter masked this bug.
             machine:str = self.aw.qmc.roastertype_setup.strip().lower()
-            self._template_fetch_gen = getattr(self, '_template_fetch_gen', 0) + 1
+            self._template_fetch_gen = getattr(self, '_template_fetch_gen', 0) + 1 # pylint: disable=attribute-defined-outside-init
             gen:int = self._template_fetch_gen
             self.plus_templates_combo.blockSignals(True)
             self.plus_templates_combo.clear()
