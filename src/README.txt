@@ -31,7 +31,7 @@ Runs on 64bit Windows 10, macOS (legacy builds support Windows 8 x64 and macOS 1
 - Automated reproduction of roasts via alarm programs, replay of events or PID control.
 - Batch counter.
 - Profile designer, cupping editor, spider- and wheel graph.
-- Roast Analyzer, Comparator, Simulator and Transformator tools
+- Roast Analyzer, Simulator and Transformator tools
 - User defined buttons and sliders with programmable actions.
 - Many import and export formats.
 

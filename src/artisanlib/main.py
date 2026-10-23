@@ -111,7 +111,7 @@ from PyQt6.QtWidgets import (QApplication, QWidget, QMessageBox, QLabel, QMainWi
                          QSlider, QCheckBox,
                          QColorDialog, QFrame, QScrollArea, QProgressDialog,
                          QStyleFactory, QMenuBar, QMenu, QLayout, QDockWidget)
-from PyQt6.QtGui import (QScreen, QPageLayout, QAction, QImageReader, QWindow,
+from PyQt6.QtGui import (QScreen, QAction, QImageReader, QWindow,
                             QKeySequence, QShortcut,
                             QPixmap,QColor,QDesktopServices,QIcon,
                             QRegularExpressionValidator, QDoubleValidator, QPainter, QCursor)
@@ -162,7 +162,6 @@ if TYPE_CHECKING:
     from artisanlib.scale import ScaleSpec
     from artisanlib.roast_properties import editGraphDlg # pylint: disable=unused-import
     from plus.operators import OperatorEntry # pylint: disable=unused-import
-    from artisanlib.comparator import roastCompareDlg # pylint: disable=unused-import
     from artisanlib.wheels import WheelDlg # pylint: disable=unused-import
     from artisanlib.hottop import Hottop # pylint: disable=unused-import
     from artisanlib.weblcds import WebLCDs, WebGreen, WebRoasted # pylint: disable=unused-import
@@ -372,10 +371,7 @@ class Artisan(QtSingleApplication):
                     if query.hasQueryItem('url'):
                         import requests
                         query_url = QUrl(requests.utils.unquote(query.queryItemValue('url'))) # type: ignore[attr-defined] # Module has no attribute "unquote"
-                        if aw.comparator is not None:
-                            aw.comparatorAddProfileURLSignal.emit(query_url)
-                        else:
-                            aw.importArtisanURLSignal.emit(query_url)
+                        aw.importArtisanURLSignal.emit(query_url)
                 except Exception as e: # pylint: disable=broad-except
                     _log.exception(e)
             elif url.scheme() == 'file':
@@ -394,12 +390,9 @@ class Artisan(QtSingleApplication):
 
                 if file_suffix == 'alog':
                     modifiers = QApplication.keyboardModifiers()
-                    if aw.comparator is not None:
-                        # add Artisan profile to the comparator selection
-                        aw.comparatorAddProfileSignal.emit(filename)
                     # load Artisan profile on double-click on *.alog file or as result of a drag-and-drop action to the canvas
                     # in case OPTION/ALT key is hold, load into background, else foreground
-                    elif (url_query is not None and url_query == 'template') or modifiers == Qt.KeyboardModifier.AltModifier:
+                    if (url_query is not None and url_query == 'template') or modifiers == Qt.KeyboardModifier.AltModifier:
                         aw.loadBackgroundSignal.emit(filename)
                     else:
                         aw.loadFileSignal.emit(filename)
@@ -409,22 +402,22 @@ class Artisan(QtSingleApplication):
                 elif file_suffix == 'apal' and not aw.app.artisanviewerMode:
                     # load Artisan palettes on double-click on *.apal file
                     aw.loadPalettesSignal.emit(filename)
-                elif file_suffix == 'json' and not aw.app.artisanviewerMode and aw.comparator is None:
+                elif file_suffix == 'json' and not aw.app.artisanviewerMode:
                     # import Artisan JSON profile
                     aw.importJSON(filename)
-                elif file_suffix == 'xls' and not aw.app.artisanviewerMode and aw.comparator is None:
+                elif file_suffix == 'xls' and not aw.app.artisanviewerMode:
                     # import Cropster XLS profile
                     from artisanlib.cropster import extractProfileCropsterXLS
                     aw.importExternal(extractProfileCropsterXLS, QApplication.translate('Message','Import {}').format('Cropster XLS'),'*.xls',filename)
-                elif file_suffix == 'csv' and not aw.app.artisanviewerMode and aw.comparator is None:
+                elif file_suffix == 'csv' and not aw.app.artisanviewerMode:
                     # import Giesen CSV profile
                     from artisanlib.giesen import extractProfileGiesenCSV
                     aw.importExternal(extractProfileGiesenCSV, QApplication.translate('Message','Import {}').format('Giesen CSV'),'*.csv',filename)
-                elif file_suffix == 'xlsx' and not aw.app.artisanviewerMode and aw.comparator is None:
+                elif file_suffix == 'xlsx' and not aw.app.artisanviewerMode:
                     # import Stronghold XLSX profile
                     from artisanlib.stronghold import extractProfileStrongholdXLSX
                     aw.importExternal(extractProfileStrongholdXLSX, QApplication.translate('Message','Import {}').format('Stronghold XLSX'),'*.xlsx',filename)
-                if filename.endswith(('.zip', '.rop')) and not aw.app.artisanviewerMode and aw.comparator is None:
+                if filename.endswith(('.zip', '.rop')) and not aw.app.artisanviewerMode:
                     # import Orbiter .rop/.zip profile
                     from artisanlib.orbiter import extractProfileOrbiterROP
                     aw.importExternal(extractProfileOrbiterROP, QApplication.translate('Message','Import {}').format('Orbiter'),'(*.rop *.zip)',filename)
@@ -507,10 +500,6 @@ class Artisan(QtSingleApplication):
                     # - in Wheel graph mode
                     # - while editing the cup profile
                     can_open_mode = not aw.qmc.flagon and not aw.qmc.designerflag and not aw.qmc.wheelflag and aw.qmc.flavorchart_plot is None
-                    if can_open_mode and aw.comparator is not None:
-                        # while in comparator mode with the events file already open we rather send it to another instance
-                        filename = url.toString(QUrl.UrlFormattingOption.PreferLocalFile)
-                        can_open_mode = not any(p.filepath == filename for p in aw.comparator.profiles)
                     if can_open_mode:
                         self.open_url(url)
                     else:
@@ -1149,7 +1138,7 @@ class VMToolbar(NavigationToolbar): # pylint: disable=abstract-method
                     else:
                         self.set_message(f"<PRE>{xs: >5}\n{channel} {'' if ys is None else ys: >{min_temp_digits}}\u00B0{self.qmc.mode}{'/min' if self.qmc.fmt_data_RoR else ''}</PRE>") # type:ignore[no-untyped-call] # ty:ignore[ignore]
             # update running LCDs
-            if not self.qmc.flagon and self.aw.comparator is None and self._last_event.xdata is not None:
+            if not self.qmc.flagon and self._last_event.xdata is not None:
                 if self.qmc.running_LCDs == 1: # show foreground profile readings at cursor position in LCDs
                     if timeindex is None:
                         timeindex = self.qmc.time2index(float(self._last_event.xdata), nearest=False)
@@ -1503,8 +1492,6 @@ class ApplicationWindow(QMainWindow):
     loadFileSignal = pyqtSignal(str)
     loadPalettesSignal = pyqtSignal(str)
     importArtisanURLSignal = pyqtSignal(QUrl)
-    comparatorAddProfileURLSignal = pyqtSignal(QUrl)
-    comparatorAddProfileSignal = pyqtSignal(str)
     updateScheduleSignal = pyqtSignal()
     disconnectPlusSignal = pyqtSignal()
 
@@ -1522,7 +1509,7 @@ class ApplicationWindow(QMainWindow):
         'WebLCDsAlerts', 'EventsDlg_activeTab', 'graphColorDlg_activeTab', 'PID_DlgControl_activeTab', 'CurveDlg_activeTab', 'editGraphDlg_activeTab',
         'backgroundDlg_activeTab', 'DeviceAssignmentDlg_activeTab', 'AlarmDlg_activeTab', 'schedule_activeTab', 'StatisticsDlg_activeTab', 'resetqsettings', 'settingspath', 'wheelpath', 'profilepath',
         'userprofilepath', 'printer', 'main_widget', 'defaultdpi', 'dpi', 'qmc', 'HottopControlActive', 'AsyncSamplingTimer', 'wheeldialog',
-        'simulator', 'simulatorpath', 'comparator', 'eventsbuttonflag', 'minieventsflags', 'seriallogflag',
+        'simulator', 'simulatorpath', 'eventsbuttonflag', 'minieventsflags', 'seriallogflag',
         'seriallog', 'ser', 'modbus', 'extraMODBUStemps', 'extraMODBUStx', 's7', 'extraS7tx', 'ws', 'extraser', 'extracomport', 'extrabaudrate',
         'extrabytesize', 'extraparity', 'extrastopbits', 'extratimeout', 'hottop', 'santokerHost', 'santokerPort', 'santokerSerial', 'santokerBLE', 'santokerEventFlags', 'santoker', 'santokerR', 'roest', 'roestEventFlags', 'lebrew_roastseeNEXT', 'thermoworksBlueDOT', 'fujipid', 'dtapid', 'pidcontrol', 'soundflag', 'recentRoasts', 'maxRecentRoasts',
         'mugmaHost','mugmaPort', 'mugma', 'mugma_default_host', 'shelly_3EMPro_host', 'shelly_PlusPlug_host',
@@ -1543,7 +1530,7 @@ class ApplicationWindow(QMainWindow):
         'flavorAction', 'switchAction', 'switchETBTAction', 'machineMenu', 'deviceAction', 'commportAction', 'calibrateDelayAction', 'curvesAction',
         'eventsAction', 'alarmAction', 'phasesGraphAction', 'StatisticsAction', 'WindowconfigAction', 'colorsAction', 'themeMenu', 'autosaveAction',
         'batchAction', 'temperatureConfMenu', 'FahrenheitAction', 'CelsiusAction', 'languageMenu', 'analyzeMenu', 'fitIdealautoAction',
-        'analyzeMenu', 'fitIdealx2Action', 'fitIdealx3Action', 'fitIdealx0Action', 'fitBkgndAction', 'clearresultsAction', 'roastCompareAction',
+        'analyzeMenu', 'fitIdealx2Action', 'fitIdealx3Action', 'fitIdealx0Action', 'fitBkgndAction', 'clearresultsAction',
         'designerAction', 'simulatorAction', 'wheeleditorAction', 'transformAction', 'temperatureMenu', 'ConvertToFahrenheitAction',
         'ConvertToCelsiusAction', 'controlsAction', 'readingsAction', 'eventsEditorAction', 'buttonsAction', 'slidersAction', 'scheduleAction', 'lcdsAction', 'deltalcdsAction',
         'pidlcdsAction', 'scalelcdsAction', 'extralcdsAction', 'phaseslcdsAction', 'fullscreenAction', 'newRoastAction', 'loadSettingsAction', 'openRecentSettingMenu',
@@ -1810,8 +1797,6 @@ class ApplicationWindow(QMainWindow):
 
         self.simulator:Simulator|None = None # holds the simulator in simulation mode
         self.simulatorpath:str = '' # points to the last profile used by the simulator
-
-        self.comparator:roastCompareDlg|None = None # holds the profile comparator dialog
 
         self.qmc.canvas.setContentsMargins(0,0,0,0)
         #events config
@@ -2694,11 +2679,6 @@ class ApplicationWindow(QMainWindow):
         self.clearresultsAction.triggered.connect(self.clearResults)
         self.clearresultsAction.setShortcut('Ctrl+Alt+K') # COMMAND+OPTION on macOS
         self.analyzeMenu.addAction(self.clearresultsAction)
-
-        self.roastCompareAction: QAction = QAction(QApplication.translate('Menu', 'Comparator'), self)
-        self.roastCompareAction.triggered.connect(self.roastCompare)
-        self.roastCompareAction.setCheckable(True)
-        self.roastCompareAction.setChecked(bool(self.comparator))
 
         self.designerAction: QAction = QAction(QApplication.translate('Menu', 'Designer') , self)
         self.designerAction.triggered.connect(self.designerTriggered)
@@ -4383,8 +4363,6 @@ class ApplicationWindow(QMainWindow):
         self.loadFileSignal.connect(self.loadFileSlot, type=Qt.ConnectionType.QueuedConnection)  # type: ignore[call-arg]
         self.loadPalettesSignal.connect(self.loadPalettesSlot, type=Qt.ConnectionType.QueuedConnection)  # type: ignore[call-arg]
         self.importArtisanURLSignal.connect(self.importArtisanURLSlot, type=Qt.ConnectionType.QueuedConnection)  # type: ignore[call-arg]
-        self.comparatorAddProfileURLSignal.connect(self.comparatorAddProfileURLSlot, type=Qt.ConnectionType.QueuedConnection)  # type: ignore[call-arg]
-        self.comparatorAddProfileSignal.connect(self.comparatorAddProfileSlot, type=Qt.ConnectionType.QueuedConnection)  # type: ignore[call-arg]
         self.updateScheduleSignal.connect(self.updateSchedule, type=Qt.ConnectionType.QueuedConnection)  # type: ignore[call-arg]
 
         self.notificationManager:NotificationManager|None = None
@@ -4503,7 +4481,6 @@ class ApplicationWindow(QMainWindow):
         if ui_mode is not UI_MODE.PRODUCTION:
             if ui_mode is UI_MODE.EXPERT:
                 tools_menu.addMenu(self.analyzeMenu)
-            tools_menu.addAction(self.roastCompareAction)
             tools_menu.addAction(self.designerAction)
             if ui_mode is UI_MODE.EXPERT:
                 tools_menu.addAction(self.simulatorAction)
@@ -5123,8 +5100,8 @@ class ApplicationWindow(QMainWindow):
             elif self.curFile:
                 # profile loaded
                 self.setWindowTitle(f'{dirtySign}{self.strippedName(self.curFile)} – {appTitle}')
-                # if not Simulator, Comparator, Designer, WheelGraph
-                if self.comparator is None and not self.qmc.designerflag and not self.qmc.wheelflag and self.qmc.ax is not None:
+                # if not Simulator, Designer, WheelGraph
+                if not self.qmc.designerflag and not self.qmc.wheelflag and self.qmc.ax is not None:
                     self.setWindowFilePath(self.curFile)
             # no profile loaded
             elif __release_sponsor_name__ != '': # pyright:ignore[reportUnnecessaryComparison]
@@ -5193,9 +5170,6 @@ class ApplicationWindow(QMainWindow):
                 try:
                     if urls and len(urls)>0:
                         self.app.open_url(urls[0])
-                    if self.comparator is not None:
-                        for url in urls[0:]:
-                            self.app.open_url(url)
                 except Exception as e:
                     _log.exception(e)
 
@@ -6576,14 +6550,13 @@ class ApplicationWindow(QMainWindow):
                                     + 'color: ' + rgba_colorname2argb_colorname(title_color) + ';'
                                     + '}' )
 
-        if self.comparator is None:
-            if self.qmc.background and self.qmc.title != '':
-                if self.qmc.roastbatchnrB == 0:
-                    titleB = self.qmc.titleB
-                else:
-                    titleB = self.qmc.roastbatchprefixB + str(self.qmc.roastbatchnrB) + ' ' + self.qmc.titleB
-                self.qmc.setProfileBackgroundTitle(titleB)
-            self.qmc.setProfileTitle(self.qmc.title,updatebackground=True)
+        if self.qmc.background and self.qmc.title != '':
+            if self.qmc.roastbatchnrB == 0:
+                titleB = self.qmc.titleB
+            else:
+                titleB = self.qmc.roastbatchprefixB + str(self.qmc.roastbatchnrB) + ' ' + self.qmc.titleB
+            self.qmc.setProfileBackgroundTitle(titleB)
+        self.qmc.setProfileTitle(self.qmc.title,updatebackground=True)
 
 
 
@@ -8619,7 +8592,7 @@ class ApplicationWindow(QMainWindow):
     pyqtSlot()
     def sliderfocusIn(self) -> None:
         sender = self.sender()
-        if not self.qmc.designerflag and self.comparator is None and sender is not None and isinstance(sender, SliderUnclickable):
+        if not self.qmc.designerflag and sender is not None and isinstance(sender, SliderUnclickable):
             try:
                 n:int = [self.slider1,self.slider2,self.slider3,self.slider4,self.sliderSV].index(sender)
                 self.quickEventShortCut = (n,'')
@@ -12138,7 +12111,6 @@ class ApplicationWindow(QMainWindow):
         self.commportAction.setEnabled(True)
         self.curvesAction.setEnabled(True)
         self.analyzeMenu.setEnabled(True)
-        self.roastCompareAction.setEnabled(True)
         self.designerAction.setEnabled(True)
         self.simulatorAction.setEnabled(True)
         self.wheeleditorAction.setEnabled(True)
@@ -12174,18 +12146,14 @@ class ApplicationWindow(QMainWindow):
             self.saveStatisticsMenu.setEnabled(True)
         self.displayonlymenus()
 
-    def disableEditMenus(self, designer:bool = False, wheel:bool = False, compare:bool = False, sampling:bool = False) -> None:
+    def disableEditMenus(self, designer:bool = False, wheel:bool = False, sampling:bool = False) -> None:
         # FILE menu
-        if designer or wheel or compare:
+        if designer or wheel:
             self.newRoastMenu.setEnabled(False)
         else:
             self.newRoastMenu.setEnabled(True)
-        if compare:
-            self.fileLoadAction.setEnabled(True) # open
-            self.openRecentMenu.setEnabled(True) # open recent
-        else:
-            self.fileLoadAction.setEnabled(False) # open
-            self.openRecentMenu.setEnabled(False) # open recent
+        self.fileLoadAction.setEnabled(False) # open
+        self.openRecentMenu.setEnabled(False) # open recent
         self.importMenu.setEnabled(False) # import
         if not sampling:
             self.fileSaveAction.setEnabled(False)
@@ -12193,29 +12161,28 @@ class ApplicationWindow(QMainWindow):
             self.fileSaveCopyAsAction.setEnabled(False)
             self.exportMenu.setEnabled(False)
         self.convMenu.setEnabled(False)
-        if not wheel and not compare and not sampling:
+        if not wheel and not sampling:
             self.saveGraphMenu.setEnabled(False)
         self.htmlAction.setEnabled(False)
         self.roastReportPDFAction.setEnabled(False)
         self.reportMenu.setEnabled(False)
         self.productionMenu.setEnabled(False)
         self.rankingMenu.setEnabled(False)
-        if not compare and not sampling:
+        if not sampling:
             self.printAction.setEnabled(False)
         self.saveStatisticsMenu.setEnabled(False)
         # EDIT menu
         # ROAST menu
-        if compare or wheel:
+        if wheel:
             self.editGraphAction.setEnabled(False)
             self.backgroundAction.setEnabled(False)
         self.flavorAction.setEnabled(False)
         self.switchAction.setEnabled(False)
         self.switchETBTAction.setEnabled(False)
         # CONFIG menu
-        if not compare:
-            self.machineMenu.setEnabled(False)
-            self.deviceAction.setEnabled(False)
-            self.commportAction.setEnabled(False)
+        self.machineMenu.setEnabled(False)
+        self.deviceAction.setEnabled(False)
+        self.commportAction.setEnabled(False)
         if designer or wheel:
             self.curvesAction.setEnabled(False) # Curves menu
         else:
@@ -12231,10 +12198,6 @@ class ApplicationWindow(QMainWindow):
         self.languageMenu.setEnabled(False)
         # TOOLS menu
         self.analyzeMenu.setEnabled(False)
-        if not compare:
-            self.roastCompareAction.setEnabled(False)
-        else:
-            self.roastCompareAction.setEnabled(True)
         if not designer:
             self.designerAction.setEnabled(False)
         else:
@@ -12458,9 +12421,7 @@ class ApplicationWindow(QMainWindow):
                     self.toggleFullscreen()
                 elif k == Qt.Key.Key_G and no_modifier: # 71:       #G (toggle time auto axis mode)
                     if not self.qmc.designerflag and not self.qmc.wheelflag:
-                        if self.comparator is not None:
-                            self.comparator.modeComboBox.setCurrentIndex((self.comparator.modeComboBox.currentIndex()+1) % 3)
-                        elif self.qmc.autotimex:
+                        if self.qmc.autotimex:
                             self.qmc.autotimexMode = (self.qmc.autotimexMode+1) % 3
                             if self.qmc.autotimexMode == 0:
                                 self.sendmessage(QApplication.translate('Message','Auto Axis Graph Mode: Roast'))
@@ -12483,20 +12444,19 @@ class ApplicationWindow(QMainWindow):
                 elif k == Qt.Key.Key_O and no_modifier: # 79:       #O (toggle background showfull flag)
                     self.toggleBackroundShowfullFlag()
                 elif k == Qt.Key.Key_H: # 72:                       #H  (load / delete background profile)
-                    if self.comparator is None:
-                        # delete background when there are platform specific modifiers
-                        if ((alt_modifier or shift_modifier) and platform.system() != 'Windows') or (control_shift_modifier or control_alt_modifier and platform.system() == 'Windows'): #control_alt_modifier here for backward compatibility only, see note above
-                            self.deleteBackground()
-                            if not self.qmc.flagon:
-                                self.autoAdjustAxis()
-                            self.qmc.redraw()
-                        # load background when there are no modifiers
-                        elif no_modifier or control_modifier:
-                            filename = self.ArtisanOpenFileDialog(msg=QApplication.translate('Message','Load Background'),ext='*.alog')
-                            if len(filename) != 0:
-                                self.loadBackgroundSignal.emit(filename)
+                    # delete background when there are platform specific modifiers
+                    if ((alt_modifier or shift_modifier) and platform.system() != 'Windows') or (control_shift_modifier or control_alt_modifier and platform.system() == 'Windows'): #control_alt_modifier here for backward compatibility only, see note above
+                        self.deleteBackground()
+                        if not self.qmc.flagon:
+                            self.autoAdjustAxis()
+                        self.qmc.redraw()
+                    # load background when there are no modifiers
+                    elif no_modifier or control_modifier:
+                        filename = self.ArtisanOpenFileDialog(msg=QApplication.translate('Message','Load Background'),ext='*.alog')
+                        if len(filename) != 0:
+                            self.loadBackgroundSignal.emit(filename)
                 elif k == Qt.Key.Key_L and no_modifier and self.ui_mode is not UI_MODE.PRODUCTION: # 76:       #L (load alarms)
-                    if not self.qmc.designerflag and self.comparator is None:
+                    if not self.qmc.designerflag:
                         filename = self.ArtisanOpenFileDialog(msg=QApplication.translate('Message','Load Alarms'),ext='*.alrm')
                         if len(filename) == 0:
                             return
@@ -12729,7 +12689,7 @@ class ApplicationWindow(QMainWindow):
                     elif self.qmc.background and self.qmc.backgroundKeyboardControlFlag:
                         self.qmc.moveBackgroundSignal.emit('down',self.qmc.backgroundmovespeed)
                 elif k == Qt.Key.Key_A and no_modifier: # 65:               #A (automatic save)
-                    if not self.app.artisanviewerMode and self.qmc.flagon and not self.qmc.designerflag and self.comparator is None:
+                    if not self.app.artisanviewerMode and self.qmc.flagon and not self.qmc.designerflag:
                         self.automaticsave()
                 elif k == Qt.Key.Key_D and no_modifier: # 68:               #D (toggle xy coordinates between temp and RoR scale)
                     if not self.qmc.wheelflag:
@@ -12754,7 +12714,7 @@ class ApplicationWindow(QMainWindow):
                             except Exception: # pylint: disable=broad-except
                                 pass
                 elif k == Qt.Key.Key_Z and no_modifier: # 90:   #Z (toggle xy coordinates between 0: cursor, 1: BT, 2: ET, 3: BTB, 4: ETB)
-                    if not self.qmc.designerflag and not self.qmc.wheelflag and self.comparator is None:
+                    if not self.qmc.designerflag and not self.qmc.wheelflag:
                         self.qmc.nextFmtDataCurve()
                 elif k == Qt.Key.Key_U and no_modifier: # 85:    #U (toggle running LCDs on/off)
                     if not self.qmc.flagon:
@@ -12794,23 +12754,23 @@ class ApplicationWindow(QMainWindow):
                 elif k == Qt.Key.Key_T and (no_modifier or control_shift_modifier):
                     self.qmc.togglecrosslines()                        #T (toggle mouse cross)
                 elif k == Qt.Key.Key_Q and no_modifier: # 81:          #Q (quick entry of custom event 1)
-                    if not self.qmc.designerflag and self.comparator is None:
+                    if not self.qmc.designerflag:
                         self.quickEventShortCut = (0,'')
                         self.sendmessage(self.qmc.etypes[0], append=False)
                 elif k == Qt.Key.Key_W and no_modifier: # 87:          #W (quick entry of custom event 2)
-                    if not self.qmc.designerflag and self.comparator is None:
+                    if not self.qmc.designerflag:
                         self.quickEventShortCut = (1,'')
                         self.sendmessage(self.qmc.etypes[1], append=False)
                 elif k == Qt.Key.Key_E and no_modifier: # 69:          #E (quick entry of custom event 3)
-                    if not self.qmc.designerflag and self.comparator is None:
+                    if not self.qmc.designerflag:
                         self.quickEventShortCut = (2,'')
                         self.sendmessage(self.qmc.etypes[2], append=False)
                 elif k == Qt.Key.Key_R and no_modifier: # 82:          #R (quick entry of custom event 4)
-                    if not self.qmc.designerflag and self.comparator is None:
+                    if not self.qmc.designerflag:
                         self.quickEventShortCut = (3,'')
                         self.sendmessage(self.qmc.etypes[3], append=False)
                 elif k == Qt.Key.Key_V and no_modifier: # 86:          #V (set SV)
-                    if not self.qmc.designerflag and self.comparator is None:
+                    if not self.qmc.designerflag:
                         self.quickEventShortCut = (4,'')
                         self.sendmessage('SV', append=False)
                 elif k == Qt.Key.Key_B: # 66:          #B (hides/shows extra rows of event buttons / actives custom event button <nr> with ALT/CTRL+SHIFT modifier)
@@ -13538,10 +13498,7 @@ class ApplicationWindow(QMainWindow):
         action = self.sender()
         if action and isinstance(action, QAction) and hasattr(action,'data'):
             filename = toString(action.data())
-            if self.comparator is not None:
-                self.comparator.addProfiles([filename])
-            else:
-                self.loadFile(filename)
+            self.loadFile(filename)
 
     def getDefaultPath(self) -> str:
         if not os.path.exists(self.userprofilepath):
@@ -13688,9 +13645,7 @@ class ApplicationWindow(QMainWindow):
     def fileLoad(self, _:bool = False) -> None:
         try:
             fileName = self.ArtisanOpenFileDialog(ext='*.alog')
-            if self.comparator is not None:
-                self.comparator.addProfiles([fileName])
-            elif fileName:
+            if fileName:
                 self.loadFile(fileName)
         except Exception as ex: # pylint: disable=broad-except
             _log.exception(ex)
@@ -13703,8 +13658,8 @@ class ApplicationWindow(QMainWindow):
 
     #loads stored profiles. Called from file menu
     def loadFile(self, filename:str, quiet:bool = False) -> None:
-        if self.comparator is not None or self.qmc.designerflag or self.qmc.wheelflag or self.qmc.ax is None:
-            # only load a profile if not in Comparator/Designer/WheelChart/FlavorChart mode
+        if self.qmc.designerflag or self.qmc.wheelflag or self.qmc.ax is None:
+            # only load a profile if not in Designer/WheelChart/FlavorChart mode
             return
         f:QFile|None = None
         try:
@@ -14224,8 +14179,8 @@ class ApplicationWindow(QMainWindow):
     # tries to load background from the given path, if that fails try to deref the given UUID
     # returns True on success, Fail otherwise
     def loadbackgroundUUID(self, filename:str|None = None, UUID:str|None = None, force_reload:bool=True) -> bool:
-        if self.comparator is not None or self.qmc.designerflag or self.qmc.wheelflag or self.qmc.ax is None:
-            # only load a background profile if not in Comparator/Designer/WheelChart/FlavorChart mode
+        if self.qmc.designerflag or self.qmc.wheelflag or self.qmc.ax is None:
+            # only load a background profile if not in Designer/WheelChart/FlavorChart mode
             return False
         if filename is not None and filename != '' and os.path.isfile(filename) and (force_reload or str(filename) != self.qmc.backgroundpath):
             try:
@@ -21578,8 +21533,6 @@ class ApplicationWindow(QMainWindow):
             tmp_LargeLCDs = self.LargePhasesLCDsFlag # we keep the state to properly store it in the settings
             self.largePhasesLCDs_dialog.close()
             self.LargePhasesLCDsFlag = tmp_LargeLCDs
-        if self.comparator:
-            self.comparator.close()
         # now wait until the current sampling thread is terminated
         while self.qmc.flagsamplingthreadrunning:
             QApplication.processEvents()
@@ -21692,7 +21645,6 @@ class ApplicationWindow(QMainWindow):
             # image coordinates
             size = image.size()
             rect_size = rect.size()
-            graph_height = size.height()
             rect_size.setHeight(int(round(rect_size.height()*self.devicePixelRatio())))
             rect_size.setWidth(int(round(rect_size.width()*self.devicePixelRatio())))
             size.scale(rect_size, Qt.AspectRatioMode.KeepAspectRatio)
@@ -21705,28 +21657,6 @@ class ApplicationWindow(QMainWindow):
                 painter.drawPixmap(0, 0, image)
             else:
                 painter.drawImage(0, 0, image) # pyright:ignore[reportUnknownArgumentType]
-            if self.comparator is not None and self.qpc is not None and len(self.splitter.sizes())>1 and self.splitter.sizes()[1]>0:
-                phases_image = self.qpc.canvas.grab().toImage() # a QImage on macOS
-                if not phases_image.isNull():
-                    if self.printer.pageLayout().orientation() == QPageLayout.Orientation.Landscape:
-                        self.printer.newPage()
-                        offset = 0
-                    else:
-                        offset = int(round(graph_height/self.devicePixelRatio())) # pyright:ignore[reportUnknownArgumentType] # put the phases graph below the profile graph
-                    size = phases_image.size()
-                    rect_size = rect.size()
-                    rect_size.setHeight(int(round(rect_size.height()*self.devicePixelRatio())))
-                    rect_size.setWidth(int(round(rect_size.width()*self.devicePixelRatio())))
-                    size.scale(rect_size, Qt.AspectRatioMode.KeepAspectRatio)
-                    painter.setViewport(rect.x(), rect.y(), size.width(), size.height())   # pyright:ignore[reportUnknownArgumentType] # sets device coordinate system
-                    image_rect = phases_image.rect()
-        #            image_rect.setHeight(int(round(image_rect.height()/self.devicePixelRatio())))
-        #            image_rect.setWidth(int(round(image_rect.width()/self.devicePixelRatio())))
-                    painter.setWindow(image_rect) #scale to fit page # sets logical coordinate system  # pyright:ignore[reportUnknownArgumentType]
-                    if isinstance(phases_image, QPixmap):
-                        painter.drawPixmap(0, 0, phases_image)
-                    else:
-                        painter.drawImage(0, offset, phases_image) # pyright:ignore[reportUnknownArgumentType]
             painter.end()
             del painter
 
@@ -26195,16 +26125,6 @@ class ApplicationWindow(QMainWindow):
 #        except Exception as e: # pylint: disable=broad-except
 #            _log.exception(e)
 
-    @pyqtSlot(str)
-    def comparatorAddProfileSlot(self, filename:str) -> None:
-        if self.comparator is not None:
-            self.comparator.addProfiles([filename])
-
-    @pyqtSlot('QUrl')
-    def comparatorAddProfileURLSlot(self, url:QUrl) -> None:
-        if self.comparator is not None:
-            self.comparator.addProfileFromURL(self.artisanURLextractor, url)
-
     @pyqtSlot('QUrl')
     def importArtisanURLSlot(self, url:QUrl) -> None:
         self.importExternalURL(self.artisanURLextractor, url=url)
@@ -27882,36 +27802,6 @@ class ApplicationWindow(QMainWindow):
         from artisanlib.transposer import profileTransformatorDlg
         dialog = profileTransformatorDlg(self,self)
         dialog.show()
-
-    @pyqtSlot()
-    @pyqtSlot(bool)
-    def roastCompare(self, _:bool = False) -> None:
-        if self.comparator is not None:
-            self.comparator.close()
-        else:
-            foreground = self.curFile
-            background = (self.qmc.backgroundpath if self.qmc.background else None)
-            self.establish_phasescanvas()
-            if self.qmc.reset():
-                filenames:list[str] = []
-                if foreground is not None and foreground.strip() != '':
-                    filenames.append(foreground)
-                if background is not None and background.strip() != '':
-                    filenames.append(background)
-                if len(filenames) == 0:
-                    filenames = self.reportFiles()
-                if filenames and len(filenames) > 0:
-                    self.deleteBackground()
-                    # disable "green flag" menu:
-                    try:
-                        self.ntb.disable_edit_curve_parameters()
-                    except Exception as e: # pylint: disable=broad-except
-                        _log.exception(e)
-                    from artisanlib.comparator import roastCompareDlg
-                    self.comparator = roastCompareDlg(self,self,foreground,background)
-                    self.comparator.addProfiles(filenames)
-                    self.comparator.show()
-            self.roastCompareAction.setChecked(bool(self.comparator))
 
     @pyqtSlot()
     @pyqtSlot(bool)
