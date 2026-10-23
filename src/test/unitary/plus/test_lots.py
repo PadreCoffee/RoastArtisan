@@ -50,7 +50,7 @@ def test_dropdown_gate() -> None:
 # --- selected_lot_id: index 0 = default = OMIT; index > 0 = explicit non-default -----------------
 
 def test_selected_lot_id_index0_omits() -> None:
-    # roaster left the pre-selected default (index 0) -> omit lot_id (today's behaviour)
+    # roaster left the preselected default (index 0) -> omit lot_id (today's behaviour)
     assert selected_lot_id(0, [A, B, C]) is None
 
 
@@ -65,7 +65,7 @@ def test_selected_lot_id_out_of_range_is_none() -> None:
     assert selected_lot_id(1, []) is None
 
 
-# --- default_lot_index: pre-select prior choice, else 0 (cloud default) --------------------------
+# --- default_lot_index: preselect prior choice, else 0 (cloud default) --------------------------
 
 def test_default_lot_index_no_prior_is_zero() -> None:
     assert default_lot_index([A, B, C], None) == 0

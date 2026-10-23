@@ -19,8 +19,8 @@
 #
 # UI/semantics decided with the cloud master:
 #  - show a lot dropdown ONLY when a coffee has MORE THAN ONE pickable lot (len > 1).
-#  - pre-select the first lot (the cloud default) — or a previously chosen lot on reopen.
-#  - "roaster changes nothing" (leaves the pre-selected default at index 0) == deduct by priority
+#  - preselect the first lot (the cloud default) — or a previously chosen lot on reopen.
+#  - "roaster changes nothing" (leaves the preselected default at index 0) == deduct by priority
 #    == today's behaviour == upload NO lot_id. Only an explicit non-default pick (index > 0)
 #    uploads a lot_id.
 
@@ -49,7 +49,7 @@ def show_lot_dropdown(lots:Any) -> bool:
 
 
 def default_lot_index(lots:Any, chosen_lot_id:str|None) -> int:
-    """The combo index to pre-select: a previously chosen lot if it is still present (survives a
+    """The combo index to preselect: a previously chosen lot if it is still present (survives a
     dialog reopen), otherwise 0 — the cloud's default (first by priority)."""
     pl = pickable_lots(lots)
     if chosen_lot_id:
@@ -60,7 +60,7 @@ def default_lot_index(lots:Any, chosen_lot_id:str|None) -> int:
 
 
 def selected_lot_id(index:int, lots:Any) -> str|None:
-    """The lot_id to upload for the given combo index. Index 0 is the pre-selected cloud default
+    """The lot_id to upload for the given combo index. Index 0 is the preselected cloud default
     -> None (omit lot_id, auto-allocate by priority = today's behaviour). An explicit non-default
     pick (index > 0, in range) -> that lot's id. Out-of-range/absent -> None (safe)."""
     pl = pickable_lots(lots)

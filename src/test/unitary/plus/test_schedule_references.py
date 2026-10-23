@@ -50,7 +50,7 @@ class TestPickDefaultReferenceIndex:
     def test_default_absent_falls_back_to_first(self) -> None:
         # NEGATIVE CONTROL: a server default that is not among the fetched references
         # must fall back to the first entry (never -1, never a crash), so the picker
-        # still shows a sensible pre-selection.
+        # still shows a sensible preselection.
         refs = [_ref('a' * 32), _ref('b' * 32)]
         assert pick_default_reference_index(refs, 'z' * 32) == 0
 

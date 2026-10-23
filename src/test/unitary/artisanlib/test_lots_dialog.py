@@ -104,7 +104,7 @@ def test_two_lots_show_picker_preselect_default_omits_lot_id() -> None:
     o._updateLotCombo({'lots': TWO})
     assert o.plusLineLotsFrame.visible is True
     assert o.plus_lots_combo.count() == 2
-    assert o.plus_lots_combo.currentIndex() == 0                     # cloud default pre-selected
+    assert o.plus_lots_combo.currentIndex() == 0                     # cloud default preselected
     assert o.plus_lots_combo.itemText(0).startswith('L-A')          # code · weight · warehouse
     assert 'WH-1' in o.plus_lots_combo.itemText(0)
     assert o.plus_lot_selected is None                              # default -> omit lot_id
@@ -129,7 +129,7 @@ def test_pick_back_to_default_omits_again() -> None:
 def test_prior_choice_survives_reopen() -> None:
     o = _harness(prior_lot='b' * 8)                                 # a lot chosen in a previous open
     o._updateLotCombo({'lots': TWO})
-    assert o.plus_lots_combo.currentIndex() == 1                    # pre-selected the prior lot
+    assert o.plus_lots_combo.currentIndex() == 1                    # preselected the prior lot
     assert o.plus_lot_selected == 'b' * 8                           # still uploaded
 
 

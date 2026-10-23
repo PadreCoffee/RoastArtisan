@@ -2698,7 +2698,7 @@ class editGraphDlg(ArtisanResizeablDialog):
         # show a lot dropdown ONLY when the selected coffee carries >1 pickable lot (cloud lots
         # mode). Absent/0/1 lots -> hidden, behaves exactly as today. Labels show
         # `code · <weight in the roaster's unit> · warehouse`; the first lot (cloud default) is
-        # pre-selected, or a previously chosen lot on reopen.
+        # preselected, or a previously chosen lot on reopen.
         if not hasattr(self, 'plus_lots_combo'):
             return
         lots = plus.lots.pickable_lots(cd.get('lots'))
@@ -2719,7 +2719,7 @@ class editGraphDlg(ArtisanResizeablDialog):
         idx = plus.lots.default_lot_index(lots, self.plus_lot_selected)
         self.plus_lots_combo.setCurrentIndex(idx)
         self.plus_lots_combo.blockSignals(False)
-        # keep the effective lot_id aligned with the pre-selected index (prior choice survives,
+        # keep the effective lot_id aligned with the preselected index (prior choice survives,
         # otherwise the default index 0 -> None -> omit lot_id -> auto-allocate)
         self.plus_lot_selected = plus.lots.selected_lot_id(idx, lots)
         self.plusLineLotsFrame.setVisible(True)

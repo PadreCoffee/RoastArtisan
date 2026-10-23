@@ -22,7 +22,7 @@ def reference_picker_applies(references: list[dict]) -> bool:
     return len(references) >= MIN_REFERENCES_FOR_PICKER
 
 
-# Index (into the cloud-ordered `references` list) to pre-select in the picker:
+# Index (into the cloud-ordered `references` list) to preselect in the picker:
 # the entry whose normalized uuid hex matches the task's server default template,
 # else 0 (the first, i.e. the cloud's lot-matched/newest entry). Returns -1 for an
 # empty list. `default_hex` is a UUID.hex (no dashes) or None.
