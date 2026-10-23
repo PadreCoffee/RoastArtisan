@@ -1343,7 +1343,8 @@ class tgraphcanvas(QObject):
         self.compareMainEvents:bool = True
         self.compareExtraCurves1:list[bool] = [False]*self.aw.nLCDS
         self.compareExtraCurves2:list[bool] = [False]*self.aw.nLCDS
-        # Comparator: Roast (compareBBP=False & compareRoast=True); BBP+Roast (compareBBP=True & compareRoast=True); BBP (compareBBP=True & compareRoast=False)
+        # compare* settings of the removed profile comparison tool, kept so stored settings still round-trip
+        # Roast (compareBBP=False & compareRoast=True); BBP+Roast (compareBBP=True & compareRoast=True); BBP (compareBBP=True & compareRoast=False)
         #   the state compareBBP=False and compareRoast=False should never occur
         self.compareBBP:bool = False # if True incl. BBP
         self.compareRoast:bool = True # if False roast should not be compared (self.compareBBP should be True in this case!)
@@ -2891,10 +2892,10 @@ class tgraphcanvas(QObject):
             except Exception:  # pylint: disable=broad-except
                 dpr = -1.0
             _log.info('[greyscreen] %s: canvas=%sx%s dpr=%s ax_is_None=%s delta_ax_is_None=%s '
-                      'ax_background_is_None=%s designerflag=%s comparator=%s flagon=%s flagstart=%s',
+                      'ax_background_is_None=%s designerflag=%s flagon=%s flagstart=%s',
                       where, w, h, dpr, self.ax is None, self.delta_ax is None,
                       self.ax_background is None, self.designerflag,
-                      self.aw.comparator is not None, self.flagon, self.flagstart)
+                      self.flagon, self.flagstart)
         except Exception as e:  # pylint: disable=broad-except
             _log.exception(e)
 
@@ -3233,7 +3234,7 @@ class tgraphcanvas(QObject):
                     self.segmentpickflag = True
 
                 # toggle visibility of graph lines by clicking on the legend
-                elif not bool(self.aw.comparator) and self.legend is not None and event_artist != self.legend and isinstance(event_artist, (Line2D, Text)) \
+                elif self.legend is not None and event_artist != self.legend and isinstance(event_artist, (Line2D, Text)) \
                     and event_artist not in [self.l_backgroundeventtype1dots,self.l_backgroundeventtype2dots,self.l_backgroundeventtype3dots,self.l_backgroundeventtype4dots] \
                     and event_artist not in [self.l_eventtype1dots,self.l_eventtype2dots,self.l_eventtype3dots,self.l_eventtype4dots]:
                     idx = None
@@ -3296,7 +3297,7 @@ class tgraphcanvas(QObject):
                                     pass
 
                 # show event information by clicking on event lines in step, step+ and combo modes
-                elif not bool(self.aw.comparator) and isinstance(event_artist, Line2D):
+                elif isinstance(event_artist, Line2D):
                     event_type:int|None = None
                     if hasattr(event, 'ind'):
                         if isinstance(event.ind, int): # pyright:ignore[reportAttributeAccessIssue] # "PickEvent" has no attribute "ind"
@@ -3360,7 +3361,7 @@ class tgraphcanvas(QObject):
                                                             self.background_event_last_picked_pos = ind
                                                             self.event_selected = True
                                                         break
-                        elif not bool(self.aw.comparator) and event_artist in [self.l_eventtype1dots,self.l_eventtype2dots,self.l_eventtype3dots,self.l_eventtype4dots]:
+                        elif event_artist in [self.l_eventtype1dots,self.l_eventtype2dots,self.l_eventtype3dots,self.l_eventtype4dots]:
                             xdata_seq = event_artist.get_xdata()
                             event_mouseevent_xdata = event.mouseevent.xdata
                             if isinstance(xdata_seq, (numpy.ndarray, Sequence)) and event_mouseevent_xdata is not None and len(xdata_seq)>ind: # pyright:ignore[reportUnknownArgumentType]
@@ -4226,7 +4227,7 @@ class tgraphcanvas(QObject):
                             # Mark starting point of click-and-drag with a marker
                             self.base_horizontalcrossline, = self.ax.plot(numpy.array(self.baseX), numpy.array(self.baseY), 'r+', markersize=20)
                             self.base_verticalcrossline, = self.ax.plot(numpy.array(self.baseX), numpy.array(self.baseY), 'wo', markersize = 2)
-                    elif not bool(self.aw.comparator) and event.button == 3 and event.inaxes and not self.designerflag and not self.wheelflag and self.aw.ntb.mode not in ['pan/zoom', 'zoom rect']:# and not self.flagon:
+                    elif event.button == 3 and event.inaxes and not self.designerflag and not self.wheelflag and self.aw.ntb.mode not in ['pan/zoom', 'zoom rect']:# and not self.flagon:
                         # popup not available if pan/zoom or zoom rect is active as it interacts
                         timex = self.time2index(event_xdata)
                         if timex > 0:
@@ -6051,34 +6052,18 @@ class tgraphcanvas(QObject):
     #   even if they are not drawn before CHARGE to ensure that the linecount corresponds to the fixes lines in self.ax.lines!!
     def resetlines(self) -> None:
         if self.ax is not None:
-            if bool(self.aw.comparator):
-                if self.l_horizontalcrossline is not None:
-                    try:
-                        i = self.ax.lines.index(self.l_horizontalcrossline)
-                        self.ax.lines[i].remove()
-                        self.l_horizontalcrossline = None
-                    except ValueError:
-                        pass
-                if self.l_verticalcrossline is not None:
-                    try:
-                        i = self.ax.lines.index(self.l_verticalcrossline)
-                        self.ax.lines[i].remove()
-                        self.l_verticalcrossline = None
-                    except ValueError:
-                        pass
-            else:
-                #note: delta curves are now in self.delta_ax and have been removed from the count of resetlines()
-                if self.linecount is None:
-                    self.linecount = self.lenaxlines()
-                if self.deltalinecount is None:
-                    self.deltalinecount = self.lendeltaaxlines()
-                total_linecount = self.linecount+self.deltalinecount
-                # remove lines beyond the max limit of self.linecount)
-                for i in range(len(self.ax.lines)-1,-1,-1):
-                    if i >= total_linecount:
-                        self.ax.lines[i].remove()
-                    else:
-                        break
+            #note: delta curves are now in self.delta_ax and have been removed from the count of resetlines()
+            if self.linecount is None:
+                self.linecount = self.lenaxlines()
+            if self.deltalinecount is None:
+                self.deltalinecount = self.lendeltaaxlines()
+            total_linecount = self.linecount+self.deltalinecount
+            # remove lines beyond the max limit of self.linecount)
+            for i in range(len(self.ax.lines)-1,-1,-1):
+                if i >= total_linecount:
+                    self.ax.lines[i].remove()
+                else:
+                    break
 
     @pyqtSlot(int)
     def getAlarmSet(self, n:int) -> 'AlarmSet|None':
@@ -7710,9 +7695,7 @@ class tgraphcanvas(QObject):
             startofx = self.startofx if min_time is None else min_time
             endofx = self.endofx if max_time is None else max_time
 
-            if bool(self.aw.comparator):
-                starttime = 0
-            elif -1 < self.timeindex[0] < len(self.timex):
+            if -1 < self.timeindex[0] < len(self.timex):
                 starttime = self.timex[self.timeindex[0]]
             else:
                 starttime = 0
@@ -7792,9 +7775,7 @@ class tgraphcanvas(QObject):
     def fmt_timedata(self, x:float) -> str:
         starttime:float
 
-        if bool(self.aw.comparator):
-            starttime = 0
-        elif self.timeindex[0] != -1 and self.timeindex[0] < len(self.timex):
+        if self.timeindex[0] != -1 and self.timeindex[0] < len(self.timex):
             starttime = self.timex[self.timeindex[0]]
         else:
             starttime = 0
@@ -7822,7 +7803,7 @@ class tgraphcanvas(QObject):
     #used by xaxistosm(). Provides also negative time
     def formtime(self, x:float, _pos:int|None) -> str:
         starttime:float
-        if not bool(self.aw.comparator) and (self.timeindex[0] != -1 and self.timeindex[0] < len(self.timex)):
+        if self.timeindex[0] != -1 and self.timeindex[0] < len(self.timex):
             starttime = self.timex[self.timeindex[0]]
         else:
             starttime = 0
@@ -9528,16 +9509,12 @@ class tgraphcanvas(QObject):
 #        _log.debug("PRINT redraw(recomputeAllDeltas: %s, re_smooth_foreground: %s, takelock: %s, forceRenewAxis: %s, re_smooth_background: %s)",recomputeAllDeltas, re_smooth_foreground, takelock, forceRenewAxis, re_smooth_background)
 
         if self._greyscreen_trace:
-            # If none of the branches below run (not designer, no comparator, ax is None) redraw()
+            # If none of the branches below run (not designer, ax is None) redraw()
             # is a silent no-op and the chart is never repainted -- this entry line captures that.
-            _log.info('[greyscreen] redraw() entry: designerflag=%s comparator=%s ax_is_None=%s takelock=%s',
-                      self.designerflag, self.aw.comparator is not None, self.ax is None, takelock)
+            _log.info('[greyscreen] redraw() entry: designerflag=%s ax_is_None=%s takelock=%s',
+                      self.designerflag, self.ax is None, takelock)
         if self.designerflag:
             self.redrawdesigner(force=True)
-        elif self.aw.comparator is not None:
-            self.aw.comparator.redraw()
-            if self.aw.qpc is not None:
-                self.aw.qpc.redraw_phases()
         else:
             # Recover from a removed axis (flavorchart()/graphwheel()/roastReport() null self.ax)
             # so redraw() can never be a silent no-op -- root-cause fix for the "grey screen" bug.

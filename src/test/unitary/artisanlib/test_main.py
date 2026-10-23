@@ -264,7 +264,6 @@ def mock_application_window(mock_qmc: Mock) -> Mock:
 
     # Configure default attributes and behaviors
     aw.qmc = mock_qmc
-    aw.comparator = None
     aw.setProfile = Mock(return_value=True)
     aw.orderEvents = Mock()
     aw.etypeComboBox = Mock()
@@ -378,7 +377,6 @@ class TestLoadFile:
             aw.qmc = mock_application_window.qmc
             aw.qmc.clearBgbeforeprofileload = False  # Ensure this is set
             # Ensure conditions for loadFile to proceed are met
-            aw.comparator = None  # Must be None
             aw.qmc.designerflag = False  # Must be False
             aw.qmc.wheelflag = False  # Must be False
             aw.qmc.ax = Mock()  # Must not be None
@@ -459,7 +457,6 @@ class TestLoadFile:
             aw.qmc.designerflag = False  # Must be False
             aw.qmc.wheelflag = False  # Must be False
             aw.qmc.ax = Mock()  # Must not be None
-            aw.comparator = None
             aw.sendmessage = mock_application_window.sendmessage  # type: ignore[method-assign]
 
             # Directly patch the Qt classes on the module that the ApplicationWindow uses
@@ -493,23 +490,6 @@ class TestLoadFile:
             mock_file_instance.close.assert_called()
             mock_application_window.sendmessage.assert_called_once()
 
-    def test_load_file_when_comparator_active(self, mock_application_window: Mock) -> None:
-        """Test that loadFile returns early when comparator is active."""
-        # Arrange
-        test_file_path = 'test_file.alog'
-
-        # Create ApplicationWindow instance with active comparator
-        aw = ApplicationWindow.__new__(ApplicationWindow)
-        aw.qmc = mock_application_window.qmc
-        aw.comparator = Mock()  # Active comparator
-        aw.sendmessage = mock_application_window.sendmessage  # type: ignore[method-assign]
-
-        # Act
-        aw.loadFile(test_file_path)
-
-        # Assert - should return early without any file operations
-        mock_application_window.sendmessage.assert_not_called()
-
     def test_load_file_when_designer_flag_active(self, mock_application_window: Mock) -> None:
         """Test that loadFile returns early when designer flag is active."""
         # Arrange
@@ -519,7 +499,6 @@ class TestLoadFile:
         aw = ApplicationWindow.__new__(ApplicationWindow)
         aw.qmc = mock_application_window.qmc
         aw.qmc.designerflag = True  # Designer mode active
-        aw.comparator = None
         aw.sendmessage = mock_application_window.sendmessage  # type: ignore[method-assign]
 
         # Act
@@ -537,7 +516,6 @@ class TestLoadFile:
         aw = ApplicationWindow.__new__(ApplicationWindow)
         aw.qmc = mock_application_window.qmc
         aw.qmc.ax = None  # No axis available
-        aw.comparator = None
         aw.sendmessage = mock_application_window.sendmessage  # type: ignore[method-assign]
 
         # Act
@@ -573,7 +551,6 @@ class TestLoadFile:
             aw.qmc.designerflag = False  # Must be False
             aw.qmc.wheelflag = False  # Must be False
             aw.qmc.ax = Mock()  # Must not be None
-            aw.comparator = None
             aw.setProfile = mock_application_window.setProfile  # type: ignore[method-assign]
             aw.orderEvents = mock_application_window.orderEvents  # type: ignore[method-assign]
             aw.etypeComboBox = mock_application_window.etypeComboBox
@@ -650,7 +627,6 @@ class TestLoadFile:
             # Create ApplicationWindow instance
             aw = ApplicationWindow.__new__(ApplicationWindow)
             aw.qmc = mock_application_window.qmc
-            aw.comparator = None
             aw.setProfile = mock_application_window.setProfile  # type: ignore[method-assign]
             aw.orderEvents = mock_application_window.orderEvents  # type: ignore[method-assign]
             aw.etypeComboBox = mock_application_window.etypeComboBox
@@ -695,7 +671,6 @@ class TestLoadFile:
             # Create ApplicationWindow instance
             aw = ApplicationWindow.__new__(ApplicationWindow)
             aw.qmc = mock_application_window.qmc
-            aw.comparator = None
             aw.updateRecentFileActions = Mock()  # type: ignore[method-assign]
 
             # Act - Should handle OSError gracefully
@@ -730,7 +705,6 @@ class TestLoadFile:
             # Create ApplicationWindow instance
             aw = ApplicationWindow.__new__(ApplicationWindow)
             aw.qmc = mock_application_window.qmc
-            aw.comparator = None
             aw.setProfile = mock_application_window.setProfile  # type: ignore[method-assign]
             aw.orderEvents = mock_application_window.orderEvents  # type: ignore[method-assign]
             aw.etypeComboBox = mock_application_window.etypeComboBox
@@ -767,7 +741,6 @@ class TestImportCSV:
         # Create ApplicationWindow instance with minimal setup
         aw = ApplicationWindow.__new__(ApplicationWindow)
         aw.qmc = mock_application_window.qmc
-        aw.comparator = None
         aw.sendmessage = mock_application_window.sendmessage  # type: ignore[method-assign]
         aw.addDevice = mock_application_window.addDevice  # type: ignore[method-assign]
         aw.autoAdjustAxis = mock_application_window.autoAdjustAxis  # type: ignore[method-assign]
@@ -791,7 +764,6 @@ class TestImportCSV:
         # Arrange
         aw = ApplicationWindow.__new__(ApplicationWindow)
         aw.qmc = mock_application_window.qmc
-        aw.comparator = None
 
         # Act & Assert - Just test that the function exists and can handle exceptions
         with patch('builtins.open', create=True) as mock_open:
@@ -805,11 +777,9 @@ class TestImportCSV:
         # Arrange
         test_csv_path = 'test_file.csv'
 
-        # Test with comparator active - importCSV doesn't have early return for comparator
-        # but we can test exception handling instead
+        # importCSV has no early return; test exception handling instead
         aw = ApplicationWindow.__new__(ApplicationWindow)
         aw.qmc = mock_application_window.qmc
-        aw.comparator = None
         aw.sendmessage = mock_application_window.sendmessage  # type: ignore[method-assign]
 
         # Test with file that doesn't exist
@@ -834,7 +804,6 @@ class TestImportCSV:
             # Create ApplicationWindow instance
             aw = ApplicationWindow.__new__(ApplicationWindow)
             aw.qmc = mock_application_window.qmc
-            aw.comparator = None
             aw.sendmessage = mock_application_window.sendmessage  # type: ignore[method-assign]
 
             # Act
@@ -885,7 +854,6 @@ class TestImportJSON:
             aw = ApplicationWindow.__new__(ApplicationWindow)
             aw.qmc = mock_application_window.qmc
             aw.qmc.etypes = ['Air', 'Drum', 'Damper', 'Burner', '--']
-            aw.comparator = None
             aw.setProfile = mock_application_window.setProfile  # type: ignore[method-assign]
             mock_application_window.setProfile.return_value = (
                 True  # setProfile returns True on success
@@ -934,7 +902,6 @@ class TestImportJSON:
             aw = ApplicationWindow.__new__(ApplicationWindow)
             aw.qmc = mock_application_window.qmc
             aw.qmc.etypes = ['Air', 'Drum', 'Damper', 'Burner', '--']
-            aw.comparator = None
             aw.setProfile = mock_application_window.setProfile  # type: ignore[method-assign]
             mock_application_window.setProfile.return_value = (
                 False  # setProfile returns False on failure
@@ -954,23 +921,6 @@ class TestImportJSON:
             aw.etypeComboBox.clear.assert_not_called()
             mock_application_window.sendmessage.assert_not_called()
 
-    def test_import_json_early_return_conditions(self, mock_application_window: Mock) -> None:
-        """Test that importJSON returns early under certain conditions."""
-        # Arrange
-        test_json_path = 'test_file.json'
-
-        # Test with comparator active
-        aw = ApplicationWindow.__new__(ApplicationWindow)
-        aw.qmc = mock_application_window.qmc
-        aw.comparator = Mock()  # Active comparator
-        aw.sendmessage = mock_application_window.sendmessage  # type: ignore[method-assign]
-
-        # Act
-        aw.importJSON(test_json_path)
-
-        # Assert - should return early without any processing
-        mock_application_window.sendmessage.assert_not_called()
-
     def test_import_json_exception_handling(self, mock_application_window: Mock) -> None:
         """Test that importJSON handles exceptions gracefully."""
         # Arrange
@@ -983,7 +933,6 @@ class TestImportJSON:
             # Create ApplicationWindow instance
             aw = ApplicationWindow.__new__(ApplicationWindow)
             aw.qmc = mock_application_window.qmc
-            aw.comparator = None
             aw.sendmessage = mock_application_window.sendmessage  # type: ignore[method-assign]
 
             # Act
@@ -1013,7 +962,6 @@ class TestImportJSON:
             # Create ApplicationWindow instance
             aw = ApplicationWindow.__new__(ApplicationWindow)
             aw.qmc = mock_application_window.qmc
-            aw.comparator = None
             aw.sendmessage = mock_application_window.sendmessage  # type: ignore[method-assign]
 
             # Act

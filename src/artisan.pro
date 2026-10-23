@@ -26,7 +26,6 @@ SOURCES = \
     artisanlib/canvas.py \
     artisanlib/colors.py \
     artisanlib/comm.py \
-    artisanlib/comparator.py \
     artisanlib/cropster.py \
     artisanlib/cup_profile.py \
     artisanlib/curves.py \
