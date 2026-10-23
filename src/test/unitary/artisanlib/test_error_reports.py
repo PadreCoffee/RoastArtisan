@@ -64,7 +64,6 @@ def test_crash_report_content(outbox:Path) -> None:
     assert 'test_error_reports.py' in r['error']['line'] and 'Traceback' in r['error']['traceback']
     assert len(r['fingerprint']) == 40 and r['client_report_id'] and r['occurred_at'].endswith('Z')
     assert r['app']['version'] and r['platform']['os']
-    assert 'last_login' not in r                       # logged in: the cloud takes the account from the token
 
 
 def test_identical_crash_is_counted_not_queued_twice(outbox:Path) -> None:
@@ -89,12 +88,25 @@ def test_daily_cap(outbox:Path) -> None:
     assert len(_reports(outbox)) == er.MAX_PER_DAY
 
 
-def test_last_login_sent_only_when_logged_out(outbox:Path, monkeypatch:pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(er, '_logged_in', lambda: False)
+@pytest.mark.parametrize('logged_in', [False, True])
+def test_last_login_sent_with_every_report(outbox:Path, monkeypatch:pytest.MonkeyPatch, logged_in:bool) -> None:
+    # the cloud needs it when the attached token went stale, and ignores it for a valid token
+    monkeypatch.setattr(er, '_logged_in', lambda: logged_in)
     er.remember_login('igor@example.com', 'S.Pudra')
     assert _crash()
     [r] = _reports(outbox)
     assert r['last_login'] == {'login': 'igor@example.com', 'org_hint': 'S.Pudra'}  # not scrubbed (cloud requirement)
+
+
+def test_rate_limit_retry_after_is_remembered(monkeypatch:pytest.MonkeyPatch) -> None:
+    import requests
+    class R:
+        status_code = 429
+        headers = {'Retry-After': '120'}
+    monkeypatch.setattr(requests, 'post', lambda *a, **k: R())
+    monkeypatch.setattr(er, '_retry_after', 0)
+    assert er._post({'app': {}, 'platform': {}}, authorized=False) == 429 # pylint: disable=protected-access
+    assert er._retry_after == 120 # pylint: disable=protected-access
 
 
 def test_disabled_reports_nothing(outbox:Path, monkeypatch:pytest.MonkeyPatch) -> None:
@@ -112,16 +124,17 @@ def test_sender_keeps_report_until_stored(outbox:Path, monkeypatch:pytest.Monkey
     assert bool(_reports(outbox)) is kept
 
 
-def test_sender_retries_expired_session_anonymously(outbox:Path, monkeypatch:pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize('refusal', [401, 403])
+def test_sender_retries_refused_token_anonymously(outbox:Path, monkeypatch:pytest.MonkeyPatch, refusal:int) -> None:
     er.remember_login('igor@example.com', '')
     assert _crash()
     calls:list[tuple[bool, bool]] = []
     def post(report:dict[str, Any], authorized:bool) -> int:
         calls.append((authorized, 'last_login' in report))
-        return 401 if authorized else 202
+        return refusal if authorized else 202
     monkeypatch.setattr(er, '_post', post)
     assert er.send_pending()
-    assert calls == [(True, False), (False, True)] and _reports(outbox) == []
+    assert calls == [(True, True), (False, True)] and _reports(outbox) == []
 
 
 def test_reports_url_points_to_the_cloud() -> None:
