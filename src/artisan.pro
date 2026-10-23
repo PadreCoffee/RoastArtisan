@@ -42,7 +42,6 @@ SOURCES = \
     artisanlib/modbusport.py \
     artisanlib/petroncini.py \
     artisanlib/phases.py \
-    artisanlib/phases_canvas.py \
     artisanlib/pid_control.py \
     artisanlib/pid_dialogs.py \
     artisanlib/platformdlg.py \

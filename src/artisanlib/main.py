@@ -173,7 +173,6 @@ if TYPE_CHECKING:
     from artisanlib.mugma import Mugma # pylint: disable=unused-import
     from artisanlib.kaleido import KaleidoPort # pylint: disable=unused-import
     from artisanlib.orbiter import Orbiter # pylint: disable=unused-import
-    from artisanlib.phases_canvas import tphasescanvas # pylint: disable=unused-import
     try:
         from artisanlib.ikawa import IKAWA_BLE # pylint: disable=unused-import
     except Exception: # pylint: disable=broad-except
@@ -181,7 +180,7 @@ if TYPE_CHECKING:
     from matplotlib.text import Annotation # type:ignore[untyped-import,unused-ignore] # ty:ignore[ignore] # pylint: disable=unused-import
     from openpyxl.worksheet.worksheet import Worksheet # pylint: disable=unused-import
     import numpy.typing as npt # pylint: disable=unused-import
-    from PyQt6.QtWidgets import QTableWidgetItem, QTableWidget, QScrollBar # pylint: disable=unused-import
+    from PyQt6.QtWidgets import QTableWidgetItem, QTableWidget # pylint: disable=unused-import
     from PyQt6.QtGui import QStyleHints, QClipboard, QKeyEvent, QMouseEvent, QDropEvent, QDragEnterEvent, QCloseEvent, QResizeEvent, QValidator # pylint: disable=unused-import
     from PyQt6.QtCore import QFile, QObject, QPermission, QMessageLogContext  # noqa: F401 # pylint: disable=unused-import,reimported # QFile is reimported for mypy!?
     from matplotlib.backend_bases import Event as MplEvent, MouseEvent # type:ignore[untyped-import,unused-ignore] # ty:ignore[ignore] # pylint: disable=unused-import
@@ -699,7 +698,6 @@ from artisanlib.widgets import (MyQLCDNumber, EventPushButton, MajorEventPushBut
 
 from artisanlib.notifications import Notification, NotificationManager, NotificationType
 from artisanlib.canvas import tgraphcanvas
-from artisanlib.phases_canvas import tphasescanvas
 from artisanlib.scale import ScaleManager
 
 
@@ -1553,7 +1551,7 @@ class ApplicationWindow(QMainWindow):
         'e3buttonbarLayout', 'e3buttondialog', 'e4buttonbarLayout', 'e4buttondialog','e5buttonbarLayout', 'e5buttondialog', 'e6buttonbarLayout', 'e6buttondialog',
         'e7buttonbarLayout', 'e7buttondialog', 'e8buttonbarLayout', 'e8buttondialog', 'e9buttonbarLayout', 'e9buttondialog', 'e10buttonbarLayout', 'e10buttondialog',
         'keyboardmove', 'keyboardButtonList', 'keyboardmoveindex',
-        'keyboardmoveflag', 'lastkeyboardcmd', 'error_dlg', 'serial_dlg', 'message_dlg', 'ETname', 'BTname', 'level1frame', 'level1layout', 'qpc', 'splitter', 'scroller', 'EventsGroupLayout',
+        'keyboardmoveflag', 'lastkeyboardcmd', 'error_dlg', 'serial_dlg', 'message_dlg', 'ETname', 'BTname', 'level1frame', 'level1layout', 'splitter', 'scroller', 'EventsGroupLayout',
         'LCD2frame', 'LCD3frame', 'LCD4frame', 'LCD5frame', 'LCD6frame', 'LCD7frame', 'TPlabel', 'TPlcd', 'TPlcdFrame', 'TP2DRYlabel', 'TP2DRYframe',
         'DRYlabel', 'DRYlcd', 'DRYlcdFrame', 'DRY2FCslabel', 'DRY2FCsframe', 'FCslabel', 'FCslcd', 'FCslcdFrame', 'AUClabel', 'AUClcd', 'AUClcdFrame',
         'AUCLCD', 'phasesLCDs', 'extrabuttonsLayout', 'extrabuttondialogs', 'slider1', 'slider2', 'slider3', 'slider4', 'sliderLCD1', 'sliderLCD2', 'sliderLCD3',
@@ -3998,8 +3996,6 @@ class ApplicationWindow(QMainWindow):
         #level 3
         level3layout.addLayout(pidbuttonLayout,0)
 
-        self.qpc:tphasescanvas|None = None
-
         self.scroller: QScrollArea = QScrollArea()
         self.scroller.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.scroller.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -4700,14 +4696,6 @@ class ApplicationWindow(QMainWindow):
 
     #
 
-    def establish_phasescanvas(self) -> None:
-        if self.qpc is None:
-            from artisanlib.phases_canvas import tphasescanvas # pylint: disable=reimported
-            self.qpc = tphasescanvas(self.dpi, self)
-            self.qpc.canvas.setSizePolicy(QSizePolicy.Policy.Expanding,QSizePolicy.Policy.Fixed)
-            self.qpc.canvas.mpl_connect('scroll_event', self.scrollingPhases)
-            self.scroller.setWidget(self.qpc.canvas)
-
     def scale_connected_handler(self, scale_id:str, scale_name:str) -> None:
         if scale_name:
             name = (self.getScaleName((scale_name, scale_id)) if scale_id else scale_name)
@@ -4805,16 +4793,6 @@ class ApplicationWindow(QMainWindow):
 
     def zoomOut(self) -> None:
         self.setdpi(self.dpi-10)
-
-    def scrollingPhases(self, event:'MplEvent') -> Any:
-        verticalScroller: QScrollBar|None = self.scroller.verticalScrollBar()
-        if verticalScroller is not None:
-            val = verticalScroller.value()
-            if hasattr(event, 'button') and event.button == 'down': # pyright: ignore[reportAttributeAccessIssue]
-                verticalScroller.setValue(val+10)
-            else:
-                verticalScroller.setValue(val-10)
-
 
     # timer_color one of "timer" (black), "slowcoolingtimer" (red), "rstimer" (blue)
     def setTimerColor(self, timer_color:str) -> None:
@@ -8870,8 +8848,6 @@ class ApplicationWindow(QMainWindow):
                     QApplication.processEvents()
                     if self.qmc.statssummary:
                         self.qmc.redraw(recomputeAllDeltas=False)
-                if self.qpc is not None:
-                    self.qpc.setdpi(dpi,moveWindow)
             except Exception as e:  # pylint: disable=broad-except
                 _log.exception(e)
 
