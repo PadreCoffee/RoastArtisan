@@ -1,4 +1,5 @@
 """switchOperator points the app at a saved account and authenticates silently."""
+from typing import Any
 import sys
 from unittest.mock import Mock
 
@@ -29,7 +30,7 @@ def test_switch_operator_sets_account_and_authenticates():
     aw.plus_account = 'old@x.io'
     config.app_window = aw
 
-    cleared = {}
+    cleared: dict[str, Any] = {}
     restore = [
         _patch(connection, 'clearCredentials',
                lambda remove_from_keychain=True: cleared.update(rk=remove_from_keychain)),

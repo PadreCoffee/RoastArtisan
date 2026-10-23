@@ -4,6 +4,7 @@ Like test_schedule_references.py, plus.lots is deliberately Qt-free and network-
 tests need no PyQt preamble and are immune to the suite's Qt global-state flakiness.
 """
 
+from typing import Any
 from plus.lots import (
     pickable_lots,
     show_lot_dropdown,
@@ -13,8 +14,8 @@ from plus.lots import (
 )
 
 
-def _lot(id_: str, code: str = '', weight_kg: float = 1.0, warehouse: str | None = None) -> dict:
-    d: dict = {'id': id_, 'code': code, 'weight_kg': weight_kg}
+def _lot(id_: str, code: str = '', weight_kg: float = 1.0, warehouse: str | None = None) -> dict[str, Any]:
+    d: dict[str, Any] = {'id': id_, 'code': code, 'weight_kg': weight_kg}
     if warehouse is not None:
         d['warehouse_name'] = warehouse
     return d

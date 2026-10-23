@@ -7,6 +7,7 @@ never coerce it to 0 — coercing would persist a real weight as 0 into the comp
 cache. Mirrors the skip-on-None guards in plus/sync.py applyServerUpdates.
 """
 
+from typing import Any
 import sys
 import uuid as uuidlib
 import datetime
@@ -21,7 +22,7 @@ from plus.schedule import CompletedItem  # noqa: E402
 
 
 def _completed_item(**overrides: object) -> CompletedItem:
-    kwargs: dict = {
+    kwargs: dict[str, Any] = {
         'count': 1, 'scheduleID': 'sch-1', 'scheduleDate': '2026-08-26', 'sequence_id': 1,
         'roastUUID': uuidlib.uuid4(), 'roastdate': datetime.datetime(2026, 8, 26, 12, 0, 0),  # noqa: DTZ001 # naive local time, as the app creates it
         'roastbatchnr': 1, 'roastbatchprefix': 'RA', 'title': 'Test Roast',
@@ -46,9 +47,9 @@ def test_update_completed_item_skips_none_weights_without_crash_or_zeroing() -> 
     assert ci.defects_weight == 0.1  # real defects weight preserved
 
 
-def test_update_completed_item_applies_real_weights(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+def test_update_completed_item_applies_real_weights(monkeypatch) -> None:
     ci = _completed_item(batchsize=3.0, weight=2.5, defects_weight=0.1)
-    persisted: dict = {}
+    persisted: dict[str, Any] = {}
     monkeypatch.setattr(plus.schedule, 'add_completed',
                         lambda acc, d: persisted.update({'acc': acc}))
 

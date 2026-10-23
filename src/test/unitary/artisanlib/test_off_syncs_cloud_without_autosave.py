@@ -9,6 +9,7 @@ Fix: after the OFF autosave attempt, if the roast was not written to a new file 
 sync it to the cloud directly.
 """
 
+from typing import Any
 import sys
 import types
 
@@ -25,8 +26,8 @@ def _q(cur_file):
     return types.SimpleNamespace(aw=types.SimpleNamespace(curFile=cur_file))
 
 
-def _calls(monkeypatch) -> list:
-    calls: list = []
+def _calls(monkeypatch) -> list[Any]:
+    calls: list[Any] = []
     monkeypatch.setattr(plus.controller, 'updateSyncRecordHashAndSync', lambda: calls.append(True))
     return calls
 

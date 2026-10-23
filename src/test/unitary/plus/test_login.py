@@ -277,7 +277,7 @@ def use_mocked_login_module() -> Generator[None, None, None]:
     if had_attr:
         _plus_pkg.login = saved_attr # type: ignore[attr-defined]
     elif hasattr(_plus_pkg, 'login'):
-        del _plus_pkg.login # type: ignore[attr-defined]
+        del _plus_pkg.login
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -682,7 +682,7 @@ class TestLoginDialogEventHandlers:
             dialog.textName.text = Mock(return_value='user@example.com')
             dialog.textPass = Mock()
             dialog.textPass.text = Mock(return_value='password123')
-            dialog.accept = Mock() # type: ignore[method-assign]
+            dialog.accept = Mock()
 
             # Act
             dialog.setCredentials()
@@ -863,7 +863,7 @@ class TestLoginDialogUIComponents:
 
             expected = login.config.normalize_server_url('roastlocal.ru')
             assert dialog.server_url == expected
-            dialog.textServer.setVisible.assert_called_with(False)  # type: ignore[attr-defined]
+            dialog.textServer.setVisible.assert_called_with(False) 
             assert dialog.textServer.text() == expected
 
     def test_server_url_argument_is_ignored(self, mock_parent_widget:Mock, mock_app_window:Mock) -> None:
@@ -1019,7 +1019,7 @@ class TestLoginDialogEdgeCases:
             dialog.textName.text = Mock(return_value='')
             dialog.textPass = Mock()
             dialog.textPass.text = Mock(return_value='')
-            dialog.accept = Mock() # type: ignore[method-assign]
+            dialog.accept = Mock()
 
             # Act
             dialog.setCredentials()

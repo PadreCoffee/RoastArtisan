@@ -459,7 +459,7 @@ class TestGetPath:
 
             mock_shelve = Mock()
             mock_db = MockShelveDB()
-            mock_db._data[_normalize_uuid(sample_uuid)] = sample_path
+            mock_db._data[str(_normalize_uuid(sample_uuid))] = sample_path
             mock_shelve.open.return_value = mock_db
 
             with patch.dict(
@@ -535,7 +535,7 @@ class TestGetPath:
 
             mock_shelve = Mock()
             mock_db = MockShelveDB()
-            mock_db._data[_normalize_uuid(sample_uuid)] = sample_path
+            mock_db._data[str(_normalize_uuid(sample_uuid))] = sample_path
             mock_shelve.open.return_value = mock_db
             mock_exists.return_value = False
 
@@ -735,7 +735,7 @@ class TestPathValidation:
 
             mock_shelve = Mock()
             mock_db = MockShelveDB()
-            mock_db._data[_normalize_uuid(sample_uuid)] = sample_path
+            mock_db._data[str(_normalize_uuid(sample_uuid))] = sample_path
             mock_shelve.open.return_value = mock_db
             mock_exists.return_value = True
 
@@ -765,7 +765,7 @@ class TestPathValidation:
 
             mock_shelve = Mock()
             mock_db = MockShelveDB()
-            mock_db._data[_normalize_uuid(sample_uuid)] = invalid_path
+            mock_db._data[str(_normalize_uuid(sample_uuid))] = invalid_path
             mock_shelve.open.return_value = mock_db
             mock_exists.return_value = False
 

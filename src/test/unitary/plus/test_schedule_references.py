@@ -5,6 +5,7 @@
 # network-free, so these tests do not need the PyQt mocking preamble the other
 # plus/ tests use and are immune to the suite's Qt global-state flakiness.
 
+from typing import Any
 from plus.schedule_references import (
     reference_picker_applies,
     pick_default_reference_index,
@@ -12,7 +13,7 @@ from plus.schedule_references import (
 )
 
 
-def _ref(uuid: str, label: str = '') -> dict:
+def _ref(uuid: str, label: str = '') -> dict[str, Any]:
     return {'uuid': uuid, 'label': label or uuid[:4]}
 
 
