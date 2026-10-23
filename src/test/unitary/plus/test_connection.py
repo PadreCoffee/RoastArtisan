@@ -494,6 +494,8 @@ class TestCredentialManagement:
 
             mock_config.app_window = mock_app_window
             mock_config.app_name = 'artisan.plus'
+            # the keyring service name is derived per cloud server by config.get_keyring_service_name()
+            mock_config.get_keyring_service_name.return_value = 'artisan.plus'
             mock_config.token = 'test_token'
             mock_config.nickname = 'test_nickname'
             mock_config.passwd = 'test_password'
@@ -503,6 +505,7 @@ class TestCredentialManagement:
             connection.clearCredentials(remove_from_keychain=True)
 
             # Assert
+            mock_config.get_keyring_service_name.assert_called_once_with()
             mock_delete_password.assert_called_once_with('artisan.plus', 'test@example.com')
             assert mock_config.token is None
             assert mock_config.nickname is None

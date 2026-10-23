@@ -173,12 +173,19 @@ class MockQLabel:
 
 
 class MockQLineEdit:
+    # stateful: text() returns what setText() stored (the hidden server field is read back by
+    # isInputReasonable()/setCredentials())
     def __init__(self, *_args: Any) -> None:
+        self._text = ''
         self.setEchoMode = Mock()
         self.setPlaceholderText = Mock()
-        self.setText = Mock()
-        self.text = Mock(return_value='')
+        self.setText = Mock(side_effect=self._set_text)
+        self.text = Mock(side_effect=lambda: self._text)
         self.textChanged = Mock()
+        self.setVisible = Mock()
+
+    def _set_text(self, text: str) -> None:
+        self._text = text
 
     class EchoMode:
         Password = 1
@@ -238,7 +245,39 @@ with patch('PyQt6.QtWidgets.QApplication', MockQApplication), patch(
 ), patch(
     'plus.config.min_login_len', 6
 ):
-    from plus import login
+    import importlib
+    import plus as _plus_pkg
+    _real_login_module = sys.modules.pop('plus.login', None)
+    login = importlib.import_module('plus.login')
+    if _real_login_module is not None:
+        sys.modules['plus.login'] = _real_login_module
+        _plus_pkg.login = _real_login_module # type: ignore[attr-defined]
+    else:
+        del sys.modules['plus.login']
+        del _plus_pkg.login # type: ignore[attr-defined]
+
+
+@pytest.fixture(scope='module', autouse=True)
+def use_mocked_login_module() -> Generator[None, None, None]:
+    """Expose the mock-built login module as plus.login while this module's tests run.
+
+    patch('plus.login.<name>') resolves the target through sys.modules, so the mocked copy
+    imported above must be registered there; the real module is put back afterwards.
+    """
+    saved_module = sys.modules.get('plus.login')
+    had_attr = hasattr(_plus_pkg, 'login')
+    saved_attr = getattr(_plus_pkg, 'login', None)
+    sys.modules['plus.login'] = login
+    _plus_pkg.login = login # type: ignore[attr-defined]
+    yield
+    if saved_module is not None:
+        sys.modules['plus.login'] = saved_module
+    else:
+        sys.modules.pop('plus.login', None)
+    if had_attr:
+        _plus_pkg.login = saved_attr # type: ignore[attr-defined]
+    elif hasattr(_plus_pkg, 'login'):
+        del _plus_pkg.login # type: ignore[attr-defined]
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -444,8 +483,11 @@ class TestLoginDialogInitialization:
             assert hasattr(dialog, 'textName')
             assert hasattr(dialog, 'textPass')
             assert hasattr(dialog, 'rememberCheckbox')
-            assert hasattr(dialog, 'linkRegister')
-            assert hasattr(dialog, 'linkResetPassword')
+            # the register / reset-password links were removed from the dialog; the (fixed)
+            # cloud server address lives in a hidden field instead
+            assert hasattr(dialog, 'textServer')
+            assert not hasattr(dialog, 'linkRegister')
+            assert not hasattr(dialog, 'linkResetPassword')
 
 
 class TestLoginDialogValidation:
@@ -684,12 +726,13 @@ class TestPlusLoginFunction:
             mock_dialog = Mock()
             mock_dialog.login = '  user@example.com  '  # With whitespace
             mock_dialog.passwd = 'password123'
+            mock_dialog.server_url = 'https://roastlocal.ru'
             mock_dialog.remember = True
             mock_dialog.exec.return_value = 1  # Dialog accepted
             mock_login_class.return_value = mock_dialog
 
             # Act
-            result_login, result_passwd, result_remember, result_code = login.plus_login(
+            result_login, result_passwd, result_server, result_remember, result_code = login.plus_login(
                 mock_parent_widget,
                 mock_app_window,
                 email=test_email,
@@ -699,9 +742,9 @@ class TestPlusLoginFunction:
 
             # Assert
             mock_login_class.assert_called_once_with(
-                mock_parent_widget, mock_app_window, test_email, test_password, True
+                mock_parent_widget, mock_app_window, test_email, test_password, None, True
             )
-            mock_dialog.setWindowTitle.assert_called_once_with('plus')
+            mock_dialog.setWindowTitle.assert_called_once_with('Roastlocal Cloud')
             mock_dialog.setWindowFlags.assert_called_once_with(MockQt.WindowType.Sheet)
             mock_dialog.setAttribute.assert_called_once_with(
                 MockQt.WidgetAttribute.WA_DeleteOnClose, True
@@ -710,6 +753,7 @@ class TestPlusLoginFunction:
 
             assert result_login == 'user@example.com'  # Whitespace stripped
             assert result_passwd == 'password123'
+            assert result_server == 'https://roastlocal.ru'
             assert result_remember is True
             assert result_code == 1
 
@@ -725,7 +769,7 @@ class TestPlusLoginFunction:
             mock_login_class.return_value = mock_dialog
 
             # Act
-            result_login, result_passwd, result_remember, result_code = login.plus_login(
+            result_login, result_passwd, _result_server, result_remember, result_code = login.plus_login(
                 mock_parent_widget, mock_app_window
             )
 
@@ -747,7 +791,7 @@ class TestPlusLoginFunction:
             mock_login_class.return_value = mock_dialog
 
             # Act
-            result_login, result_passwd, result_remember, result_code = login.plus_login(
+            result_login, result_passwd, _result_server, result_remember, result_code = login.plus_login(
                 mock_parent_widget, mock_app_window
             )
 
@@ -769,7 +813,7 @@ class TestPlusLoginFunction:
             mock_login_class.return_value = mock_dialog
 
             # Act
-            result_login, result_passwd, result_remember, result_code = login.plus_login(
+            result_login, result_passwd, _result_server, result_remember, result_code = login.plus_login(
                 mock_parent_widget, mock_app_window
             )
 
@@ -791,52 +835,45 @@ class TestPlusLoginFunction:
             mock_login_class.return_value = mock_dialog
 
             # Act
-            result_login, result_passwd, result_remember, result_code = login.plus_login(
+            result_login, result_passwd, _result_server, result_remember, result_code = login.plus_login(
                 mock_parent_widget, mock_app_window
             )
 
             # Assert
             mock_login_class.assert_called_once_with(
-                mock_parent_widget, mock_app_window, None, None, True
+                mock_parent_widget, mock_app_window, None, None, None, True
             )
+            assert result_login == 'user@example.com'
+            assert result_passwd == 'password123'
+            assert result_remember is True
+            assert result_code == 1
 
 
 class TestLoginDialogUIComponents:
     """Test Login dialog UI component setup."""
 
-    def test_register_link_setup(self, mock_parent_widget:Mock, mock_app_window:Mock) -> None:
-        """Test register link is properly configured."""
-        # Arrange
-        with patch('plus.login.ArtisanDialog.__init__') as mock_super_init, patch(
-            'plus.login.QLabel'
-        ) as mock_qlabel_class:
+    # The register / reset-password QLabel links were removed from the dialog (the cloud server
+    # is fixed to roastlocal.ru). The former link tests are replaced by tests of the hidden server field.
+    def test_server_field_hidden_and_fixed(self, mock_parent_widget:Mock, mock_app_window:Mock) -> None:
+        """The server field is hidden and always holds the fixed roastlocal.ru server."""
+        with patch('plus.login.ArtisanDialog.__init__') as mock_super_init:
             mock_super_init.return_value = None
-            mock_register_link = Mock()
-            mock_qlabel_class.return_value = mock_register_link
 
-            # Act
             dialog = login.Login(mock_parent_widget, mock_app_window)
 
-            # Assert
-            mock_register_link.setOpenExternalLinks.assert_called_with(True)
-            assert dialog.linkRegister == mock_register_link
+            expected = login.config.normalize_server_url('roastlocal.ru')
+            assert dialog.server_url == expected
+            dialog.textServer.setVisible.assert_called_with(False)  # type: ignore[attr-defined]
+            assert dialog.textServer.text() == expected
 
-    def test_reset_password_link_setup(self, mock_parent_widget:Mock, mock_app_window:Mock) -> None:
-        """Test reset password link is properly configured."""
-        # Arrange
-        with patch('plus.login.ArtisanDialog.__init__') as mock_super_init, patch(
-            'plus.login.QLabel'
-        ) as mock_qlabel_class:
+    def test_server_url_argument_is_ignored(self, mock_parent_widget:Mock, mock_app_window:Mock) -> None:
+        """A server_url passed by the caller cannot override the fixed server."""
+        with patch('plus.login.ArtisanDialog.__init__') as mock_super_init:
             mock_super_init.return_value = None
-            mock_reset_link = Mock()
-            mock_qlabel_class.return_value = mock_reset_link
 
-            # Act
-            dialog = login.Login(mock_parent_widget, mock_app_window)
+            dialog = login.Login(mock_parent_widget, mock_app_window, server_url='https://example.com')
 
-            # Assert
-            mock_reset_link.setOpenExternalLinks.assert_called_with(True)
-            assert dialog.linkResetPassword == mock_reset_link
+            assert dialog.server_url == login.config.normalize_server_url('roastlocal.ru')
 
     def test_password_field_setup(self, mock_parent_widget:Mock, mock_app_window:Mock) -> None:
         """Test password field is configured with password echo mode."""

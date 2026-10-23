@@ -111,6 +111,21 @@ mock_modules = {
 for module_name, mock_module in mock_modules.items():
     sys.modules[module_name] = mock_module
 
+
+# register.addPath()/getPath() key the cache by the normalized UUID (plus.util.normalizeUUID);
+# the mocked plus.util must therefore normalize like the real implementation does.
+def _normalize_uuid(value: str|None) -> str|None:
+    import uuid as uuidlib
+    if value is None or value.strip() == '':
+        return None
+    try:
+        return uuidlib.UUID(value.strip()).hex
+    except Exception:  # pylint: disable=broad-except
+        return value.strip()
+
+
+mock_modules['plus.util'].normalizeUUID = Mock(side_effect=_normalize_uuid)
+
 # ============================================================================
 # SPECIALIZED MOCK CONFIGURATIONS
 # Configure specific mock behaviors for Qt and external libraries
@@ -378,7 +393,8 @@ class TestAddPath:
 
             # Assert
             mock_portalocker_lock.assert_called()
-            mock_add_path_shelve.assert_called_once_with(sample_uuid, sample_path, mock_lock)
+            # the cache key is the normalized (dash-less hex) UUID
+            mock_add_path_shelve.assert_called_once_with(_normalize_uuid(sample_uuid), sample_path, mock_lock)
 
     def test_add_path_lock_exception(self, sample_uuid: str, sample_path: str) -> None:
         """Test addPath with lock exception and recovery."""
@@ -443,7 +459,7 @@ class TestGetPath:
 
             mock_shelve = Mock()
             mock_db = MockShelveDB()
-            mock_db._data[sample_uuid] = sample_path
+            mock_db._data[_normalize_uuid(sample_uuid)] = sample_path
             mock_shelve.open.return_value = mock_db
 
             with patch.dict(
@@ -519,7 +535,7 @@ class TestGetPath:
 
             mock_shelve = Mock()
             mock_db = MockShelveDB()
-            mock_db._data[sample_uuid] = sample_path
+            mock_db._data[_normalize_uuid(sample_uuid)] = sample_path
             mock_shelve.open.return_value = mock_db
             mock_exists.return_value = False
 
@@ -719,7 +735,7 @@ class TestPathValidation:
 
             mock_shelve = Mock()
             mock_db = MockShelveDB()
-            mock_db._data[sample_uuid] = sample_path
+            mock_db._data[_normalize_uuid(sample_uuid)] = sample_path
             mock_shelve.open.return_value = mock_db
             mock_exists.return_value = True
 
@@ -749,7 +765,7 @@ class TestPathValidation:
 
             mock_shelve = Mock()
             mock_db = MockShelveDB()
-            mock_db._data[sample_uuid] = invalid_path
+            mock_db._data[_normalize_uuid(sample_uuid)] = invalid_path
             mock_shelve.open.return_value = mock_db
             mock_exists.return_value = False
 
@@ -908,4 +924,4 @@ class TestDatabaseOperations:
 
                 # Assert
                 assert result == sample_path
-                mock_shelve_db.__getitem__.assert_called_with(sample_uuid)
+                mock_shelve_db.__getitem__.assert_called_with(_normalize_uuid(sample_uuid))
