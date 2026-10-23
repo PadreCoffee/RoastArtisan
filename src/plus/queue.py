@@ -166,6 +166,34 @@ def requeue_dead_letters() -> int:
     return requeued
 
 
+# the dead-letter entries ({failed_at, reason, status, item}), for display
+def dead_letter_entries() -> list[dict[str, Any]]:
+    with _dead_letter_lock:
+        return [e for e in _read_dead_letters(dead_letter_path()) if isinstance(e, dict)]
+
+
+# the items still waiting in the outbox queue (incl. the one being sent), for display. Read straight from the
+# persist-queue SQLite file in read-only mode: a SQLiteQueue.get() would need the write lock the worker holds
+# while it is sending or backing off.
+def pending_items() -> list[dict[str, Any]]:
+    import pickle
+    import sqlite3
+    db = os.path.join(queue_path, 'data.db')
+    if not os.path.exists(db):
+        return []
+    res:list[dict[str, Any]] = []
+    try:
+        from contextlib import closing
+        with closing(sqlite3.connect(f'file:{db}?mode=ro', uri=True, timeout=1)) as con:
+            for (data,) in con.execute('SELECT data FROM queue_default ORDER BY _id'):
+                item = pickle.loads(data) # the app's own outbox file
+                if isinstance(item, dict):
+                    res.append(item)
+    except Exception as e:  # pylint: disable=broad-except
+        _log.exception(e)
+    return res
+
+
 _dead_letter_retry_thread:threading.Thread|None = None
 
 

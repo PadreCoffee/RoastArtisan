@@ -178,6 +178,14 @@
 </context><context>
     <name>Button</name>
     <message>
+        <source>Refresh</source>
+        <translation>Обновить</translation>
+    </message>
+    <message>
+        <source>Send now</source>
+        <translation>Отправить сейчас</translation>
+    </message>
+    <message>
         <source>Set/Clear PIN</source>
         <translation>Задать/снять PIN</translation>
     </message>
@@ -4486,6 +4494,10 @@ END</source>
     </message>
 </context><context>
     <name>Form Caption</name>
+    <message>
+        <source>Unsent Cloud Data</source>
+        <translation>Неотправленные данные</translation>
+    </message>
     <message>
         <source>Manage Operators</source>
         <translation>Управление операторами</translation>
@@ -14666,6 +14678,10 @@ Fewer nodes: simpler curve but may lose detail</source>
 </context><context>
     <name>Menu</name>
     <message>
+        <source>Unsent cloud data…</source>
+        <translation>Неотправленные данные…</translation>
+    </message>
+    <message>
         <source>Operators</source>
         <translation>Операторы</translation>
     </message>
@@ -18104,6 +18120,50 @@ Continue?</source>
 </context><context>
     <name>Plus</name>
     <message>
+        <source>Not uploaded yet: {0}. Sending resumes when the cloud connection is back.</source>
+        <translation>Не загружено: {0}. Отправка продолжится, когда появится связь с облаком.</translation>
+    </message>
+    <message>
+        <source>Not uploaded yet: {0}. Sending is retried automatically.</source>
+        <translation>Не загружено: {0}. Отправка повторяется автоматически.</translation>
+    </message>
+    <message>
+        <source>All data is uploaded to the cloud.</source>
+        <translation>Все данные загружены в облако.</translation>
+    </message>
+    <message>
+        <source>Waiting to be sent</source>
+        <translation>Ожидает отправки</translation>
+    </message>
+    <message>
+        <source>Not accepted yet ({0}), retried hourly</source>
+        <translation>Пока не принято ({0}), повтор каждый час</translation>
+    </message>
+    <message>
+        <source>Rejected by the server ({0}), retried hourly</source>
+        <translation>Сервер отклонил ({0}), повтор каждый час</translation>
+    </message>
+    <message>
+        <source>Not sent: the profile file is gone</source>
+        <translation>Не отправится: файл профиля удалён</translation>
+    </message>
+    <message>
+        <source>Roast change</source>
+        <translation>Изменение обжарки</translation>
+    </message>
+    <message>
+        <source>Roast</source>
+        <translation>Обжарка</translation>
+    </message>
+    <message>
+        <source>Schedule lock</source>
+        <translation>Блокировка расписания</translation>
+    </message>
+    <message>
+        <source>Full profile</source>
+        <translation>Полный профиль</translation>
+    </message>
+    <message>
         <source>Sending the log is disabled</source>
         <translation>Отправка журнала отключена</translation>
     </message>
@@ -19131,6 +19191,22 @@ Continue?</source>
     </message>
 </context><context>
     <name>Table</name>
+    <message>
+        <source>State</source>
+        <translation>Состояние</translation>
+    </message>
+    <message>
+        <source>Since</source>
+        <translation>Когда</translation>
+    </message>
+    <message>
+        <source>Roast</source>
+        <translation>Обжарка</translation>
+    </message>
+    <message>
+        <source>What</source>
+        <translation>Что</translation>
+    </message>
     <message>
         <location filename="../artisanlib/cup_profile.py" line="220" />
         <location filename="../artisanlib/events.py" line="2699" />

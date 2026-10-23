@@ -2647,6 +2647,8 @@ class ApplicationWindow(QMainWindow):
         # Operators submenu (multi-operator cloud login); rebuilt each time it is about to show
         self.operatorsMenu:QMenu = QMenu(QApplication.translate('Menu', 'Operators'))
         self.operatorsMenu.aboutToShow.connect(self.populateOperatorsMenu)
+        self.unsentAction:QAction = QAction(QApplication.translate('Menu', 'Unsent cloud data…'), self)
+        self.unsentAction.triggered.connect(self.showUnsentData)
 
         self.UIModeMenu:QMenu = QMenu(QApplication.translate('Menu', 'Mode'))
         self.productionModeAction:QAction = QAction(QApplication.translate('Menu', 'Production'), self)
@@ -4493,6 +4495,7 @@ class ApplicationWindow(QMainWindow):
         # Operators (multi-operator cloud login)
         config_menu.addSeparator()
         config_menu.addMenu(self.operatorsMenu)
+        config_menu.addAction(self.unsentAction)
         # the UI mode selector should always be present
         config_menu.addSeparator()
         config_menu.addMenu(self.UIModeMenu)
@@ -4577,6 +4580,12 @@ class ApplicationWindow(QMainWindow):
         return help_menu
 
     # Operators menu (multi-operator cloud login)
+
+    @pyqtSlot()
+    @pyqtSlot(bool)
+    def showUnsentData(self, _:bool = False) -> None:
+        from artisanlib.unsent_dialog import UnsentDialog
+        UnsentDialog(self, self).exec()
 
     @pyqtSlot()
     def populateOperatorsMenu(self) -> None:
