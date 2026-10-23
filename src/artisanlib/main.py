@@ -102,7 +102,6 @@ except Exception: # pylint: disable=broad-except
 #    syslog.syslog(syslog.LOG_ALERT, str(e))
 #    syslog.syslog(syslog.LOG_ALERT, str(traceback.format_exc()))
 
-QtWebEngineSupport:bool = False # set to True if the QtWebEngine was successfully imported
 
 
 from PyQt6.QtWidgets import (QApplication, QWidget, QMessageBox, QLabel, QMainWindow, QFileDialog, QGraphicsDropShadowEffect,
@@ -122,14 +121,9 @@ from PyQt6.QtCore import (QStandardPaths, QLibraryInfo, QTranslator, QLocale, QF
                           QRegularExpression, QDate, QUrl, QUrlQuery, QDir, Qt, QPoint, QEvent, QDateTime, QThread, qInstallMessageHandler)
 from PyQt6.QtNetwork import QLocalSocket
 
-#QtWebEngineWidgets must be imported before a QCoreApplication instance is created
-try:
-    from PyQt6.QtWebEngineWidgets import QWebEngineView
-    from PyQt6.QtWebEngineCore import QWebEngineProfile
-    QtWebEngineSupport = True
-except ImportError:
-    # on the RPi platform there is no native package PyQt-WebEngine nor PyQt6-WebEngine
-    pass
+# PDF reports are drawn with ReportLab (artisanlib.pdf_report); without it the PDF report items are disabled
+from artisanlib import pdf_report
+PDFReportSupport:bool = pdf_report.available()
 from PyQt6 import sip
 
 
@@ -191,7 +185,6 @@ if TYPE_CHECKING:
     from PyQt6.QtWidgets import QTableWidgetItem, QTableWidget, QScrollBar # pylint: disable=unused-import
     from PyQt6.QtGui import QStyleHints, QClipboard, QKeyEvent, QMouseEvent, QDropEvent, QDragEnterEvent, QCloseEvent, QResizeEvent, QValidator # pylint: disable=unused-import
     from PyQt6.QtCore import QFile, QObject, QPermission, QMessageLogContext  # noqa: F401 # pylint: disable=unused-import,reimported # QFile is reimported for mypy!?
-    from PyQt6.QtWebEngineCore import QWebEnginePage  # noqa: F401 # pylint: disable=unused-import
     from matplotlib.backend_bases import Event as MplEvent, MouseEvent # type:ignore[untyped-import,unused-ignore] # ty:ignore[ignore] # pylint: disable=unused-import
     from matplotlib.artist import Artist # type:ignore[untyped-import,unused-ignore] # ty:ignore[ignore] # pylint: disable=unused-import
     from matplotlib.lines import Line2D # type:ignore[untyped-import,unused-ignore] # ty:ignore[ignore] # pylint: disable=unused-import
@@ -689,10 +682,10 @@ if multiprocessing.current_process().name == 'MainProcess':
 else:
     _log.info('child process loaded')
 
-if QtWebEngineSupport:
-    _log.info('QtWebEngine found => PDF report rendering enabled')
+if PDFReportSupport:
+    _log.info('ReportLab found => PDF report rendering enabled')
 else:
-    _log.info('QtWebEngine not found => PDF report rendering disabled')
+    _log.info('ReportLab not found => PDF report rendering disabled')
 
 if platform.system().startswith('Windows'):
     # on Windows we use the Fusion style per default which supports the dark mode
@@ -1578,10 +1571,10 @@ class ApplicationWindow(QMainWindow):
         'DRYlabel', 'DRYlcd', 'DRYlcdFrame', 'DRY2FCslabel', 'DRY2FCsframe', 'FCslabel', 'FCslcd', 'FCslcdFrame', 'AUClabel', 'AUClcd', 'AUClcdFrame',
         'AUCLCD', 'phasesLCDs', 'extrabuttonsLayout', 'extrabuttondialogs', 'slider1', 'slider2', 'slider3', 'slider4', 'sliderLCD1', 'sliderLCD2', 'sliderLCD3',
         'sliderLCD4', 'sliderGrpBox1', 'sliderGrpBox2', 'sliderGrpBox3', 'sliderGrpBox4', 'sliderSV', 'sliderLCDSV', 'sliderGrpBoxSV', 'leftlayout',
-        'sliderFrame', 'sliderDock', 'lcdFrame', 'midlayout', 'editgraphdialog', 'html_loader', 'QtWebEngineSupport', 'artisanviewerFirstStart',
+        'sliderFrame', 'sliderDock', 'lcdFrame', 'midlayout', 'editgraphdialog', 'PDFReportSupport', 'artisanviewerFirstStart',
         'buttonpalette', 'extraeventbuttontextcolor', 'extraeventsactions', 'extraeventsdescriptions', 'extraeventstypes', 'extraeventsvalues',
         'extraeventsvisibility', 'fileSaveAsAction', 'keyboardButtonStyles', 'language_menu_actions', 'loadThemeAction', 'main_button_min_width_str',
-        'minieventleft', 'minieventright', 'notificationManager', 'notificationsflag', 'ntb', 'pdf_page_layout', 'pdf_rendering', 'productionPDFAction',
+        'minieventleft', 'minieventright', 'notificationManager', 'notificationsflag', 'ntb', 'productionPDFAction',
         'rankingPDFAction', 'roastReportMenu', 'roastReportPDFAction', 'saveAsThemeAction', 'sliderGrp12', 'sliderGrp34', 'sliderGrpBox1x', 'sliderGrpBox2x', 'sliderGrpBox3x', 'sliderGrpBox4x',
         'small_button_min_width_str', 'standard_button_min_width_px', 'tiny_button_min_width_str', 'recording_version', 'recording_revision', 'recording_build',
         'lastIOResult', 'lastArtisanResult', 'max_palettes', 'palette_entries', 'eventsliders', 'defaultSettings', 'zoomInShortcut', 'zoomOutShortcut',
@@ -1595,7 +1588,7 @@ class ApplicationWindow(QMainWindow):
 
     nLCDS: Final[int] = 10 # maximum number of LCDs and extra devices (2x10 => 20 in total!)
 
-    def __init__(self, parent:QWidget|None = None, *, locale:str, WebEngineSupport:bool, artisanviewerFirstStart:bool) -> None:
+    def __init__(self, parent:QWidget|None = None, *, locale:str, pdfReportSupport:bool, artisanviewerFirstStart:bool) -> None:
 
         self.defaultSettings: dict[str, Any] = {}
                 # holds default values of all app QSettings
@@ -1609,7 +1602,7 @@ class ApplicationWindow(QMainWindow):
         self.sample_loop_running:bool = True
         self.time_stopped:float = 0
 
-        self.QtWebEngineSupport:bool = WebEngineSupport
+        self.PDFReportSupport:bool = pdfReportSupport
         self.artisanviewerFirstStart:bool = artisanviewerFirstStart
 
 #PLUS
@@ -1643,11 +1636,6 @@ class ApplicationWindow(QMainWindow):
         self.quickEventShortCut:tuple[int, str]|None = None
         # this is None if inactive, or holds a tuple (n,s) with n a number {-1,..,4} indicating the custom event number (0-3), 4 for SV, or -1 for custom event buttons to be addressed
         # and s a string of length 0 (no digit yet), length 1 (if first digit is typed) or 2 (both digits are typed) indicating the value (00-99)
-
-        # html2pdf() state:
-        self.html_loader:QWebEngineView|None = None # pyright:ignore[reportPossiblyUnboundVariable] # holds the QWebEngineView during HTML2PDF generation in self.html2pdf()
-        self.pdf_page_layout:QPageLayout|None = None # holds the QPageLayout used during HTML2PDF generation in self.html2pdf()
-        self.pdf_rendering:bool = False # True while PDF is rendered by QWebEngineView
 
         self.eventaction_running_threads:list[EventActionThread] = []
         self.updateCheckThread:UpdateCheckThread|None = None # holds the currently running UpdateCheckThread, if any
@@ -2390,7 +2378,7 @@ class ApplicationWindow(QMainWindow):
         fileConvertReportPDFAction = QAction(QApplication.translate('Menu', 'Roast Report PDF...'), self)
         fileConvertReportPDFAction.triggered.connect(self.fileConvertReportPDF)
         self.convMenu.addAction(fileConvertReportPDFAction)
-        if not self.QtWebEngineSupport:
+        if not self.PDFReportSupport:
             fileConvertReportPDFAction.setEnabled(False)
 
         self.saveGraphMenu:QMenu = QMenu(QApplication.translate('Menu', 'Save Graph'))
@@ -2448,7 +2436,7 @@ class ApplicationWindow(QMainWindow):
         self.roastReportPDFAction = QAction(QApplication.translate('Menu', 'PDF...'), self)
         self.roastReportPDFAction.triggered.connect(self.pdfReport)
         self.roastReportMenu.addAction(self.roastReportPDFAction)
-        if not self.QtWebEngineSupport:
+        if not self.PDFReportSupport:
             self.roastReportPDFAction.setEnabled(False)
 
         self.htmlAction = QAction(QApplication.translate('Menu', 'Web...'), self)
@@ -2461,7 +2449,7 @@ class ApplicationWindow(QMainWindow):
         self.productionPDFAction = QAction(QApplication.translate('Menu', 'PDF...'), self)
         self.productionPDFAction.triggered.connect(self.productionPDFReport)
         self.productionMenu.addAction(self.productionPDFAction)
-        if not self.QtWebEngineSupport:
+        if not self.PDFReportSupport:
             self.productionPDFAction.setEnabled(False)
         self.productionWebAction = QAction(QApplication.translate('Menu', 'Web...'), self)
         self.productionWebAction.triggered.connect(self.productionHTMLReport)
@@ -2478,7 +2466,7 @@ class ApplicationWindow(QMainWindow):
         self.rankingPDFAction = QAction(QApplication.translate('Menu', 'PDF...'), self)
         self.rankingPDFAction.triggered.connect(self.rankingPDFReport)
         self.rankingMenu.addAction(self.rankingPDFAction)
-        if not self.QtWebEngineSupport:
+        if not self.PDFReportSupport:
             self.rankingPDFAction.setEnabled(False)
         self.rankingWebAction = QAction(QApplication.translate('Menu', 'Web...'), self)
         self.rankingWebAction.triggered.connect(self.rankingHTMLReport)
@@ -12177,7 +12165,7 @@ class ApplicationWindow(QMainWindow):
         self.convMenu.setEnabled(True)
         self.saveGraphMenu.setEnabled(True)
         self.htmlAction.setEnabled(True)
-        if self.QtWebEngineSupport:
+        if self.PDFReportSupport:
             self.roastReportPDFAction.setEnabled(True)
         self.reportMenu.setEnabled(True)
         self.productionMenu.setEnabled(True)
@@ -13347,7 +13335,7 @@ class ApplicationWindow(QMainWindow):
     def autosave(self, filename:str) -> None:
         if self.qmc.autosaveimageformat == 'PDF':
             self.saveVectorGraph(extension='.pdf',fname=filename)
-        elif self.qmc.autosaveimageformat == 'PDF Report' and self.QtWebEngineSupport:
+        elif self.qmc.autosaveimageformat == 'PDF Report' and self.PDFReportSupport:
             self.roastReport(pdf_filename=filename + '.pdf')
         elif self.qmc.autosaveimageformat == 'SVG':
             self.saveVectorGraph(extension='.svg',fname=filename)
@@ -17967,7 +17955,7 @@ class ApplicationWindow(QMainWindow):
                         pd = cast('ProfileData', profile)
                         self.setProfile(f,pd,quiet=True)
                         self.qmc.redraw()
-                        self.roastReport(pdf_filename=fconv, batch_process=True)
+                        self.roastReport(pdf_filename=fconv)
                     else:
                         self.sendmessage(QApplication.translate('Message','Target file {0} exists. {1} not converted.').format(fconv,fname + str(ext)))
                 except Exception as e: # pylint: disable=broad-except
@@ -17976,7 +17964,6 @@ class ApplicationWindow(QMainWindow):
                 self.qmc.fileCleanSignal.emit()
                 self.qmc.reset(soundOn=False)
                 self.restoreExtradeviceSettings()
-            self.releaseQWebEngineView()
             if loaded_profile:
                 self.loadFile(loaded_profile, quiet=True)
             self.qmc.roastpropertiesflag = flag_temp
@@ -22118,27 +22105,28 @@ class ApplicationWindow(QMainWindow):
                     total_defects_sum += (convertWeight(defects_weight,weight_units.index(last_unit),weight_units.index(unit)) if defects_weight == 0 else 0)
                     entries += self.productionData2htmlentry(d) + '\n'
 
-                html = libstring.Template(HTML_REPORT_TEMPLATE).safe_substitute(
-                    title = QApplication.translate('HTML Report Template', 'Roast Batches'),
-                    entries = entries,
-                    total_in = (f'{total_in_sum:.2f}' if unit in {'Kg', 'lb', 'oz'} else f'{total_in_sum:.0f}'),
-                    total_out = (f'{total_out_sum:.2f}' if unit in {'Kg', 'lb', 'oz'} else f'{total_out_sum:.0f}'),
-                    total_loss = float2float(self.weight_loss(total_in_sum,total_out_sum), self.percent_decimals),
-                    total_defects = (f'{total_defects_sum:.2f}' if unit in {'Kg', 'lb', 'oz'} else f'{total_defects_sum:.0f}'),
-                    total_defectsloss = float2float(self.weight_loss(total_out_sum,total_out_sum-total_defects_sum), self.percent_decimals),
-                    resources = str(getResourcePath()),
-                    batch = QApplication.translate('HTML Report Template', 'Batch'),
-                    time = QApplication.translate('HTML Report Template', 'Date'),
-                    profile = QApplication.translate('Label', 'Title'),
-                    beans = QApplication.translate('HTML Report Template', 'Beans'),
-                    weightin = QApplication.translate('HTML Report Template', 'In'),
-                    weightout = QApplication.translate('HTML Report Template', 'Out'),
-                    loss = QApplication.translate('HTML Report Template', 'Loss'),
-                    defects = QApplication.translate('HTML Report Template', 'Def.'),
-                    defectsloss = QApplication.translate('HTML Report Template', 'Def.L'),
-                    sum = QApplication.translate('HTML Report Template', 'SUM'),
-                    unit = unit.lower()
-                )
+                report_values:dict[str, Any] = {
+                    'title': QApplication.translate('HTML Report Template', 'Roast Batches'),
+                    'entries': entries,
+                    'total_in': (f'{total_in_sum:.2f}' if unit in {'Kg', 'lb', 'oz'} else f'{total_in_sum:.0f}'),
+                    'total_out': (f'{total_out_sum:.2f}' if unit in {'Kg', 'lb', 'oz'} else f'{total_out_sum:.0f}'),
+                    'total_loss': float2float(self.weight_loss(total_in_sum,total_out_sum), self.percent_decimals),
+                    'total_defects': (f'{total_defects_sum:.2f}' if unit in {'Kg', 'lb', 'oz'} else f'{total_defects_sum:.0f}'),
+                    'total_defectsloss': float2float(self.weight_loss(total_out_sum,total_out_sum-total_defects_sum), self.percent_decimals),
+                    'resources': str(getResourcePath()),
+                    'batch': QApplication.translate('HTML Report Template', 'Batch'),
+                    'time': QApplication.translate('HTML Report Template', 'Date'),
+                    'profile': QApplication.translate('Label', 'Title'),
+                    'beans': QApplication.translate('HTML Report Template', 'Beans'),
+                    'weightin': QApplication.translate('HTML Report Template', 'In'),
+                    'weightout': QApplication.translate('HTML Report Template', 'Out'),
+                    'loss': QApplication.translate('HTML Report Template', 'Loss'),
+                    'defects': QApplication.translate('HTML Report Template', 'Def.'),
+                    'defectsloss': QApplication.translate('HTML Report Template', 'Def.L'),
+                    'sum': QApplication.translate('HTML Report Template', 'SUM'),
+                    'unit': unit.lower()
+                }
+                html = libstring.Template(HTML_REPORT_TEMPLATE).safe_substitute(report_values)
 
                 f = None
                 try:
@@ -22159,7 +22147,7 @@ class ApplicationWindow(QMainWindow):
                         # select file
                         filename = self.ArtisanSaveFileDialog(msg=QApplication.translate('Message', 'Export {}').format('PDF'),ext='*.pdf')
                         if filename:
-                            self.html2pdf(full_path, filename, landscape=True)
+                            pdf_report.production_report(filename, report_values, letter=self.pdfReportLetterPaper())
                     else:
                         QDesktopServices.openUrl(QUrl(full_path, QUrl.ParsingMode.TolerantMode))
 
@@ -22927,6 +22915,7 @@ class ApplicationWindow(QMainWindow):
     def rankingReport(self, pdf:bool = False) -> None:
         try:
             import string as libstring
+            ranking_graphs:list[str] = [] # PNG copies of the charts for the PDF report
             # get profile filenames
             files = self.reportFiles()
             if files and len(files) > 0:
@@ -23294,6 +23283,8 @@ class ApplicationWindow(QMainWindow):
                                 pass
                             self.qmc.fig.set_layout_engine('tight', **self.qmc.tight_layout_params)
                             self.qmc.fig.savefig(graph_image,transparent=True)
+                            if pdf:
+                                ranking_graphs.append(self.savePDFReportGraph(self.qmc.fig, graph_image))
 
                             #add some random number to force HTML reloading
                             graph_image = path2url(graph_image)
@@ -23444,6 +23435,8 @@ class ApplicationWindow(QMainWindow):
                         except OSError:
                             pass
                         fig.savefig(graph_image_pct,transparent=True)
+                        if pdf:
+                            ranking_graphs.append(self.savePDFReportGraph(fig, graph_image_pct))
                         #add some random number to force HTML reloading
                         graph_image_pct = path2url(graph_image_pct)
                         graph_image_pct = graph_image_pct + '?dummy=' + str(int(libtime.time()))
@@ -23469,36 +23462,37 @@ class ApplicationWindow(QMainWindow):
                         _log.exception(e)
 
                     weight_fmt = ('{0:.2f}' if self.qmc.weight[2] in {'Kg', 'lb', 'oz'} else '{0:.0f}')
-                    html = libstring.Template(HTML_REPORT_TEMPLATE).safe_substitute(
-                        resources = str(getResourcePath()),
-                        title = QApplication.translate('HTML Report Template', 'Roast Ranking'),
-                        time = QApplication.translate('HTML Report Template', 'Date'),
-                        profile = QApplication.translate('Label', 'Title'),
-                        weightin = QApplication.translate('HTML Report Template', 'In'),
-                        weightloss = QApplication.translate('HTML Report Template', 'Loss'),
-                        colorHeader = QApplication.translate('HTML Report Template', 'Color'),
-                        weight_unit = self.qmc.weight[2].lower(),
-                        temp_unit = self.qmc.mode,
-                        entries = entries,
-                        charges_avg = (weight_fmt.format(charges / charges_count) if charges_count > 0 and charges > 0 else ''),
-                        charges_temp_avg = (f'{charges_temp / charges_temp_count:.1f}' if charges_temp > 0 and charges_temp_count > 0 else ''),
-                        FCs_time_avg = (eventtime2string(FCs_time / FCs_time_count) if FCs_time > 0 and FCs_time_count > 0 else ''),
-                        FCs_temp_avg = (f'{FCs_temp / FCs_temp_count:.1f}' if FCs_temp > 0 and FCs_temp_count > 0 else ''),
-                        DROP_time_avg = (eventtime2string(DROP_time / DROP_time_count) if DROP_time > 0 and DROP_time_count > 0 else ''),
-                        DROP_temp_avg = (f'{DROP_temp / DROP_temp_count:.1f}' if DROP_temp > 0 and DROP_temp_count > 0 else ''),
-                        DRY_percent_avg = (f'{DRY_percent / DRY_percent_count:.1f}' if DRY_percent > 0 and DRY_percent_count > 0 else ''),
-                        MAI_percent_avg = (f'{MAI_percent / MAI_percent_count:.1f}' if MAI_percent > 0 and MAI_percent_count > 0 else ''),
-                        DEV_percent_avg = (f'{DEV_percent / DEV_percent_count:.1f}' if DEV_percent > 0 and DEV_percent_count > 0 else ''),
-                        AUC_avg = (f'{AUC / AUC_count:.1f}' if AUC > 0 and AUC_count > 0 else ''),
-                        loss_avg = (f'{loss / loss_count:.1f}' if loss_count > 0 and loss > 0 else ''),
-                        colors_avg = (f'{colors_list / colors_count:.1f}' if colors_list > 0 and colors_count > 0 else ''),
-                        cup_avg = (f'{cuppings / cuppings_count:.2f}' if cuppings > 0 and cuppings_count > 0 else ''),
-                        energy_avg = (f'{energies / energies_count:.2f}' if energies > 0 and energies_count > 0 else ''),
-                        co2_avg = (f'{co2s / co2s_count:.2f}' if co2s > 0 and co2s_count > 0 else ''),
-                        co2kg_avg = (f'{co2kgs / co2kgs_count:.2f}' if co2kgs > 0 and co2kgs_count > 0 else ''),
-                        graph_image=graph_image,
-                        graph_image_pct=graph_image_pct
-                    )
+                    report_values:dict[str, Any] = {
+                        'resources': str(getResourcePath()),
+                        'title': QApplication.translate('HTML Report Template', 'Roast Ranking'),
+                        'time': QApplication.translate('HTML Report Template', 'Date'),
+                        'profile': QApplication.translate('Label', 'Title'),
+                        'weightin': QApplication.translate('HTML Report Template', 'In'),
+                        'weightloss': QApplication.translate('HTML Report Template', 'Loss'),
+                        'colorHeader': QApplication.translate('HTML Report Template', 'Color'),
+                        'weight_unit': self.qmc.weight[2].lower(),
+                        'temp_unit': self.qmc.mode,
+                        'entries': entries,
+                        'charges_avg': (weight_fmt.format(charges / charges_count) if charges_count > 0 and charges > 0 else ''),
+                        'charges_temp_avg': (f'{charges_temp / charges_temp_count:.1f}' if charges_temp > 0 and charges_temp_count > 0 else ''),
+                        'FCs_time_avg': (eventtime2string(FCs_time / FCs_time_count) if FCs_time > 0 and FCs_time_count > 0 else ''),
+                        'FCs_temp_avg': (f'{FCs_temp / FCs_temp_count:.1f}' if FCs_temp > 0 and FCs_temp_count > 0 else ''),
+                        'DROP_time_avg': (eventtime2string(DROP_time / DROP_time_count) if DROP_time > 0 and DROP_time_count > 0 else ''),
+                        'DROP_temp_avg': (f'{DROP_temp / DROP_temp_count:.1f}' if DROP_temp > 0 and DROP_temp_count > 0 else ''),
+                        'DRY_percent_avg': (f'{DRY_percent / DRY_percent_count:.1f}' if DRY_percent > 0 and DRY_percent_count > 0 else ''),
+                        'MAI_percent_avg': (f'{MAI_percent / MAI_percent_count:.1f}' if MAI_percent > 0 and MAI_percent_count > 0 else ''),
+                        'DEV_percent_avg': (f'{DEV_percent / DEV_percent_count:.1f}' if DEV_percent > 0 and DEV_percent_count > 0 else ''),
+                        'AUC_avg': (f'{AUC / AUC_count:.1f}' if AUC > 0 and AUC_count > 0 else ''),
+                        'loss_avg': (f'{loss / loss_count:.1f}' if loss_count > 0 and loss > 0 else ''),
+                        'colors_avg': (f'{colors_list / colors_count:.1f}' if colors_list > 0 and colors_count > 0 else ''),
+                        'cup_avg': (f'{cuppings / cuppings_count:.2f}' if cuppings > 0 and cuppings_count > 0 else ''),
+                        'energy_avg': (f'{energies / energies_count:.2f}' if energies > 0 and energies_count > 0 else ''),
+                        'co2_avg': (f'{co2s / co2s_count:.2f}' if co2s > 0 and co2s_count > 0 else ''),
+                        'co2kg_avg': (f'{co2kgs / co2kgs_count:.2f}' if co2kgs > 0 and co2kgs_count > 0 else ''),
+                        'graph_image': graph_image,
+                        'graph_image_pct': graph_image_pct
+                    }
+                    html = libstring.Template(HTML_REPORT_TEMPLATE).safe_substitute(report_values)
                     try:
                         filename = str(QDir(tmpdir).filePath('RankingReport.html'))
                         try:
@@ -23517,7 +23511,7 @@ class ApplicationWindow(QMainWindow):
                             # select file
                             filename = self.ArtisanSaveFileDialog(msg=QApplication.translate('Message', 'Export {}').format('PDF'),ext='*.pdf')
                             if filename:
-                                self.html2pdf(full_path, filename, landscape=True)
+                                pdf_report.ranking_report(filename, report_values, ranking_graphs, letter=self.pdfReportLetterPaper())
                         else:
                             QDesktopServices.openUrl(QUrl(full_path, QUrl.ParsingMode.TolerantMode))
 
@@ -23801,113 +23795,23 @@ class ApplicationWindow(QMainWindow):
     def htmlReport(self, _:bool = False) -> None:
         self.roastReport()
 
-    def releaseQWebEngineView(self) -> None:
-        try: # sip not supported on older PyQt versions (RPi!)
-            if self.pdf_page_layout is not None:
-                sip.delete(self.pdf_page_layout)
-            #print(sip.isdeleted(self.pdf_page_layout))
-        except Exception: # pylint: disable=broad-except
-            pass
-        self.pdf_page_layout = None
-        try: # sip not supported on older PyQt versions (RPi!)
-            if self.html_loader is not None:
-                sip.delete(self.html_loader)
-            #print(sip.isdeleted(self.html_loader))
-        except Exception: # pylint: disable=broad-except
-            pass
-        self.html_loader = None
-
-    # if batch_process is True, the QWebEngineView() is created only if self.html_loader is not None and never deleted
-    # the caller is responsible to release that self.html_loader via releaseQWebEngineView()
-    def html2pdf(self, html_file:str, pdf_file:str, landscape:bool = False, batch_process:bool = False) -> None:
-        def release() -> None:
-            if batch_process and self.html_loader is not None:
-                try:
-                    self.html_loader.page().pdfPrintingFinished.disconnect() # type: ignore[union-attr] # "Callable[[str, bool], None]" has no attribute "disconnect"
-                except Exception: # pylint: disable=broad-except
-                    pass
-                try:
-                    self.html_loader.loadFinished.disconnect()
-                except Exception: # pylint: disable=broad-except
-                    pass
-                try:
-                    self.html_loader.renderProcessTerminated.disconnect()
-                except Exception: # pylint: disable=broad-except
-                    pass
-            else:
-                self.releaseQWebEngineView()
-            self.pdf_rendering = False
-
-        @pyqtSlot(str,bool)
-        def printing_finished(_file:str, _success:bool) -> None:
-            release()
-
-        @pyqtSlot(bool)
-        def emit_pdf(ok:bool) -> None:
-            if ok:
-                if self.html_loader is not None and self.pdf_page_layout is not None:
-                    page = self.html_loader.page()
-                    if page is not None:
-                        page.pdfPrintingFinished.connect(printing_finished)
-                        page.printToPdf(pdf_file, self.pdf_page_layout)
-                else:
-                    self.pdf_rendering = False
-            else:
-                self.pdf_rendering = False
-
-        @pyqtSlot('QWebEnginePage::RenderProcessTerminationStatus', int)
-        def renderingTerminated(terminationStatus:'QWebEnginePage.RenderProcessTerminationStatus',exitCode:int) -> None:
-            _log.debug('renderingTerminated(%s,%s)',terminationStatus,exitCode)
-            release()
-
+    @staticmethod
+    def savePDFReportGraph(fig:'Figure', svg_path:str) -> str:
+        # the PDF reports embed a PNG copy of the SVG chart written for the HTML report
+        png_path = f'{os.path.splitext(svg_path)[0]}.png'
         try:
-            # we wait for a previous pdf conversion to terminate
-            while self.pdf_rendering:
-                QApplication.processEvents()
-                libtime.sleep(0.001)
-            self.pdf_rendering = True
-            if self.html_loader is None:
-                try:
-                    profile = QWebEngineProfile() # pyright:ignore[reportPossiblyUnboundVariable]
-                    profile.setSpellCheckEnabled(False) # disable spell checker
-                    profile.setHttpCacheType(QWebEngineProfile.HttpCacheType.NoCache) # pyright:ignore[reportPossiblyUnboundVariable]
-                    self.html_loader = QWebEngineView(profile) # pyright:ignore[reportPossiblyUnboundVariable]
-                except Exception: # pylint: disable=broad-except
-                    self.html_loader = QWebEngineView() # pyright:ignore[reportPossiblyUnboundVariable]
-                if self.html_loader is not None:
-                    self.html_loader.setZoomFactor(1)
-            if self.pdf_page_layout is None:
-                # lazy imports
-                from PyQt6.QtCore import QMarginsF
-                from PyQt6.QtGui import QPageSize
-                if QPrinter().pageLayout().pageSize().id() == QPageSize.PageSizeId.Letter: # ty:ignore[no-matching-overload]
-                    # Letter
-                    ps = QPageSize(QPageSize.PageSizeId.Letter)
-                    pu = QPageLayout.Unit.Inch
-                    pm = QMarginsF(0.7, 0.7, 0.7, 0.7)
-                else:
-                    # A4
-                    ps = QPageSize(QPageSize.PageSizeId.A4)
-                    pu = QPageLayout.Unit.Millimeter
-                    pm = QMarginsF(15, 15, 15, 15)
-                if landscape:
-                    po = QPageLayout.Orientation.Landscape
-                else:
-                    po = QPageLayout.Orientation.Portrait
-                self.pdf_page_layout = QPageLayout(ps, po, pm, pu)
-            if self.html_loader is not None:
-                self.html_loader.renderProcessTerminated.connect(renderingTerminated)
-                self.html_loader.loadFinished.connect(emit_pdf)
-                self.html_loader.load(QUrl(html_file))
-                # busy wait for the pdf conversion to terminate
-                while self.pdf_rendering:
-                    QApplication.processEvents()
-                    libtime.sleep(0.001)
-        except Exception as e: # pylint: disable=broad-except
-            _log.exception(e)
+            os.remove(png_path)
+        except OSError:
+            pass
+        fig.savefig(png_path, transparent=True, dpi=200)
+        return png_path
 
-    # if batch_process is True and pdf_filename is given, the caller needs to cleanup the QWebEngineView by calling self.releaseQWebEngineView() the after processing all reports
-    def roastReport(self, pdf_filename:str|None = None, batch_process:bool = False) -> None:
+    @staticmethod
+    def pdfReportLetterPaper() -> bool:
+        from PyQt6.QtGui import QPageSize
+        return bool(QPrinter().pageLayout().pageSize().id() == QPageSize.PageSizeId.Letter)
+
+    def roastReport(self, pdf_filename:str|None = None) -> None:
         import html as htmllib
         import string as libstring
         try:
@@ -23947,6 +23851,7 @@ class ApplicationWindow(QMainWindow):
             self.qmc.redraw(recomputeAllDeltas=False)
 
             self.qmc.fig.savefig(graph_image,transparent=True)
+            graph_png = (self.savePDFReportGraph(self.qmc.fig, graph_image) if pdf_filename else None)
             #add some random number to force HTML reloading
             graph_image = path2url(graph_image)
             graph_image = graph_image + '?dummy=' + str(int(libtime.time()))
@@ -23960,6 +23865,7 @@ class ApplicationWindow(QMainWindow):
             except OSError:
                 pass
             self.qmc.fig.savefig(flavor_image,transparent=True)
+            flavor_png = (self.savePDFReportGraph(self.qmc.fig, flavor_image) if pdf_filename else None)
             flavor_image = path2url(flavor_image)
             flavor_image = flavor_image + '?dummy=' + str(int(libtime.time()))
             #return screen to GRAPH profile mode
@@ -24072,92 +23978,93 @@ class ApplicationWindow(QMainWindow):
             cupping_score, cupping_all_default = self.cuppingSum(self.qmc.flavors)
             cupping_notes = self.note2html(self.qmc.cuppingnotes).strip()
             special_events = self.specialevents2html().strip()
-            html = libstring.Template(HTML_REPORT_TEMPLATE).safe_substitute(
-                title=title_html,
-                titlecolor=QColor(self.qmc.palette['title']).name(),
-                doc=QApplication.translate('HTML Report Template', 'Roasting Report'),
-                datatime_label=QApplication.translate('HTML Report Template', 'Date:'),
-                datetime=datetime_html,
-                beans_label=QApplication.translate('HTML Report Template', 'Beans:'),
-                beans=beans_html,
-                weight_label=QApplication.translate('HTML Report Template', 'Weight:'),
-                weight=weight,
-                defects_label=f"{QApplication.translate('Label', 'Defects')}:",
-                defects=defects,
-                volume_label=QApplication.translate('HTML Report Template', 'Volume:'),
-                volume=volume,
-                roaster_label=QApplication.translate('HTML Report Template', 'Roaster:'),
-                roaster=str(htmllib.escape(self.qmc.roastertype)),
-                operator_label=QApplication.translate('HTML Report Template', 'Operator:'),
-                operator=str(htmllib.escape(self.qmc.operator)),
-                organization_label=QApplication.translate('HTML Report Template', 'Organization:'),
-                organization=str(htmllib.escape(self.qmc.organization)),
-                cup_label=('' if cupping_all_default else QApplication.translate('HTML Report Template', 'Cupping:')),
-                cup=('' if cupping_all_default else str(float2float(cupping_score))),
-                color_label=QApplication.translate('HTML Report Template', 'Color:'),
-                color=color,
-                energy_label=QApplication.translate('HTML Report Template', 'Energy:'),
-                energy=energy,
-                CO2_label=QApplication.translate('HTML Report Template', 'CO2:').replace('CO2','CO₂'),
-                CO2=CO2,
-                charge_label=QApplication.translate('HTML Report Template', 'CHARGE:'),
-                charge=charge,
-                size_label=QApplication.translate('HTML Report Template', 'Size:'),
-                size='--' if (self.qmc.beansize_max == 0 and self.qmc.beansize_min == 0) else (str(round(int(self.qmc.beansize_min))) if self.qmc.beansize_min != 0 else ''
+            report_values:dict[str, Any] = {
+                'title': title_html,
+                'titlecolor': QColor(self.qmc.palette['title']).name(),
+                'doc': QApplication.translate('HTML Report Template', 'Roasting Report'),
+                'datatime_label': QApplication.translate('HTML Report Template', 'Date:'),
+                'datetime': datetime_html,
+                'beans_label': QApplication.translate('HTML Report Template', 'Beans:'),
+                'beans': beans_html,
+                'weight_label': QApplication.translate('HTML Report Template', 'Weight:'),
+                'weight': weight,
+                'defects_label': f"{QApplication.translate('Label', 'Defects')}:",
+                'defects': defects,
+                'volume_label': QApplication.translate('HTML Report Template', 'Volume:'),
+                'volume': volume,
+                'roaster_label': QApplication.translate('HTML Report Template', 'Roaster:'),
+                'roaster': str(htmllib.escape(self.qmc.roastertype)),
+                'operator_label': QApplication.translate('HTML Report Template', 'Operator:'),
+                'operator': str(htmllib.escape(self.qmc.operator)),
+                'organization_label': QApplication.translate('HTML Report Template', 'Organization:'),
+                'organization': str(htmllib.escape(self.qmc.organization)),
+                'cup_label': ('' if cupping_all_default else QApplication.translate('HTML Report Template', 'Cupping:')),
+                'cup': ('' if cupping_all_default else str(float2float(cupping_score))),
+                'color_label': QApplication.translate('HTML Report Template', 'Color:'),
+                'color': color,
+                'energy_label': QApplication.translate('HTML Report Template', 'Energy:'),
+                'energy': energy,
+                'CO2_label': QApplication.translate('HTML Report Template', 'CO2:').replace('CO2','CO₂'),
+                'CO2': CO2,
+                'charge_label': QApplication.translate('HTML Report Template', 'CHARGE:'),
+                'charge': charge,
+                'size_label': QApplication.translate('HTML Report Template', 'Size:'),
+                'size': '--' if (self.qmc.beansize_max == 0 and self.qmc.beansize_min == 0) else (str(round(int(self.qmc.beansize_min))) if self.qmc.beansize_min != 0 else ''
                     ) + ('/' if (self.qmc.beansize_max != 0 and self.qmc.beansize_min != 0) else '') + (str(round(int(self.qmc.beansize_max))) if (self.qmc.beansize_max != 0) else ''),
-                density_label=QApplication.translate('HTML Report Template', 'Density:'),
-                density=density,
-                moisture_label=QApplication.translate('HTML Report Template', 'Moisture:'),
-                moisture=moisture,
-                humidity_label=QApplication.translate('HTML Report Template', 'Ambient:'),
-                humidity=humidity,
-                TP_label=QApplication.translate('HTML Report Template', 'TP:'),
-                TP=self.event2html(cp,'TP_time','TP_BT'),
-                DRY_label=QApplication.translate('HTML Report Template', 'DRY:'),
-                DRY=self.event2html(cp,'DRY_time','DRY_BT'),
-                FCs_label=QApplication.translate('HTML Report Template', 'FCs:'),
-                FCs=self.event2html(cp,'FCs_time','FCs_BT'),
-                FCe_label=QApplication.translate('HTML Report Template', 'FCe:'),
-                FCe=self.event2html(cp,'FCe_time','FCe_BT'),
-                SCs_label=QApplication.translate('HTML Report Template', 'SCs:'),
-                SCs=self.event2html(cp,'SCs_time','SCs_BT'),
-                SCe_label=QApplication.translate('HTML Report Template', 'SCe:'),
-                SCe=self.event2html(cp,'SCe_time','SCe_BT'),
-                drop_label=QApplication.translate('HTML Report Template', 'DROP:'),
-                drop=self.event2html(cp,'DROP_time','DROP_BT'),
-                cool_label=QApplication.translate('HTML Report Template', 'COOL:'),
-                cool=self.event2html(cp,'COOL_time',None,'DROP_time'),
-                met_label=QApplication.translate('HTML Report Template', 'MET:'),
-                met=met,
-                cm_label=QApplication.translate('HTML Report Template', 'CM:'),
-                cm_tuple=cm_tuple,
-                dry_phase_label=QApplication.translate('HTML Report Template', 'Drying:'),
-                dry_phase=dryphase,
-                mid_phase_label=QApplication.translate('HTML Report Template', 'Maillard:'),
-                mid_phase=midphase,
-                finish_phase_label=QApplication.translate('HTML Report Template', 'Finishing:'),
-                finish_phase=finishphase,
-                cool_phase_label=QApplication.translate('HTML Report Template', 'Cooling:'),
-                cool_phase=coolphase,
-                background_label=QApplication.translate('HTML Report Template', 'Background:'),
-                background=background_html,
-                alarms_label=QApplication.translate('HTML Report Template', 'Alarms:'),
-                alarms=alarms,
-                ror_label=QApplication.translate('HTML Report Template', 'RoR:'),
-                ror= ror,
-                etbta_label=QApplication.translate('HTML Report Template', 'AUC:'),
-                etbta=etbta,
-                roasting_notes_label=(QApplication.translate('HTML Report Template', 'Roasting Notes') if self.qmc.roastingnotes != '' else ''),
-                roasting_notes=self.note2html(self.qmc.roastingnotes),
-                roast_attributes=self.roastattributes(),
-                graph_image=graph_image,
-                flavor_image=flavor_image,
-                show_cupping=('none' if cupping_all_default else 'inline'),
-                specialevents_label=QApplication.translate('HTML Report Template', 'Events'),
-                specialevents=special_events,
-                show_special_events=('none' if special_events == '' else 'inline'),
-                cupping_notes_label=(QApplication.translate('HTML Report Template', 'Cupping Notes') if self.qmc.cuppingnotes != '' else ''),
-                cupping_notes=cupping_notes)
+                'density_label': QApplication.translate('HTML Report Template', 'Density:'),
+                'density': density,
+                'moisture_label': QApplication.translate('HTML Report Template', 'Moisture:'),
+                'moisture': moisture,
+                'humidity_label': QApplication.translate('HTML Report Template', 'Ambient:'),
+                'humidity': humidity,
+                'TP_label': QApplication.translate('HTML Report Template', 'TP:'),
+                'TP': self.event2html(cp,'TP_time','TP_BT'),
+                'DRY_label': QApplication.translate('HTML Report Template', 'DRY:'),
+                'DRY': self.event2html(cp,'DRY_time','DRY_BT'),
+                'FCs_label': QApplication.translate('HTML Report Template', 'FCs:'),
+                'FCs': self.event2html(cp,'FCs_time','FCs_BT'),
+                'FCe_label': QApplication.translate('HTML Report Template', 'FCe:'),
+                'FCe': self.event2html(cp,'FCe_time','FCe_BT'),
+                'SCs_label': QApplication.translate('HTML Report Template', 'SCs:'),
+                'SCs': self.event2html(cp,'SCs_time','SCs_BT'),
+                'SCe_label': QApplication.translate('HTML Report Template', 'SCe:'),
+                'SCe': self.event2html(cp,'SCe_time','SCe_BT'),
+                'drop_label': QApplication.translate('HTML Report Template', 'DROP:'),
+                'drop': self.event2html(cp,'DROP_time','DROP_BT'),
+                'cool_label': QApplication.translate('HTML Report Template', 'COOL:'),
+                'cool': self.event2html(cp,'COOL_time',None,'DROP_time'),
+                'met_label': QApplication.translate('HTML Report Template', 'MET:'),
+                'met': met,
+                'cm_label': QApplication.translate('HTML Report Template', 'CM:'),
+                'cm_tuple': cm_tuple,
+                'dry_phase_label': QApplication.translate('HTML Report Template', 'Drying:'),
+                'dry_phase': dryphase,
+                'mid_phase_label': QApplication.translate('HTML Report Template', 'Maillard:'),
+                'mid_phase': midphase,
+                'finish_phase_label': QApplication.translate('HTML Report Template', 'Finishing:'),
+                'finish_phase': finishphase,
+                'cool_phase_label': QApplication.translate('HTML Report Template', 'Cooling:'),
+                'cool_phase': coolphase,
+                'background_label': QApplication.translate('HTML Report Template', 'Background:'),
+                'background': background_html,
+                'alarms_label': QApplication.translate('HTML Report Template', 'Alarms:'),
+                'alarms': alarms,
+                'ror_label': QApplication.translate('HTML Report Template', 'RoR:'),
+                'ror': ror,
+                'etbta_label': QApplication.translate('HTML Report Template', 'AUC:'),
+                'etbta': etbta,
+                'roasting_notes_label': (QApplication.translate('HTML Report Template', 'Roasting Notes') if self.qmc.roastingnotes != '' else ''),
+                'roasting_notes': self.note2html(self.qmc.roastingnotes),
+                'roast_attributes': self.roastattributes(),
+                'graph_image': graph_image,
+                'flavor_image': flavor_image,
+                'show_cupping': ('none' if cupping_all_default else 'inline'),
+                'specialevents_label': QApplication.translate('HTML Report Template', 'Events'),
+                'specialevents': special_events,
+                'show_special_events': ('none' if special_events == '' else 'inline'),
+                'cupping_notes_label': (QApplication.translate('HTML Report Template', 'Cupping Notes') if self.qmc.cuppingnotes != '' else ''),
+                'cupping_notes': cupping_notes}
+            html = libstring.Template(HTML_REPORT_TEMPLATE).safe_substitute(report_values)
             f = None
             try:
                 filename = str(QDir(tmpdir).filePath('Roastlog.html'))
@@ -24173,7 +24080,7 @@ class ApplicationWindow(QMainWindow):
                 else:
                     full_path = 'file:///' + filename # Explorer refuses to start otherwise
                 if pdf_filename:
-                    self.html2pdf(full_path,pdf_filename, batch_process=batch_process)
+                    pdf_report.roast_report(pdf_filename, report_values, graph_png, flavor_png, letter=self.pdfReportLetterPaper())
                 else:
                     QDesktopServices.openUrl(QUrl(full_path, QUrl.ParsingMode.TolerantMode))
 
@@ -28366,7 +28273,7 @@ def main() -> None:
     locale_str = initialize_locale(app)
     _log.info('locale: %s',locale_str)
 
-    appWindow = ApplicationWindow(locale=locale_str, WebEngineSupport=QtWebEngineSupport, artisanviewerFirstStart=artisanviewerFirstStart)
+    appWindow = ApplicationWindow(locale=locale_str, pdfReportSupport=PDFReportSupport, artisanviewerFirstStart=artisanviewerFirstStart)
 
     app.setActivationWindow(appWindow,activateOnMessage=False) # set the activation window for the QtSingleApplication
 

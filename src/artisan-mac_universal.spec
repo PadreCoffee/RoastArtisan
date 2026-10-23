@@ -254,19 +254,8 @@ Qt_modules = [
     'QtDBus',
 #    'QtBluetooth', # replaced by bleak
 #    'QtConcurrent', # not on PyQt6.2, but PyQt6.4 and PyQt5.x
-# needed for QtWebEngine HTML2PDF export:
-    'QtWebEngineCore',
-#    'QtWebEngine', # only on PyQt5, does not exists for PyQt6
-    'QtWebEngineWidgets', # required by QtWebEngineCore
-# the following are required by QtWebEngineWidgets and thus by QtWebEngine for the HTML2PDF export
-    'QtQuick',
-    'QtQuickWidgets',
-    'QtQml',
-    'QtQmlModels',
-    'QtQmlMeta',
-    'QtQmlWorkerScript',
-    'QtWebChannel',
-    'QtPositioning',
+# QtWebEngine (and the QtQuick/QtQml/QtWebChannel/QtPositioning frameworks it pulled in) is no longer
+# used: PDF reports are drawn with ReportLab (artisanlib/pdf_report.py)
     'QtOpenGL'
 ]
 Qt_frameworks = [module + '.framework' for module in Qt_modules]
@@ -361,23 +350,6 @@ for qt_dir in ['PyQt6/Qt6/translations']:
                 subprocess.check_call(f'rm -rf {file_path}',shell = True)
 
 
-print('*** Removing QtWebEngine translations ***')
-
-for qtwebengine_dir in ['PyQt6/Qt6/lib/QtWebEngineCore.framework/Versions/A/Resources/qtwebengine_locales/']:
-    qtwebengine = f'{rootdir}/{qtwebengine_dir}'
-    for root, _, files in os.walk(qtwebengine):
-        for file in files:
-            if not file == 'en-US.pak':
-                file_path = os.path.join(root, file)
-                print(f'rm -rf {file_path}')
-                subprocess.check_call(f'rm {file_path}',shell = True)
-
-print('*** Removing QtWebEngine remote debug lib ***')
-
-try:
-    subprocess.check_call(f'rm -rf {rootdir}/PyQt6/Qt6/lib/QtWebEngineCore.framework/Versions/A/Resources/qtwebengine_devtools_resources.pak',shell = True)
-except Exception: # pylint: disable=broad-except
-    pass
 
 
 print('*** Removing unused files ***')

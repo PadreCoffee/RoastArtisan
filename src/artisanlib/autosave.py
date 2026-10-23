@@ -71,8 +71,8 @@ class autosaveDlg(ArtisanDialog):
         self.imageTypesComboBox = QComboBox()
         self.imageTypesComboBox.addItems(self.aw.qmc.autoasaveimageformat_types)
         try:
-            if not self.aw.QtWebEngineSupport:
-                # disable "PDF Report" item if QtWebEngine Support is not available
+            if not self.aw.PDFReportSupport:
+                # disable "PDF Report" item if PDF report support (ReportLab) is not available
                 model = self.imageTypesComboBox.model()
                 if model is not None:
                     item: QStandardItem|None = cast(QStandardItemModel, model).item(self.aw.qmc.autoasaveimageformat_types.index('PDF Report'))
