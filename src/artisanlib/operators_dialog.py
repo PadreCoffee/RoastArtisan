@@ -49,7 +49,7 @@ class OperatorsDialog(ArtisanDialog):
             item.setData(256, e['email'])   # Qt.ItemDataRole.UserRole == 256
             self.listw.addItem(item)
 
-    def _selected_email(self):
+    def _selected_email(self) -> 'str|None':
         it = self.listw.currentItem()
         return None if it is None else it.data(256)
 

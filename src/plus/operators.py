@@ -42,7 +42,7 @@ def load_operators() -> 'list[OperatorEntry]':
     try:
         data = json.loads(raw)
         if isinstance(data, list):
-            return [e for e in data if isinstance(e, dict) and e.get('email')]
+            return [e for e in data if isinstance(e, dict) and e.get('email')] # type: ignore[misc] # JSON entries are OperatorEntry dicts
     except Exception as e:  # pylint: disable=broad-except
         _log.exception(e)
     return []
@@ -104,7 +104,7 @@ def verify_pin(entry: OperatorEntry, pin: str) -> bool:
     try:
         salt = bytes.fromhex(entry['pin_salt'])         # type: ignore[arg-type]
         dk, _ = hash_pin(pin, salt)
-        return hmac.compare_digest(dk, entry['pin_hash'])   # type: ignore[arg-type]
+        return hmac.compare_digest(dk, entry['pin_hash'])   # type: ignore[type-var]
     except Exception as e:  # pylint: disable=broad-except
         _log.exception(e)
         return False

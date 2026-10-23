@@ -725,7 +725,7 @@ class editGraphDlg(ArtisanResizeablDialog):
         self.template_label:str|None = self._referenceDisplayLabel() if self.template_uuid else None
         self.template_batchnr:int|None = None
         self.template_batchprefix:str|None = None
-        self.plus_templates:list[dict] = []  # reference items matching current coffee/blend + machine (each: {uuid,label,_raw})
+        self.plus_templates:list[dict[str, Any]] = []  # reference items matching current coffee/blend + machine (each: {uuid,label,_raw})
 
         # energy variables (explicitly define constructors)
         self.curvenames:list[str] = []
@@ -2732,11 +2732,11 @@ class editGraphDlg(ArtisanResizeablDialog):
         self.plus_lot_selected = plus.lots.selected_lot_id(idx, self.plus_lots_current)
 
     # fallback: returns normalized template dicts from scheduler (used when remote API is not available)
-    def _getTemplatesFromSchedule(self) -> list[dict]:
+    def _getTemplatesFromSchedule(self) -> list[dict[str, Any]]:
         coffee_hr_id:str|None = self.plus_coffee_selected
         blend_hr_id:str|None = (self.plus_blend_selected_spec.get('hr_id') if self.plus_blend_selected_spec is not None else None)
         machine_name:str = self.aw.qmc.roastertype_setup.strip().lower()
-        results:list[dict] = []
+        results:list[dict[str, Any]] = []
         for si in plus.stock.getSchedule():
             template_str = si.get('template')
             if not template_str:
@@ -2795,7 +2795,7 @@ class editGraphDlg(ArtisanResizeablDialog):
         self._updateSnapshotBlock()
 
     @pyqtSlot(int, list)
-    def _onReferencesFetched(self, gen:int, items:list) -> None:
+    def _onReferencesFetched(self, gen:int, items:list[Any]) -> None:
         try:
             _log.info('_onReferencesFetched: gen=%d current=%d items=%d', gen, getattr(self, '_template_fetch_gen', -1), len(items))
             if gen != getattr(self, '_template_fetch_gen', 0):
@@ -2816,7 +2816,7 @@ class editGraphDlg(ArtisanResizeablDialog):
             return title
         return self.template_uuid[:8] if self.template_uuid else ''
 
-    def _applyTemplatesToCombo(self, templates:list[dict]) -> None:
+    def _applyTemplatesToCombo(self, templates:list[dict[str, Any]]) -> None:
         # preserve existing selection if its uuid is still in the list (e.g. async refetch
         # after background load completes). Only drop the uuid if the user actively changed
         # the coffee/blend — otherwise a fetch that happens to not include the saved
@@ -3031,7 +3031,7 @@ class editGraphDlg(ArtisanResizeablDialog):
             self.commentsHeaderLabel.setText('<b>' + QApplication.translate('Label', 'Комментарий к обжарке') + '</b>')
             self.commentsStack.setCurrentWidget(self.roastCommentEdit)
 
-    def _getSelectedReferenceRaw(self) -> dict|None:
+    def _getSelectedReferenceRaw(self) -> dict[str, Any]|None:
         uuid = getattr(self, 'template_uuid', None)
         if not uuid:
             return None
@@ -3041,7 +3041,7 @@ class editGraphDlg(ArtisanResizeablDialog):
                 return raw if isinstance(raw, dict) else None
         return None
 
-    def _renderReferenceComments(self, comments:list[dict]) -> None:
+    def _renderReferenceComments(self, comments:list[dict[str, Any]]) -> None:
         if not comments:
             self.referenceCommentsView.setPlainText(
                 QApplication.translate('Label', 'Комментариев пока нет'))
@@ -3077,11 +3077,11 @@ class editGraphDlg(ArtisanResizeablDialog):
         threading.Thread(target=_fetch, daemon=True).start()
 
     @pyqtSlot(str, dict)
-    def _onReferenceDetailReady(self, uuid:str, item:dict) -> None:
+    def _onReferenceDetailReady(self, uuid:str, item:dict[str, Any]) -> None:
         try:
             if uuid != getattr(self, 'template_uuid', None):
                 return  # selection changed before the detail returned — stale
-            comments = item.get('reference_comments') if isinstance(item, dict) else None
+            comments = item.get('reference_comments') if isinstance(item, dict) else None # type: ignore[redundant-expr] # defensive
             # merge into the matching list entry's _raw so later re-renders are stable
             for t in getattr(self, 'plus_templates', []):
                 if t.get('uuid') == uuid:
@@ -3092,7 +3092,7 @@ class editGraphDlg(ArtisanResizeablDialog):
                     raw['reference_comments'] = comments if isinstance(comments, list) else []
                     break
             self._renderReferenceComments(
-                plus.stock.parseReferenceComments(item if isinstance(item, dict) else {}))
+                plus.stock.parseReferenceComments(item if isinstance(item, dict) else {})) # type: ignore[redundant-expr]
         except Exception as e:  # pylint: disable=broad-except
             _log.exception(e)  # dialog may have been closed before the callback fired
 
@@ -3146,7 +3146,7 @@ class editGraphDlg(ArtisanResizeablDialog):
         grid.addWidget(self._snapshot_incomplete_label, len(rows) + 1, 0, 1, 4)
         self.snapshotGroup.setLayout(grid)
 
-    def _getCurrentSnapshot(self) -> dict|None:
+    def _getCurrentSnapshot(self) -> dict[str, Any]|None:
         # returns the cloud-supplied {mc, aw, density, incomplete?} for the selected coffee or blend
         try:
             if self.plus_coffee_selected:
@@ -3167,7 +3167,7 @@ class editGraphDlg(ArtisanResizeablDialog):
             _log.exception(e)
         return None
 
-    def _getReferenceSnapshot(self) -> dict|None:
+    def _getReferenceSnapshot(self) -> dict[str, Any]|None:
         if not self.template_uuid:
             return None
         for t in self.plus_templates:
@@ -3197,14 +3197,14 @@ class editGraphDlg(ArtisanResizeablDialog):
 
     # dates make it clear how current the compared values are: the green measurement date (cloud
     # current_snapshot) and the reference date (cloud reference data, else the cached reference profile)
-    def _updateSnapshotHeaders(self, cur:dict|None, ref:dict|None) -> None:
+    def _updateSnapshotHeaders(self, cur:dict[str, Any]|None, ref:dict[str, Any]|None) -> None:
         if not hasattr(self, '_snapshot_header_current'):
             return
         cur_date = snapshot_date(cur)
         self._snapshot_header_current.setText('<b>Текущий</b>' + (f'<br><small>замер {cur_date}</small>' if cur_date else ''))
         ref_date:str|None = None
         if self.template_uuid:
-            raw:dict|None = None
+            raw:dict[str, Any]|None = None
             for t in self.plus_templates:
                 if t.get('uuid') == self.template_uuid:
                     raw = t.get('_raw') if isinstance(t.get('_raw'), dict) else None

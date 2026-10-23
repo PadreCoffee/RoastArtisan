@@ -167,6 +167,7 @@ if TYPE_CHECKING:
     from artisanlib.atypes import ExtraDeviceSettings, Palette # pylint: disable=unused-import
     from artisanlib.scale import ScaleSpec
     from artisanlib.roast_properties import editGraphDlg # pylint: disable=unused-import
+    from plus.operators import OperatorEntry # pylint: disable=unused-import
     from artisanlib.comparator import roastCompareDlg # pylint: disable=unused-import
     from artisanlib.wheels import WheelDlg # pylint: disable=unused-import
     from artisanlib.hottop import Hottop # pylint: disable=unused-import
@@ -4597,17 +4598,17 @@ class ApplicationWindow(QMainWindow):
         self.operatorsMenu.clear()
         for entry in operators.load_operators():
             act = self.operatorsMenu.addAction(entry.get('nickname') or entry['email'])
-            act.setCheckable(True)
-            act.setChecked(entry['email'] == self.plus_account)
-            act.triggered.connect(lambda _checked=False, e=dict(entry): self.switchToOperator(e))
+            act.setCheckable(True) # type: ignore[union-attr] # addAction(str) never returns None
+            act.setChecked(entry['email'] == self.plus_account) # type: ignore[union-attr]
+            act.triggered.connect(lambda _checked=False, e=dict(entry): self.switchToOperator(e)) # type: ignore[union-attr]
         self.operatorsMenu.addSeparator()
         addAct = self.operatorsMenu.addAction(QApplication.translate('Menu', 'Add operator…'))
-        addAct.triggered.connect(self.addOperator)
+        addAct.triggered.connect(self.addOperator) # type: ignore[union-attr]
         mgrAct = self.operatorsMenu.addAction(QApplication.translate('Menu', 'Manage operators…'))
-        mgrAct.triggered.connect(self.manageOperators)
+        mgrAct.triggered.connect(self.manageOperators) # type: ignore[union-attr]
 
     @pyqtSlot()
-    def switchToOperator(self, entry:dict) -> None:
+    def switchToOperator(self, entry:'OperatorEntry') -> None:
         import plus.controller as plus_controller # pylint: disable=reimported
         from plus import operators
         if operators.has_pin(entry):
@@ -13181,7 +13182,7 @@ class ApplicationWindow(QMainWindow):
         for name, value in fields:
             try:
                 v = str(value)
-                fn = re.sub(fr'{fielddelim}{name}', lambda _m, _v=v: _v, fn, count=0, flags=flags)
+                fn = re.sub(fr'{fielddelim}{name}', lambda _m, _v=v: _v, fn, count=0, flags=flags) # type: ignore[misc]
             except Exception as e:  # pylint: disable=broad-except
                 _log.exception(e)
         return fn
@@ -24952,7 +24953,7 @@ class ApplicationWindow(QMainWindow):
                 QApplication.translate('About', 'Update status'),
                 '<p>' + QApplication.translate('About', 'You are using the latest release.') + '</p>')
 
-    def _showNewUpdateDialog(self, response:dict, version:str) -> None:
+    def _showNewUpdateDialog(self, response:dict[str, Any], version:str) -> None:
         downloads = response.get('downloads') or {}
         download_url = update_check.select_download(downloads, platform.system(), platform.machine())
         os_label = {'Windows': 'Windows', 'Darwin': 'macOS'}.get(platform.system(), platform.system())

@@ -17,7 +17,7 @@
 import asyncio # pylint: disable=unused-import # used in a string annotation
 import logging
 import struct
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from typing import Any, Final, override, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -127,8 +127,9 @@ class Roest(AsyncComm):
                  '_ev_charge', '_ev_dry', '_ev_fcs', '_ev_drop', '_prev_state0']
 
     def __init__(self, host: str = '127.0.0.1', port: int = 8080, serial: 'SerialSettings|None' = None,
-                 connected_handler=None, disconnected_handler=None,
-                 charge_handler=None, dry_handler=None, fcs_handler=None, drop_handler=None) -> None:
+                 connected_handler:Callable[[], None]|None = None, disconnected_handler:Callable[[], None]|None = None,
+                 charge_handler:Callable[[], None]|None = None, dry_handler:Callable[[], None]|None = None,
+                 fcs_handler:Callable[[], None]|None = None, drop_handler:Callable[[], None]|None = None) -> None:
         super().__init__(host, port, serial, connected_handler, disconnected_handler)
         self._charge_handler = charge_handler
         self._dry_handler = dry_handler

@@ -15,10 +15,11 @@
 # pure helpers for the update-check feature: no Qt, no network, so these
 # can be unit tested in isolation from ApplicationWindow
 
+from typing import Any
 import re
 
 
-def parse_version(s: str) -> tuple:
+def parse_version(s: str) -> tuple[int, ...]:
     """Parse '4.0.3' / 'v4.0.3' / a git tag into a tuple of ints.
 
     A trailing non-numeric suffix (e.g. '-beta') is ignored. Returns ()
@@ -44,7 +45,7 @@ def is_newer(latest: str, current: str) -> bool:
     return latest_v > current_v
 
 
-def select_download(downloads: dict, system: str, machine: str) -> str | None:
+def select_download(downloads: dict[str, Any], system: str, machine: str) -> str | None:
     """Pick the download URL matching this platform from the cloud manifest's 'downloads' dict.
 
     `system`/`machine` are the values of platform.system()/platform.machine(). A platform

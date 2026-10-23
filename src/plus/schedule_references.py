@@ -9,7 +9,7 @@
 # "show the picker?" and "which entry is the default?" rules and live here, apart
 # from the Qt/network code in plus/schedule.py, so they can be unit-tested headlessly.
 
-from typing import Final
+from typing import Any, Final
 
 
 # Minimum number of references for the picker to be offered. Fewer than this and the
@@ -18,7 +18,7 @@ MIN_REFERENCES_FOR_PICKER: Final[int] = 2
 
 
 # True iff a reference picker should be offered for this reference list.
-def reference_picker_applies(references: list[dict]) -> bool:
+def reference_picker_applies(references: list[dict[str, Any]]) -> bool:
     return len(references) >= MIN_REFERENCES_FOR_PICKER
 
 
@@ -26,7 +26,7 @@ def reference_picker_applies(references: list[dict]) -> bool:
 # the entry whose normalized uuid hex matches the task's server default template,
 # else 0 (the first, i.e. the cloud's lot-matched/newest entry). Returns -1 for an
 # empty list. `default_hex` is a UUID.hex (no dashes) or None.
-def pick_default_reference_index(references: list[dict], default_hex: str | None) -> int:
+def pick_default_reference_index(references: list[dict[str, Any]], default_hex: str | None) -> int:
     if not references:
         return -1
     if default_hex:
