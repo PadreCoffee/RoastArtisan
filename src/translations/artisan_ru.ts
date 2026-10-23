@@ -15299,6 +15299,10 @@ Fewer nodes: simpler curve but may lose detail</source>
 </context><context>
     <name>Message</name>
     <message>
+        <source>An unhandled exception occurred. Please report the problem to Roastlocal support: {0}&lt;br&gt;&lt;br&gt;When reporting this issue, please include your settings file (export via menu Help &gt;&gt; Save Settings) and the details below.&lt;br&gt;&lt;br&gt;An entry has been written to the error log (menu Help &gt;&gt; Error).&lt;br&gt;&lt;br&gt;</source>
+        <translation>Произошла непредвиденная ошибка. Пожалуйста, сообщите о ней в поддержку Roastlocal: {0}&lt;br&gt;&lt;br&gt;Приложите файл настроек (меню Помощь &gt;&gt; Сохранить настройки) и сведения ниже.&lt;br&gt;&lt;br&gt;Запись об ошибке сохранена в журнале ошибок (меню Помощь &gt;&gt; Ошибки).&lt;br&gt;&lt;br&gt;</translation>
+    </message>
+    <message>
         <source>Operator PIN</source>
         <translation>PIN оператора</translation>
     </message>
@@ -18099,6 +18103,14 @@ Continue?</source>
     </message>
 </context><context>
     <name>Plus</name>
+    <message>
+        <source>Sending the log is disabled</source>
+        <translation>Отправка журнала отключена</translation>
+    </message>
+    <message>
+        <source>Upload to {} failed; it will be retried automatically</source>
+        <translation>Не удалось отправить в {}; отправка будет повторяться автоматически</translation>
+    </message>
     <message>
         <location filename="../artisanlib/main.py" line="1213" />
         <source>debug logging ON</source>

@@ -262,10 +262,6 @@ def connect(clear_on_failure: bool =False, interactive: bool = True) -> None:
                             queue.start()  # start the outbox queue
                         except Exception as e:  # pylint: disable=broad-except
                             _log.exception(e)
-                        try:
-                            aw.resetDonateCounter()
-                        except Exception as e:  # pylint: disable=broad-except
-                            _log.exception(e)
                         # remember this operator for one-click switching later
                         try:
                             if aw.plus_remember_credentials and aw.plus_account:

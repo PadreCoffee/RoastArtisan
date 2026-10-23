@@ -4399,8 +4399,6 @@ class ApplicationWindow(QMainWindow):
         self.updatePlusStatusSignal.connect(self.updatePlusStatusSlot)
         self.checkUpdateResultSignal.connect(self.checkUpdateResultSlot)
 
-        QTimer.singleShot(2000,self.donate)
-
         QTimer.singleShot(0, self.logStartupTime)
         QTimer.singleShot(500, self.updateBadge)
         QTimer.singleShot(3000, self.autoCheckUpdate)
@@ -5138,52 +5136,9 @@ class ApplicationWindow(QMainWindow):
         except Exception as e: # pylint: disable=broad-except
             _log.exception(e)
 
-    @staticmethod
-    def resetDonateCounter() -> None:
-        settings = QSettings()
-        settings.setValue('lastdonationpopup',int(libtime.time()))
-        settings.setValue('starts',0)
-        settings.sync()
-        if settings.status() != QSettings.Status.NoError:
-            _log.error('Failed to save lastdonationpopup settings')
-
     @pyqtSlot()
     def logStartupTime(self) -> None: # pylint: disable=no-self-use # used as slot
         _log.info('MODE: startup time: %.2f', libtime.process_time() - startup_time)
-
-    @pyqtSlot()
-    def donate(self) -> None:
-        try:
-            everytime = 4*30*24*60*60 # 4 month in seconds
-            everystarts = 30 # number of recordings
-            starts = None
-            lastdonationpopup = None
-            settings = QSettings()
-            if settings.contains('starts'):
-                starts = toInt(settings.value('starts'))
-            if settings.contains('lastdonationpopup'):
-                lastdonationpopup = toInt(settings.value('lastdonationpopup'))
-            now = int(libtime.time())
-            if not(settings.status() == QSettings.Status.NoError and
-                    lastdonationpopup is not None and
-                    starts is not None and
-                    (now >= lastdonationpopup > now-everytime) and
-                    0 <= starts < everystarts):
-#                message = QApplication.translate('Message', 'Artisan is free to use!<br><br>To keep it free and current please support us<br><br><a href="{0}">{0}</a><br><br>and book<br><br><a href="{1}">{1}</a><br><br>to suppress this dialog')
-#                message = message.format('https://artisan-scope.org/donate/', 'https://artisan.plus')
-                message = QApplication.translate('Message', 'Artisan is free to use!\n\nTo keep it free and current please support us with your donation and subscribe to Roastlocal Cloud to suppress this dialog!')
-                donate_message_box = QMessageBox()
-                donate_message_box.setText(message)
-                donate_message_box.setIcon(QMessageBox.Icon.Information)
-                donate_message_box.setModal(True)
-                donate_message_box.setStandardButtons(QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Ok)
-                donate_message_box.setDefaultButton(QMessageBox.StandardButton.Ok)
-                res = donate_message_box.exec()
-                if res == QMessageBox.StandardButton.Ok:
-                    QDesktopServices.openUrl(QUrl('https://artisan-scope.org/donate/', QUrl.ParsingMode.TolerantMode)) # zuban:ignore[unreachable]
-                self.resetDonateCounter()
-        except Exception as e: # pylint: disable=broad-except
-            _log.exception(e)
 
     @pyqtSlot(str)
     def setCanvasColor(self, c:str) -> None: # pylint: disable=no-self-use # used as slot
@@ -28043,12 +27998,11 @@ def excepthook(excType:type, excValue:BaseException, tracebackobj:'TracebackType
     import traceback
     separator = '-' * 80
 #    logFile = 'simple.log'
-    notice = \
-        """An unhandled exception occurred. Please report the problem on Github:<br>"""\
-        """<a href='https://github.com/artisan-roaster-scope/artisan/issues'>https://github.com/artisan-roaster-scope/artisan/issues</a><br><br>"""\
-        """When reporting this issue, please include your settings file (export <br>"""\
-        """via menu Help >> Save Settings) and the details below.<br><br>"""\
-        """An entry has been written to the error log (menu Help >> Error).<br><br>"""
+    # problems are reported to Roastlocal support, not to the upstream Artisan project
+    notice = QApplication.translate('Message', 'An unhandled exception occurred. Please report the problem to Roastlocal support: {0}<br><br>'
+        'When reporting this issue, please include your settings file (export via menu Help >> Save Settings) and the details below.<br><br>'
+        'An entry has been written to the error log (menu Help >> Error).<br><br>').format(
+        "<a href='https://roastlocal.ru'>roastlocal.ru</a>")
     versionInfo= f'Version: {__version__}, revision: {__revision__}<br>'
     timeString = libtime.strftime('%Y-%m-%d, %H:%M:%S')
 

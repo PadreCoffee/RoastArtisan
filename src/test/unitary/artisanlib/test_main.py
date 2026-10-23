@@ -3600,20 +3600,12 @@ class TestColorUtilitiesExtended:
         assert result.startswith('#')
 
 
-class TestDonationUtilities:
-    """Test donation utility static methods."""
+class TestNoDonationPopup:
+    """The upstream Artisan donation popup is not shown to Roastlocal roasters."""
 
-    def test_resetDonateCounter_basic(self) -> None:
-        """Test resetDonateCounter resets donation settings."""
-        # Arrange & Act
-        ApplicationWindow.resetDonateCounter()
-
-        # Assert
-        settings = QSettings()
-        # Check that the settings were written (values should exist)
-        assert settings.contains('lastdonationpopup')
-        assert settings.contains('starts')
-        assert settings.value('starts') == 0
+    def test_no_donation_popup(self) -> None:
+        assert not hasattr(ApplicationWindow, 'donate')
+        assert not hasattr(ApplicationWindow, 'resetDonateCounter')
 
 
 class TestHelpDialogUtilities:

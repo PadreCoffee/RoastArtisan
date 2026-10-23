@@ -14680,15 +14680,6 @@ class tgraphcanvas(QObject):
                 self.clearMeasurements(andLCDs=False)
             elif self.timex != []: # there is a profile loaded, we have to reset
                 self.reset(True,False,keepProperties=True)
-            try:
-                settings = QSettings()
-                starts = 0
-                if settings.contains('starts'):
-                    starts = toInt(settings.value('starts'))
-                settings.setValue('starts',starts+1)
-                settings.sync()
-            except Exception as e: # pylint: disable=broad-except
-                _log.exception(e)
             self.OnRecorder()
         #turn STOP
         else:
