@@ -228,10 +228,11 @@ def build_report(kind:str, exc_type:str, message:str, tb_text:str, line:str, fra
         'log_tail': log_tail(),
         'occurrences': 1,
     }
-    if not _logged_in():
-        last = _last_login()
-        if last is not None:
-            report['last_login'] = last # the one place the login e-mail is not scrubbed (cloud requirement)
+    # sent with every report, also with a token: the cloud ignores it for a valid token and shows it (unconfirmed)
+    # when the token went stale; the one place the login e-mail is not scrubbed (cloud requirement)
+    last = _last_login()
+    if last is not None:
+        report['last_login'] = last
     return report
 
 
@@ -377,8 +378,12 @@ def reports_url() -> str:
     return f'{config.api_base_url}/client/reports'
 
 
+_retry_after:float = 0 # seconds the cloud asked us to wait (429 Retry-After)
+
+
 def _post(report:dict[str, Any], authorized:bool) -> int|None:
     """Sends one report; returns the HTTP status or None if there was no response."""
+    global _retry_after # pylint: disable=global-statement
     import gzip
     import requests
     from plus import connection, config
@@ -392,6 +397,11 @@ def _post(report:dict[str, Any], authorized:bool) -> int|None:
     try:
         r = requests.post(reports_url(), data=body, headers=headers, verify=config.verify_ssl,
             timeout=(config.connect_timeout, config.read_timeout))
+        if r.status_code == 429:
+            try:
+                _retry_after = max(0.0, float(r.headers.get('Retry-After', 0)))
+            except (TypeError, ValueError):
+                _retry_after = 0
         return r.status_code
     except Exception as e:  # pylint: disable=broad-except
         _log.debug('error report not sent: %s', e)
@@ -411,11 +421,8 @@ def send_pending() -> bool:
             continue
         logged_in = _logged_in()
         status = _post(report, authorized=logged_in)
-        if status == 401 and logged_in:
-            # expired session: send it anonymously with the last login instead
-            last = _last_login()
-            if last is not None:
-                report['last_login'] = last
+        if status in {401, 403} and logged_in:
+            # the token's organisation is gone (401) or suspended (403): send it anonymously with the last login
             status = _post(report, authorized=False)
         if status in {200, 201, 202, 413, 422}:
             # stored, or rejected for good (too large / invalid): never resend
@@ -428,7 +435,8 @@ def send_pending() -> bool:
 
 
 def _sender_loop() -> None:
-    delay = SEND_INTERVAL
+    global _retry_after # pylint: disable=global-statement
+    delay:float = SEND_INTERVAL
     while True:
         _wakeup.wait(delay)
         _wakeup.clear()
@@ -437,6 +445,10 @@ def _sender_loop() -> None:
                 delay = SEND_INTERVAL
             else:
                 delay = min(delay * 2, MAX_BACKOFF)
+            if _retry_after > 0:
+                # rate limited: wait at least as long as the cloud asked
+                delay = max(delay, _retry_after)
+                _retry_after = 0
         except Exception as e:  # pylint: disable=broad-except
             _log.debug(e)
             delay = MAX_BACKOFF
