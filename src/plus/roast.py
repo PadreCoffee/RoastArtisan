@@ -476,7 +476,7 @@ sync_record_zero_supressed_attributes_unsynced: list[str] = [
     'pressure',
     'humidity',
     'roastersize',
-    'roasterheating'
+    'roasterheating',
     # computed ENERGY DATA
     # energy consumption by source type in BTU
     'BTU_ELEC',

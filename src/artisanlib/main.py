@@ -5119,81 +5119,11 @@ class ApplicationWindow(QMainWindow):
         if self.locale_str == locale:
             languageAction.setChecked(True)
 
+    # Sending the log by e-mail (ALT-click on the cloud icon) is disabled: it addressed the upstream Artisan
+    # team (logfile@artisan.plus), i.e. roasters' logs left to a third party. Logs stay local (Help » Errors/Messages).
     def sendLog(self) -> None:
-        _log.info('sendLog()')
-
-        from email import encoders, generator
-        from email.mime.base import MIMEBase
-        from email.mime.multipart import MIMEMultipart
-        from email.mime.text import MIMEText
-
-        message = MIMEMultipart()
-        if self.plus_email is not None:
-            message['From'] = self.plus_email
-        message['To'] = f"{'logfile'}@{'artisan.plus'}"
-        message['Subject'] = 'roastartisan log'
-        message['X-Unsent'] = '1'
-        # message["X-Uniform-Type-Identifier"] = "com.apple.mail-draft"
-        message.attach(
-            MIMEText(
-                f"Please find attached the log files written by RoastArtisan!\nPlease forward this email to {message['To']}\n--\n",
-                'plain',
-            )
-        )
-        try:
-            directory = getDataDirectory()
-            if directory is not None:
-                for log_file_name in ['roastartisan.log', 'roastartisanViewer.log']:
-                    try:
-                        with open(os.path.join(directory, os.path.normpath(log_file_name)), 'rb') as attachment:
-                            # Add file as application/octet-stream
-                            # Email client can usually download this automatically
-                            # as attachment
-                            part = MIMEBase('application', 'octet-stream')
-                            part.set_payload(attachment.read())
-                        # Encode file in ASCII characters to send by email
-                        encoders.encode_base64(part)
-                        # Add header as key/value pair to attachment part
-                        part.add_header(
-                            'Content-Disposition',
-                            f'attachment; filename= {log_file_name}',
-                        )
-                        # Add attachment to message and convert message to string
-                        message.attach(part)
-                    except FileNotFoundError:
-                        _log.debug('log file %s not found', log_file_name)
-        except Exception as e:  # pylint: disable=broad-except
-            _log.exception(e)
-        try:
-            with open(self.qmc.device_log_file, 'rb') as attachment:
-                # Add file as application/octet-stream
-                # Email client can usually download this automatically
-                # as attachment
-                part2 = MIMEBase('application', 'octet-stream')
-                part2.set_payload(attachment.read())
-            # Encode file in ASCII characters to send by email
-            encoders.encode_base64(part2)
-            # Add header as key/value pair to attachment part
-            part2.add_header(
-                'Content-Disposition',
-                f'attachment; filename= {self.qmc.device_log_file_name}.log'
-            )
-            # Add attachment to message and convert message to string
-            message.attach(part2)
-        except FileNotFoundError:
-            _log.debug('log file %s not found', self.qmc.device_log_file)
-        except Exception as e:  # pylint: disable=broad-except
-            _log.exception(e)
-        # Save message to file tmp file
-        tmpfile = QDir(QDir.tempPath()).filePath('plus-log.eml')
-        try:
-            os.remove(tmpfile)
-        except OSError:
-            pass
-        with open(tmpfile, 'w', encoding='utf-8') as outfile:
-            gen = generator.Generator(outfile)
-            gen.flatten(message)
-        QDesktopServices.openUrl(QUrl.fromLocalFile(tmpfile))
+        _log.info('sendLog() disabled')
+        self.sendmessage(QApplication.translate('Plus', 'Sending the log is disabled'))
 
     def updateWindowTitle(self) -> None:
         try:

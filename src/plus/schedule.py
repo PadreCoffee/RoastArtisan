@@ -3269,6 +3269,24 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
         self.set_next(True)
 
     # weight in kg
+    # marks a completed item as measured with the given weight in the local completed-roasts cache only; nothing is
+    # sent to the cloud and the loaded profile is not changed (used for items whose sync record is missing)
+    def mark_roasted_weight_locally(self, uuid:str, weight:float) -> None:
+        item:CompletedItem|None = next((ci for ci in self.completed_items if ci.roastUUID.hex == uuid), None)
+        if item is not None:
+            try:
+                item.update_completed_item(self.aw, {'end_weight': weight, 'roast_id': item.roastUUID.hex,
+                    'modified_at': epoch2ISO8601(time.time())})
+                item.measured = True
+                completed_item_dict = item.model_dump(mode='json')
+                if 'prefix' in completed_item_dict:
+                    del completed_item_dict['prefix']
+                add_completed(self.aw.plus_account_id, cast(CompletedItemDict, completed_item_dict))
+                self.updateRoastedItems() # updates widgets
+            except Exception as e:  # pylint: disable=broad-except
+                _log.error(e)
+        self.set_next(True)
+
     def set_roasted_weight(self, uuid:str, weight:float) -> None:
         item:CompletedItem|None = next((ci for ci in self.completed_items if ci.roastUUID.hex == uuid), None)
         if item is not None:
@@ -3726,8 +3744,9 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
                 if sender != self.selected_completed_item:
                     if plus.sync.getSync(sender.data.roastUUID.hex) is None:
                         _log.info('completed roast %s could not be edited as corresponding sync record is missing', sender.data.roastUUID.hex)
-                        # as we cannot edit this entry we mark it as completed by setting the weight_estimate as weight locally, not to block the Batch Manager
-                        self.set_roasted_weight(sender.data.roastUUID.hex, sender.data.weight_estimate)
+                        # as we cannot edit this entry we mark it as completed by setting the weight_estimate as weight locally,
+                        # not to block the Batch Manager. The estimate must NEVER be sent to the cloud as the measured end weight.
+                        self.mark_roasted_weight_locally(sender.data.roastUUID.hex, sender.data.weight_estimate)
                     else:
                         # fetch data if roast is participating in the sync record game
                         profile_data: dict[str, Any]|None = plus.sync.fetchServerUpdate(sender.data.roastUUID.hex, return_data = True)
