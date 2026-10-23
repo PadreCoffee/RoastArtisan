@@ -35,6 +35,7 @@ import json
 import json.decoder
 import logging
 import dateutil.parser
+import threading
 import requests
 import requests.models
 import requests.exceptions
@@ -151,9 +152,23 @@ def clearCredentials(remove_from_keychain: bool = True) -> None:
         if token_semaphore.available() < 1:
             token_semaphore.release(1)
 
+# serialises (re-)authentication: on a 401 several threads (GUI, outbox queue, stock worker, reference
+# fetchers) may re-authenticate at once; only one talks to the server at a time
+_auth_lock = threading.RLock()
+
+
 # returns True on successful authentication
 # NOTE: authentify might be called from outside the GUI thread
+# Credentials are cleared (keychain entry deleted, cloud OFF) ONLY on a definitive rejection by the server
+# (a JSON reply with success:false, i.e. wrong login/password). Any ambiguous outcome — a non-JSON reply such
+# as an nginx 502/503 page, a missing content-type, an SSL error or an unexpected exception — raises instead,
+# so callers treat it like a network problem: the account stays ON, roasts keep queueing and are retried.
 def authentify() -> bool:
+    with _auth_lock:
+        return _authentify()
+
+
+def _authentify() -> bool:
     _log.debug('authentify()')
     try:
         aw = config.app_window
@@ -162,6 +177,7 @@ def authentify() -> bool:
             and aw.plus_account is not None
         ):  # @UndefinedVariable
             # fetch passwd
+            keychain_read_failed = False
             if config.passwd is None:
                 try:
                     import keyring  # @Reimport # imported last to make py2app work
@@ -170,10 +186,12 @@ def authentify() -> bool:
                         config.get_keyring_service_name(), aw.plus_account
                     )  # @UndefinedVariable
                 except Exception as e:  # pylint: disable=broad-except
+                    keychain_read_failed = True
                     _log.exception(e)
             if config.passwd is None:
                 _log.debug('-> password not found')
-                clearCredentials()
+                # a keychain that could not be read (e.g. locked) must not lose its entry
+                clearCredentials(remove_from_keychain=not keychain_read_failed)
                 return False
             _log.debug(
                 '-> authentifying %s',
@@ -189,7 +207,7 @@ def authentify() -> bool:
                 r.status_code,
             )  # @UndefinedVariable
             # returns 404: login wrong and 401: passwd wrong
-            if r.status_code != 204 and r.headers['content-type'].strip().startswith('application/json'):
+            if r.status_code != 204 and str(r.headers.get('content-type', '')).strip().startswith('application/json'):
                 res = r.json()
                 if (
                     'success' in res
@@ -302,15 +320,16 @@ def authentify() -> bool:
                     )  # @UndefinedVariable
                 clearCredentials()
                 return False
-            _log.error('204: empty response')
-            clearCredentials()
+            # not a definitive answer (e.g. an HTML 502/503 error page during a cloud restart): keep the account
+            raise requests.exceptions.ConnectionError(
+                f'ambiguous authentication response (status {r.status_code}, content-type '
+                f"{r.headers.get('content-type', '')!r})")
         return False
     except (requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout) as e:
         _log.info(e)
         raise e
     except requests.exceptions.SSLError as e:
         _log.info(e)
-        clearCredentials()
         aw = config.app_window
         if aw is not None:
             aw.sendmessage('SSLError')
@@ -325,7 +344,6 @@ def authentify() -> bool:
         raise ValueError(f"Decoding error at char {e.pos} (line {e.lineno}, col {e.colno}): '{e.doc}'") from e
     except Exception as e:  # pylint: disable=broad-except
         _log.exception(e)
-        clearCredentials()
         raise e
 
 
@@ -333,7 +351,7 @@ def getHeaders(
     authorized: bool = True, decompress: bool = True) -> dict[str, str]:
     aw = config.app_window
     if aw is not None:
-        os, os_version, os_arch = aw.get_os()  # @UndefinedVariable
+        os, os_version, os_arch = aw.get_os()  # @UndefinedVariable # pylint: disable=redefined-outer-name
         headers = {
             'user-agent': f'Artisan/{__version__} ({os}; {os_version}; {os_arch})',
             'Accept-Charset': 'utf-8'

@@ -3,10 +3,11 @@ import logging
 from typing import TYPE_CHECKING
 
 from PyQt6.QtCore import QCoreApplication
-from PyQt6.QtWidgets import (QListWidget, QListWidgetItem, QVBoxLayout, QHBoxLayout,
+from PyQt6.QtWidgets import ( # pylint: disable=unused-import # QWidget is used in a string annotation
+                             QListWidget, QListWidgetItem, QVBoxLayout, QHBoxLayout,
                              QPushButton, QInputDialog, QLineEdit, QMessageBox, QWidget)
 
-import plus.operators as operators
+from plus import operators
 from artisanlib.dialogs import ArtisanDialog
 
 if TYPE_CHECKING:
@@ -48,7 +49,7 @@ class OperatorsDialog(ArtisanDialog):
             item.setData(256, e['email'])   # Qt.ItemDataRole.UserRole == 256
             self.listw.addItem(item)
 
-    def _selected_email(self):
+    def _selected_email(self) -> 'str|None':
         it = self.listw.currentItem()
         return None if it is None else it.data(256)
 
@@ -92,7 +93,7 @@ class OperatorsDialog(ArtisanDialog):
                                 ) == QMessageBox.StandardButton.Yes:
             try:
                 import keyring
-                import plus.config as config
+                from plus import config
                 keyring.delete_password(config.get_keyring_service_name(), email)
             except Exception as e:  # pylint: disable=broad-except
                 _log.exception(e)

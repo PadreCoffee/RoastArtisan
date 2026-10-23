@@ -12,7 +12,6 @@ sampling loop while a recording is still active.
 import sys
 from unittest.mock import Mock
 
-import pytest
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication

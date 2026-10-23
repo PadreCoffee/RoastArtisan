@@ -1,6 +1,7 @@
 """Canvas side of the empty-stock rule: applyRoastStockGuard clears the selection for a NEW batch and tells
 the operator; it never touches a batch already CHARGEd; the async stock refresh re-checks only before CHARGE."""
 
+from typing import Any
 import sys
 import types
 
@@ -19,7 +20,7 @@ FULL = {'coffees': [{'hr_id': 'C1', 'label': 'Колумбия', 'origin': '',
 
 
 def _q(charge: int = -1, account: object = 'acc'):
-    msgs: list = []
+    msgs: list[Any] = []
     q = types.SimpleNamespace(
         timeindex=[charge, 0, 0, 0, 0, 0, 0, 0], flagon=True,
         plus_coffee='C1', plus_coffee_label='Колумбия', plus_store='S1', plus_lot_id='L1',
@@ -75,6 +76,7 @@ def test_refresh_rechecks_only_while_pending_and_before_charge(monkeypatch) -> N
 
 
 def test_check_runs_on_cached_stock_when_offline_and_never_crashes(monkeypatch) -> None:
+    s: object
     for s in (None, {}, 'garbage'):
         monkeypatch.setattr(plus.stock, 'stock', s)
         q, msgs = _q()

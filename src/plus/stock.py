@@ -37,7 +37,7 @@ import functools
 from artisanlib.util import (decodeLocal, encodeLocal, getDirectory, is_int_list, is_float_list, render_weight,
     weight_units, float2float, convertWeight)
 from plus import config, connection, controller, util
-from typing import Final, TypedDict, TextIO, NotRequired
+from typing import Any, Final, TypedDict, TextIO, NotRequired
 
 
 _log: Final[logging.Logger] = logging.getLogger(__name__)
@@ -1801,7 +1801,7 @@ def getBlendSpecStockPosition(blendSpec:Blend, stockId:str, blends:list[BlendStr
 # Each dict has at minimum: 'uuid' (str, normalized hex), 'label' (str).
 # Filters by coffee_hr_id or blend_hr_id, and optionally by machine.
 # Backend applies machine fallback automatically (returns all if no match by machine).
-def _parseReferenceItems(items:list) -> list[dict]:
+def _parseReferenceItems(items:list[Any]) -> list[dict[str, Any]]:
     result = []
     for item in items:
         raw_uuid = str(item.get('id', ''))
@@ -1815,7 +1815,7 @@ def _parseReferenceItems(items:list) -> list[dict]:
     return result
 
 
-def getReferencesFromAPI(coffee_hr_id:str|None = None, blend_hr_id:str|None = None, machine:str|None = None) -> list[dict]:
+def getReferencesFromAPI(coffee_hr_id:str|None = None, blend_hr_id:str|None = None, machine:str|None = None) -> list[dict[str, Any]]:
     _log.debug('getReferencesFromAPI(%s, %s, %s)', coffee_hr_id, blend_hr_id, machine)
     try:
         params:dict[str, str] = {}
@@ -1861,7 +1861,7 @@ def getReferencesFromAPI(coffee_hr_id:str|None = None, blend_hr_id:str|None = No
 # --- Reference comments (READ-ONLY in the client; authoring is cloud-UI only) ---
 
 # Normalizes a single reference comment dict to {id, text, created_by, created_at}.
-def _normalizeReferenceComment(c:dict) -> dict|None:
+def _normalizeReferenceComment(c:Any) -> dict[str, Any]|None:
     if not isinstance(c, dict):
         return None
     text = str(c.get('text', '') or '')
@@ -1878,7 +1878,7 @@ def _normalizeReferenceComment(c:dict) -> dict|None:
 # Extracts the reference_comments array already delivered inside a reference's
 # list/detail item ('_raw') and returns it as a normalized list of comment dicts
 # sorted by created_at (oldest first). Safe against missing/malformed data -> [].
-def parseReferenceComments(raw_item:dict|None) -> list[dict]:
+def parseReferenceComments(raw_item:dict[str, Any]|None) -> list[dict[str, Any]]:
     if not isinstance(raw_item, dict):
         return []
     comments = raw_item.get('reference_comments')
@@ -1895,14 +1895,14 @@ def parseReferenceComments(raw_item:dict|None) -> list[dict]:
 
 # True when the reference item carries a (possibly empty) reference_comments array,
 # i.e. the discussion was actually delivered and a detail fetch is not required.
-def referenceCommentsDelivered(raw_item:dict|None) -> bool:
+def referenceCommentsDelivered(raw_item:dict[str, Any]|None) -> bool:
     return isinstance(raw_item, dict) and isinstance(raw_item.get('reference_comments'), list)
 
 
 # Fetches a single reference's detail (which includes reference_comments) for the
 # case where the filtered references list omitted it (injected empty _raw). Returns
 # the raw detail item dict or None on any failure (caller degrades gracefully).
-def getReferenceDetailFromAPI(roast_id:str) -> dict|None:
+def getReferenceDetailFromAPI(roast_id:str) -> dict[str, Any]|None:
     _log.debug('getReferenceDetailFromAPI(%s)', roast_id)
     if not roast_id:
         return None

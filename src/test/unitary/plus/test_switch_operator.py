@@ -1,4 +1,5 @@
 """switchOperator points the app at a saved account and authenticates silently."""
+from typing import Any
 import sys
 from unittest.mock import Mock
 
@@ -10,9 +11,9 @@ for _mod in ('plus.stock', 'plus.queue', 'plus.sync', 'plus.roast', 'plus.util')
 from PyQt6.QtWidgets import QApplication  # noqa: E402
 
 _app = QApplication.instance() or QApplication(sys.argv)
-import plus.config as config         # noqa: E402
-import plus.controller as controller   # noqa: E402
-import plus.connection as connection   # noqa: E402
+from plus import config         # noqa: E402
+from plus import controller   # noqa: E402
+from plus import connection   # noqa: E402
 
 
 def _patch(obj, attr, value):
@@ -29,7 +30,7 @@ def test_switch_operator_sets_account_and_authenticates():
     aw.plus_account = 'old@x.io'
     config.app_window = aw
 
-    cleared = {}
+    cleared: dict[str, Any] = {}
     restore = [
         _patch(connection, 'clearCredentials',
                lambda remove_from_keychain=True: cleared.update(rk=remove_from_keychain)),

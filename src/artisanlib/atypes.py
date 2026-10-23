@@ -266,6 +266,7 @@ class ProfileData(TypedDict, total=False):
     alarmstrings: list[str]
     backgroundpath: str
     backgroundUUID: str
+    backgroundIsReference: bool
     samplinginterval: float
     svLabel: str
     svValues: list[float]

@@ -1,4 +1,5 @@
 """Unit tests for the saved-operators store (multi-operator cloud login)."""
+from typing import Any
 import sys
 from PyQt6.QtCore import QSettings, QCoreApplication
 from PyQt6.QtWidgets import QApplication
@@ -32,7 +33,7 @@ def test_save_then_load_roundtrip():
 
 
 def test_upsert_adds_then_updates():
-    entries: list = []
+    entries: list[Any] = []
     entries = ops.upsert_operator(entries, 'a@x.io', 'Иван', 'https://artisan.plus', '7')
     assert len(entries) == 1
     # second upsert with same email updates nickname, does not duplicate
@@ -44,7 +45,9 @@ def test_upsert_adds_then_updates():
 def test_find_and_remove():
     entries = ops.upsert_operator([], 'a@x.io', 'Иван', 'https://artisan.plus')
     entries = ops.upsert_operator(entries, 'b@x.io', 'Мария', 'https://artisan.plus')
-    assert ops.find_operator(entries, 'b@x.io')['nickname'] == 'Мария'
+    found = ops.find_operator(entries, 'b@x.io')
+    assert found is not None
+    assert found['nickname'] == 'Мария'
     entries = ops.remove_operator(entries, 'a@x.io')
     assert ops.find_operator(entries, 'a@x.io') is None
     assert len(entries) == 1

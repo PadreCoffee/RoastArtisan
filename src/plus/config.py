@@ -98,8 +98,13 @@ queue_start_delay: Final[int] = 5  # startup time of queue in seconds
 queue_task_delay: Final[float] = 2.0
 queue_retries: Final[int] = 2  # number of retries (should be >=0)
 queue_retry_delay: Final[int] = 30  # time between retries in seconds
-queue_discard_after: Final[int] = 3*24*60*60 # period in seconds after 'modified_at'..
-# .. until a queued item is removed from the queue; if queue_discard_after is 0 items are never discarded
+# roast data must never be dropped by age: 0 = queued items are never discarded (was 3 days, which silently lost
+# roasts queued during a long offline period). Items that finally fail are kept in the outbox dead-letter file.
+queue_discard_after: Final[int] = 0
+# transient failures (no response, timeouts, 408/425/429, 5xx) are retried with exponential backoff up to this delay ..
+queue_transient_max_delay: Final[int] = 15*60
+# .. for at most this long per item, after which the item is moved to the dead-letter file and the queue moves on
+queue_transient_give_up: Final[int] = 24*60*60
 # queque_put_timeout indicates the number of seconds to wait on putting
 # a new item into the queue (unused for now)
 queue_put_timeout: Final[float] = 0.5
@@ -195,8 +200,8 @@ def derive_service_base_urls(url: str|None) -> tuple[str, str]:
 
 
 def set_server_base_url(url: str|None) -> None:
-    global server_url, web_base_url, api_base_url, shop_base_url
-    global register_url, reset_passwd_url, auth_url, stock_url, roast_url, lock_schedule_url, notifications_url, profile_upload_url_template, profile_data_url_template, references_url, reference_detail_url_template
+    global server_url, web_base_url, api_base_url, shop_base_url # pylint: disable=global-statement
+    global register_url, reset_passwd_url, auth_url, stock_url, roast_url, lock_schedule_url, notifications_url, profile_upload_url_template, profile_data_url_template, references_url, reference_detail_url_template # pylint: disable=global-statement
 
     web_base_url, api_base_url = derive_service_base_urls(url)
     server_url = web_base_url

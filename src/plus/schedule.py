@@ -451,19 +451,32 @@ def total_roasting_time(rtimes:list[float|None]) -> float:
 
 
 # save completed roasts data to local file cache
+# per-account JSON cache write: read ALL accounts' data first, replace only this account's entry and write atomically
+# (temp file + rename). Opening with 'w'/'w+' and then reading returned nothing, so every save wiped the data of all
+# other accounts, and a crash during the write left an empty cache file.
+def _save_account_cache(path:str, plus_account_id:str, account_data:Any) -> None:
+    data:dict[str, Any] = {}
+    if os.path.exists(path):
+        try:
+            with open(path, encoding='utf-8') as f:
+                loaded = json.load(f)
+            if isinstance(loaded, dict):
+                data = loaded
+        except Exception as e:  # pylint: disable=broad-except
+            _log.error(e)
+    data[plus_account_id] = account_data
+    tmp = f'{path}.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=None, separators=(',', ':'), ensure_ascii=False)
+    os.replace(tmp, path)
+
+
 def save_completed(plus_account_id:str|None) -> None:
     _log.debug('save_completed(%s): %s', plus_account_id, len(completed_roasts_cache))
     if plus_account_id is not None:
         try:
             completed_roasts_semaphore.acquire(1)
-            f:TextIO
-            with open(completed_roasts_cache_path, 'w', encoding='utf-8') as f:
-                try:
-                    completed_roasts_cache_data = json.load(f)
-                except Exception:   # pylint: disable=broad-except
-                    completed_roasts_cache_data = {}
-                completed_roasts_cache_data[plus_account_id] = completed_roasts_cache
-                json.dump(completed_roasts_cache_data, f, indent=None, separators=(',', ':'), ensure_ascii=False)
+            _save_account_cache(completed_roasts_cache_path, plus_account_id, completed_roasts_cache)
         except Exception as e:  # pylint: disable=broad-except
             _log.exception(e)
         finally:
@@ -650,14 +663,7 @@ def save_prepared(plus_account_id:str|None) -> None:
     if plus_account_id is not None:
         try:
             prepared_items_semaphore.acquire(1)
-            f:TextIO
-            with open(prepared_items_cache_path, 'w+', encoding='utf-8') as f:
-                try:
-                    prepared_items_cache_data = json.load(f)
-                except Exception:   # pylint: disable=broad-except
-                    prepared_items_cache_data = {}
-                prepared_items_cache_data[plus_account_id] = prepared_items_cache
-                json.dump(prepared_items_cache_data, f, indent=None, separators=(',', ':'), ensure_ascii=False)
+            _save_account_cache(prepared_items_cache_path, plus_account_id, prepared_items_cache)
         except Exception as e:  # pylint: disable=broad-except
             _log.exception(e)
         finally:
@@ -1946,7 +1952,7 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
         # monotonic fetch generation to discard stale background results; the list of
         # references most recently applied to the strip combo (cloud order preserved).
         self._reference_fetch_gen:int = 0
-        self._references:list[dict] = []
+        self._references:list[dict[str, Any]] = []
         self.referencesReady.connect(self._on_references_ready)
 
         # holds the currently selected completed NoDragItem widget if any
@@ -3196,7 +3202,7 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
         threading.Thread(target=_fetch, daemon=True).start()
 
     @pyqtSlot(int, str, list)
-    def _on_references_ready(self, gen:int, item_id:str, items:list) -> None:
+    def _on_references_ready(self, gen:int, item_id:str, items:list[Any]) -> None:
         try:
             if gen != self._reference_fetch_gen:
                 return  # stale result from a previous selection
@@ -3269,6 +3275,24 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
         self.set_next(True)
 
     # weight in kg
+    # marks a completed item as measured with the given weight in the local completed-roasts cache only; nothing is
+    # sent to the cloud and the loaded profile is not changed (used for items whose sync record is missing)
+    def mark_roasted_weight_locally(self, uuid:str, weight:float) -> None:
+        item:CompletedItem|None = next((ci for ci in self.completed_items if ci.roastUUID.hex == uuid), None)
+        if item is not None:
+            try:
+                item.update_completed_item(self.aw, {'end_weight': weight, 'roast_id': item.roastUUID.hex,
+                    'modified_at': epoch2ISO8601(time.time())})
+                item.measured = True
+                completed_item_dict = item.model_dump(mode='json')
+                if 'prefix' in completed_item_dict:
+                    del completed_item_dict['prefix']
+                add_completed(self.aw.plus_account_id, cast(CompletedItemDict, completed_item_dict))
+                self.updateRoastedItems() # updates widgets
+            except Exception as e:  # pylint: disable=broad-except
+                _log.error(e)
+        self.set_next(True)
+
     def set_roasted_weight(self, uuid:str, weight:float) -> None:
         item:CompletedItem|None = next((ci for ci in self.completed_items if ci.roastUUID.hex == uuid), None)
         if item is not None:
@@ -3726,8 +3750,9 @@ class ScheduleWindow(ArtisanResizeablDialog): # pyright:ignore[reportGeneralType
                 if sender != self.selected_completed_item:
                     if plus.sync.getSync(sender.data.roastUUID.hex) is None:
                         _log.info('completed roast %s could not be edited as corresponding sync record is missing', sender.data.roastUUID.hex)
-                        # as we cannot edit this entry we mark it as completed by setting the weight_estimate as weight locally, not to block the Batch Manager
-                        self.set_roasted_weight(sender.data.roastUUID.hex, sender.data.weight_estimate)
+                        # as we cannot edit this entry we mark it as completed by setting the weight_estimate as weight locally,
+                        # not to block the Batch Manager. The estimate must NEVER be sent to the cloud as the measured end weight.
+                        self.mark_roasted_weight_locally(sender.data.roastUUID.hex, sender.data.weight_estimate)
                     else:
                         # fetch data if roast is participating in the sync record game
                         profile_data: dict[str, Any]|None = plus.sync.fetchServerUpdate(sender.data.roastUUID.hex, return_data = True)

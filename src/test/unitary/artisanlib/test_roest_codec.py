@@ -1,3 +1,4 @@
+from typing import Any
 import asyncio
 import pytest
 import struct
@@ -145,11 +146,11 @@ def test_roest_send_msg_bursts_control(monkeypatch):
     assert sent[0] == encode_power(50.0) * 8
 
 
-def _make_roest_with_handlers() -> tuple[Roest, list, list, list, list]:
-    charges: list = []
-    drys: list = []
-    fcss: list = []
-    drops: list = []
+def _make_roest_with_handlers() -> tuple[Roest, list[Any], list[Any], list[Any], list[Any]]:
+    charges: list[Any] = []
+    drys: list[Any] = []
+    fcss: list[Any] = []
+    drops: list[Any] = []
     r = Roest(serial=None,
                charge_handler=lambda: charges.append(True),
                dry_handler=lambda: drys.append(True),

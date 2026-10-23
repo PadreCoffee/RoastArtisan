@@ -425,12 +425,10 @@ class TestCacheAndQueueParameters:
         assert config.queue_retry_delay > 0
 
     def test_queue_discard_after(self) -> None:
-        """Test queue discard after setting."""
+        """Queued roast data is never discarded by age (0 = off); finally failing items go to the dead-letter file."""
         # Assert
-        expected_value = 3 * 24 * 60 * 60  # 3 days in seconds
-        assert config.queue_discard_after == expected_value
+        assert config.queue_discard_after == 0
         assert isinstance(config.queue_discard_after, int)
-        assert config.queue_discard_after > 0
 
     def test_queue_put_timeout(self) -> None:
         """Test queue put timeout setting."""

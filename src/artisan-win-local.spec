@@ -315,7 +315,7 @@ xcopy_files(r'includes\Icons', TARGET + 'Icons')
 ###################################
 # remove unused translations of unused Qt modules
 rootdir = f'{TARGET}_internal'
-SUPPORTED_LANGUAGES = ['ar', 'cs', 'da', 'de','el','en','es','fa','fi','fr','gd', 'he','hu','id','it','ja','ko','lv', 'nl','no','pl','pt_BR','pt','sk', 'sv','th','tr','uk','vi','zh_CN','zh_TW']
+SUPPORTED_LANGUAGES = ['ar', 'cs', 'da', 'de','el','en','es','fa','fi','fr','gd', 'he','hu','id','it','ja','ko','lv', 'nl','no','pl','pt_BR','pt','ru','sk', 'sv','th','tr','uk','vi','zh_CN','zh_TW']
 
 qt_trans_prefix_keep = {
     'qtbase',

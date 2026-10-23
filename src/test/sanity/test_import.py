@@ -4,7 +4,6 @@ from collections.abc import Callable
 from typing import override, Any, TypedDict, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from _pytest.python_api import ApproxScalar
     from _pytest.python import Metafunc
 
 from _pytest.python_api import ApproxBase, ApproxMapping, ApproxSequenceLike
@@ -95,7 +94,7 @@ class ApproxBaseReprMixin(ApproxBase):
     @override
     def __repr__(self) -> str:
 
-        def recur_repr_helper(obj:Any) -> dict[Any,Any]|tuple[Any,...]|list[Any]|ApproxScalar:
+        def recur_repr_helper(obj:Any) -> dict[Any,Any]|tuple[Any,...]|list[Any]|ApproxBase:
             if isinstance(obj, dict):
                 return {k : recur_repr_helper(v) for k, v in obj.items()}
             if isinstance(obj, tuple):

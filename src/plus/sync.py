@@ -103,11 +103,27 @@ def addSyncShelve(uuid: str, modified_at:float, fh:IO[str]) -> None:
 # register the modified_at timestamp (EPOC as float with milliseoncds)
 # for the given uuid, assuming it holds the last timepoint modifications were
 # last synced with the server
-def addSync(uuid:str, modified_at:float) -> None:
+# the server sends modified_at as an ISO 8601 string; the sync cache stores EPOCH floats. Storing the string (as
+# applied server updates used to) made getSync() fail on float() and the roast silently counted as unsynced.
+def _modified_at_epoch(modified_at:float|str) -> float:
+    if isinstance(modified_at, str):
+        try:
+            return float(modified_at)
+        except ValueError:
+            return util.ISO86012epoch(modified_at)
+    return float(modified_at)
+
+
+def addSync(uuid:str, modified_at:float|str) -> None:
     import portalocker
     fh:IO[str]
     normalized_uuid = util.normalizeUUID(uuid)
     if normalized_uuid is None:
+        return
+    try:
+        modified_at = _modified_at_epoch(modified_at)
+    except Exception as e:  # pylint: disable=broad-except
+        _log.exception(e)
         return
     try:
         sync_cache_semaphore.acquire(1)
@@ -151,7 +167,7 @@ def getSync(uuid:str) -> float|None:
             try:
                 with shelve.open(getSyncPath()) as db:
                     try:
-                        ts:float = float(db[normalized_uuid])
+                        ts:float = _modified_at_epoch(db[normalized_uuid]) # tolerates legacy ISO strings
                         _log.debug(' -> sync:getSync = %s', ts)
                         return ts
                     except Exception:  # pylint: disable=broad-except
@@ -271,6 +287,37 @@ def setSyncRecordHash(sync_record:dict[str, Any]|None = None, h:str|None = None)
             cached_sync_record_hash = h
         else:
             cached_sync_record, cached_sync_record_hash = roast.getSyncRecord()
+    except Exception as e:  # pylint: disable=broad-except
+        _log.exception(e)
+    finally:
+        if sync_record_semaphore.available() < 1:
+            sync_record_semaphore.release(1)
+
+# undoes suppress_zero_values() on a record that was sent (None -> 0 / 50), so a record rebuilt from sent data
+# hashes like the same record taken from the roast properties
+def unsuppress_values(record:dict[str, Any]) -> dict[str, Any]:
+    res = dict(record)
+    for key in roast.sync_record_zero_supressed_attributes:
+        if key in res and res[key] is None:
+            res[key] = 0
+    for key in roast.sync_record_fifty_supressed_attributes:
+        if key in res and res[key] is None:
+            res[key] = 50
+    return res
+
+
+# after a successful upload, remembers what the server now has: built from the data actually SENT (a full record,
+# or the previous cached record updated with the sent diff), never from the current roast properties. Taking the
+# live properties (as before) marked edits made between queueing and upload as already synced, so they were never
+# sent; it also read the app state from the outbox worker thread.
+def setSyncRecordFromSent(sent:dict[str, Any], full_record:bool) -> None:
+    # pylint: disable=global-statement
+    global cached_sync_record_hash, cached_sync_record
+    try:
+        sync_record_semaphore.acquire(1)
+        base:dict[str, Any] = {} if full_record or cached_sync_record is None else dict(cached_sync_record)
+        base.update(unsuppress_values(sent))
+        cached_sync_record, cached_sync_record_hash = roast.getSyncRecord(base)
     except Exception as e:  # pylint: disable=broad-except
         _log.exception(e)
     finally:

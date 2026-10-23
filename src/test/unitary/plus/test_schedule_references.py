@@ -5,6 +5,7 @@
 # network-free, so these tests do not need the PyQt mocking preamble the other
 # plus/ tests use and are immune to the suite's Qt global-state flakiness.
 
+from typing import Any
 from plus.schedule_references import (
     reference_picker_applies,
     pick_default_reference_index,
@@ -12,7 +13,7 @@ from plus.schedule_references import (
 )
 
 
-def _ref(uuid: str, label: str = '') -> dict:
+def _ref(uuid: str, label: str = '') -> dict[str, Any]:
     return {'uuid': uuid, 'label': label or uuid[:4]}
 
 
@@ -50,7 +51,7 @@ class TestPickDefaultReferenceIndex:
     def test_default_absent_falls_back_to_first(self) -> None:
         # NEGATIVE CONTROL: a server default that is not among the fetched references
         # must fall back to the first entry (never -1, never a crash), so the picker
-        # still shows a sensible pre-selection.
+        # still shows a sensible preselection.
         refs = [_ref('a' * 32), _ref('b' * 32)]
         assert pick_default_reference_index(refs, 'z' * 32) == 0
 

@@ -50,7 +50,7 @@ except Exception:
     HOME = expanduser('~')
     QTDIR = HOME + r'/Qt/6.5.3/macos/'
 
-SUPPORTED_LANGUAGES = ['ar', 'cs', 'da', 'de','el','en','es','fa','fi','fr','gd', 'he','hu','id','it','ja','ko','lv', 'nl','no','pl','pt_BR','pt','sk', 'sv','th','tr','uk','vi','zh_CN','zh_TW']
+SUPPORTED_LANGUAGES = ['ar', 'cs', 'da', 'de','el','en','es','fa','fi','fr','gd', 'he','hu','id','it','ja','ko','lv', 'nl','no','pl','pt_BR','pt','ru','sk', 'sv','th','tr','uk','vi','zh_CN','zh_TW']
 
 DATA_FILES = [
         (r'roastartisan.png', '.'),  # in-app window icon (artisanlib.main loads roastartisan.png)
@@ -81,7 +81,6 @@ DATA_FILES = [
         (r'includes/favicon-32x32.png', '.'),
         (r'includes/favicon-96x96.png', '.'),
         (r'includes/favicon.ico', '.'),
-        (r'includes/favicon.svg', '.'),
         (r'includes/mstile-70x70.png', '.'),
         (r'includes/mstile-144x144.png', '.'),
         (r'includes/mstile-150x150.png', '.'),
@@ -210,8 +209,10 @@ app = BUNDLE(bundle_obj,
 #------
 
 subprocess.check_call(r'mv dist/RoastArtisan.app/Contents/Resources/translations dist/RoastArtisan.app/Contents/',shell = True)
-subprocess.check_call(r'rm -rf dist/Test/_internal/babel/*',shell = True) # unclear: without this line, the next fails
-subprocess.check_call(r'rm -rf dist/Test',shell = True)
+# remove PyInstaller's onedir COLLECT output (named like the app since the rebrand; it was 'Test'), otherwise
+# hdiutil below packs it into the DMG next to RoastArtisan.app and the DMG ships the app twice
+subprocess.check_call(r'rm -rf dist/RoastArtisan/_internal/babel/*',shell = True) # unclear: without this line, the next fails
+subprocess.check_call(r'rm -rf dist/RoastArtisan',shell = True)
 subprocess.check_call(r'cp README.txt dist',shell = True)
 subprocess.check_call(r'cp ../LICENSE dist/LICENSE.txt',shell = True)
 subprocess.check_call(r'mkdir -p dist/Wheels',shell = True)
@@ -431,12 +432,11 @@ for root, _, files in os.walk(f'./RoastArtisan.app/Contents/Resources/babel/loca
 #            print('Deleting', file)
             os.remove(os.path.join(root,file))
 
-# NOT NEEDED for pyinstaller builds
-#print('*** Removing Phidget driver libs not for this platforms ***')
-#try:
-#    subprocess.check_call(f'rm -f ./RoastArtisan.app/Contents/Frameworks/phidget22.dll',shell = True)
-#except Exception: # pylint: disable=broad-except
-#    pass
+print('*** Removing Phidget driver libs not for this platforms ***')
+try:
+    subprocess.check_call('rm -f ./RoastArtisan.app/Contents/Frameworks/phidget22.dll',shell = True) # the Windows DLL got bundled on macOS
+except Exception: # pylint: disable=broad-except
+    pass
 
 
 print('*** Removing mypy completely ***')

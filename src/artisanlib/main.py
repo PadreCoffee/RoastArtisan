@@ -167,6 +167,7 @@ if TYPE_CHECKING:
     from artisanlib.atypes import ExtraDeviceSettings, Palette # pylint: disable=unused-import
     from artisanlib.scale import ScaleSpec
     from artisanlib.roast_properties import editGraphDlg # pylint: disable=unused-import
+    from plus.operators import OperatorEntry # pylint: disable=unused-import
     from artisanlib.comparator import roastCompareDlg # pylint: disable=unused-import
     from artisanlib.wheels import WheelDlg # pylint: disable=unused-import
     from artisanlib.hottop import Hottop # pylint: disable=unused-import
@@ -809,12 +810,12 @@ class VMToolbar(NavigationToolbar): # pylint: disable=abstract-method
 
         self.aw.updatePlusStatus(self)
 
-        self.update_view_org = self._update_view # type: ignore[has-type] # ty:ignore[ignore] # Cannot determine type of "_update_view"
+        self.update_view_org = self._update_view # type: ignore[has-type] # ty:ignore[ignore] # Cannot determine type of "_update_view" # pylint: disable=access-member-before-definition
         self._update_view = self.update_view_new # pyright: ignore # Cannot assign to a method  [method-assign]
 
-        self.release_pan_org = self.release_pan
+        self.release_pan_org = self.release_pan # pylint: disable=access-member-before-definition
         self.release_pan = self.release_pan_new # type:ignore[method-assign,misc,unused-ignore] # ty:ignore[unused-ignore]  # Cannot assign to a method  [method-assign]
-        self.release_zoom_org = self.release_zoom
+        self.release_zoom_org = self.release_zoom # pylint: disable=access-member-before-definition
         self.release_zoom = self.release_zoom_new # type:ignore[method-assign,misc,unused-ignore] # ty:ignore[unused-ignore] # Cannot assign to a method  [method-assign]
 
 #        # monkey patch matplotlib figureoptions that links to svg icon by default (crashes Windows Qt4 builds!)
@@ -4593,23 +4594,23 @@ class ApplicationWindow(QMainWindow):
 
     @pyqtSlot()
     def populateOperatorsMenu(self) -> None:
-        import plus.operators as operators
+        from plus import operators
         self.operatorsMenu.clear()
         for entry in operators.load_operators():
             act = self.operatorsMenu.addAction(entry.get('nickname') or entry['email'])
-            act.setCheckable(True)
-            act.setChecked(entry['email'] == self.plus_account)
-            act.triggered.connect(lambda _checked=False, e=dict(entry): self.switchToOperator(e))
+            act.setCheckable(True) # type: ignore[union-attr] # addAction(str) never returns None
+            act.setChecked(entry['email'] == self.plus_account) # type: ignore[union-attr]
+            act.triggered.connect(lambda _checked=False, e=dict(entry): self.switchToOperator(e)) # type: ignore[union-attr]
         self.operatorsMenu.addSeparator()
         addAct = self.operatorsMenu.addAction(QApplication.translate('Menu', 'Add operator…'))
-        addAct.triggered.connect(self.addOperator)
+        addAct.triggered.connect(self.addOperator) # type: ignore[union-attr]
         mgrAct = self.operatorsMenu.addAction(QApplication.translate('Menu', 'Manage operators…'))
-        mgrAct.triggered.connect(self.manageOperators)
+        mgrAct.triggered.connect(self.manageOperators) # type: ignore[union-attr]
 
     @pyqtSlot()
-    def switchToOperator(self, entry:dict) -> None:
-        import plus.controller as plus_controller
-        import plus.operators as operators
+    def switchToOperator(self, entry:'OperatorEntry') -> None:
+        import plus.controller as plus_controller # pylint: disable=reimported
+        from plus import operators
         if operators.has_pin(entry):
             pin, okp = QInputDialog.getText(
                 self, QApplication.translate('Message', 'Operator PIN'),
@@ -4624,7 +4625,7 @@ class ApplicationWindow(QMainWindow):
             self.sendmessage(QApplication.translate('Plus', 'Operator {0} connected').format(name))
         else:
             # stored password missing/invalid -> fall back to the login dialog (prefill the email)
-            import plus.config as plus_config
+            import plus.config as plus_config # pylint: disable=reimported
             self.plus_account = None
             self.plus_email = entry['email']
             plus_config.passwd = None
@@ -4633,8 +4634,8 @@ class ApplicationWindow(QMainWindow):
 
     @pyqtSlot()
     def addOperator(self) -> None:
-        import plus.controller as plus_controller
-        import plus.config as plus_config
+        import plus.controller as plus_controller # pylint: disable=reimported
+        import plus.config as plus_config # pylint: disable=reimported
         # Adding a new operator needs the login dialog. connect() is a no-op while already
         # connected (and would otherwise silently reuse the active account), so drop the
         # session — keeping every saved password — and clear the active account to force the
@@ -5119,81 +5120,11 @@ class ApplicationWindow(QMainWindow):
         if self.locale_str == locale:
             languageAction.setChecked(True)
 
+    # Sending the log by e-mail (ALT-click on the cloud icon) is disabled: it addressed the upstream Artisan
+    # team (logfile@artisan.plus), i.e. roasters' logs left to a third party. Logs stay local (Help » Errors/Messages).
     def sendLog(self) -> None:
-        _log.info('sendLog()')
-
-        from email import encoders, generator
-        from email.mime.base import MIMEBase
-        from email.mime.multipart import MIMEMultipart
-        from email.mime.text import MIMEText
-
-        message = MIMEMultipart()
-        if self.plus_email is not None:
-            message['From'] = self.plus_email
-        message['To'] = f"{'logfile'}@{'artisan.plus'}"
-        message['Subject'] = 'roastartisan log'
-        message['X-Unsent'] = '1'
-        # message["X-Uniform-Type-Identifier"] = "com.apple.mail-draft"
-        message.attach(
-            MIMEText(
-                f"Please find attached the log files written by RoastArtisan!\nPlease forward this email to {message['To']}\n--\n",
-                'plain',
-            )
-        )
-        try:
-            directory = getDataDirectory()
-            if directory is not None:
-                for log_file_name in ['roastartisan.log', 'roastartisanViewer.log']:
-                    try:
-                        with open(os.path.join(directory, os.path.normpath(log_file_name)), 'rb') as attachment:
-                            # Add file as application/octet-stream
-                            # Email client can usually download this automatically
-                            # as attachment
-                            part = MIMEBase('application', 'octet-stream')
-                            part.set_payload(attachment.read())
-                        # Encode file in ASCII characters to send by email
-                        encoders.encode_base64(part)
-                        # Add header as key/value pair to attachment part
-                        part.add_header(
-                            'Content-Disposition',
-                            f'attachment; filename= {log_file_name}',
-                        )
-                        # Add attachment to message and convert message to string
-                        message.attach(part)
-                    except FileNotFoundError:
-                        _log.debug('log file %s not found', log_file_name)
-        except Exception as e:  # pylint: disable=broad-except
-            _log.exception(e)
-        try:
-            with open(self.qmc.device_log_file, 'rb') as attachment:
-                # Add file as application/octet-stream
-                # Email client can usually download this automatically
-                # as attachment
-                part2 = MIMEBase('application', 'octet-stream')
-                part2.set_payload(attachment.read())
-            # Encode file in ASCII characters to send by email
-            encoders.encode_base64(part2)
-            # Add header as key/value pair to attachment part
-            part2.add_header(
-                'Content-Disposition',
-                f'attachment; filename= {self.qmc.device_log_file_name}.log'
-            )
-            # Add attachment to message and convert message to string
-            message.attach(part2)
-        except FileNotFoundError:
-            _log.debug('log file %s not found', self.qmc.device_log_file)
-        except Exception as e:  # pylint: disable=broad-except
-            _log.exception(e)
-        # Save message to file tmp file
-        tmpfile = QDir(QDir.tempPath()).filePath('plus-log.eml')
-        try:
-            os.remove(tmpfile)
-        except OSError:
-            pass
-        with open(tmpfile, 'w', encoding='utf-8') as outfile:
-            gen = generator.Generator(outfile)
-            gen.flatten(message)
-        QDesktopServices.openUrl(QUrl.fromLocalFile(tmpfile))
+        _log.info('sendLog() disabled')
+        self.sendmessage(QApplication.translate('Plus', 'Sending the log is disabled'))
 
     def updateWindowTitle(self) -> None:
         try:
@@ -13181,7 +13112,7 @@ class ApplicationWindow(QMainWindow):
         for name, value in fields:
             try:
                 v = str(value)
-                fn = re.sub(fr'{fielddelim}{name}', lambda _m, _v=v: _v, fn, count=0, flags=flags)
+                fn = re.sub(fr'{fielddelim}{name}', lambda _m, _v=v: _v, fn, count=0, flags=flags) # type: ignore[misc]
             except Exception as e:  # pylint: disable=broad-except
                 _log.exception(e)
         return fn
@@ -18446,7 +18377,7 @@ class ApplicationWindow(QMainWindow):
             self.plus_account_id = settings.value('plus_account_id',self.plus_account_id)
             # Migration: seed the saved-operators list from a pre-existing remembered account
             try:
-                import plus.operators as operators
+                from plus import operators
                 if self.plus_account:
                     _ops = operators.load_operators()
                     if operators.find_operator(_ops, self.plus_account) is None:
@@ -24952,7 +24883,7 @@ class ApplicationWindow(QMainWindow):
                 QApplication.translate('About', 'Update status'),
                 '<p>' + QApplication.translate('About', 'You are using the latest release.') + '</p>')
 
-    def _showNewUpdateDialog(self, response:dict, version:str) -> None:
+    def _showNewUpdateDialog(self, response:dict[str, Any], version:str) -> None:
         downloads = response.get('downloads') or {}
         download_url = update_check.select_download(downloads, platform.system(), platform.machine())
         os_label = {'Windows': 'Windows', 'Darwin': 'macOS'}.get(platform.system(), platform.system())

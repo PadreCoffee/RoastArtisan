@@ -10,7 +10,7 @@ import hmac
 import json
 import logging
 import os
-from typing import Optional, TypedDict
+from typing import TypedDict
 
 from PyQt6.QtCore import QSettings
 
@@ -23,14 +23,14 @@ _PIN_ITERATIONS = 200_000
 class OperatorEntry(TypedDict):
     email: str
     nickname: str
-    account_id: Optional[str]
+    account_id: str | None
     server_url: str
-    pin_hash: Optional[str]   # hex digest, or None
-    pin_salt: Optional[str]   # hex salt, or None
+    pin_hash: str | None   # hex digest, or None
+    pin_salt: str | None   # hex salt, or None
 
 
 def new_entry(email: str, nickname: str, server_url: str,
-              account_id: Optional[str] = None) -> OperatorEntry:
+              account_id: str | None = None) -> OperatorEntry:
     return OperatorEntry(email=email, nickname=nickname, account_id=account_id,
                          server_url=server_url, pin_hash=None, pin_salt=None)
 
@@ -42,7 +42,7 @@ def load_operators() -> 'list[OperatorEntry]':
     try:
         data = json.loads(raw)
         if isinstance(data, list):
-            return [e for e in data if isinstance(e, dict) and e.get('email')]
+            return [e for e in data if isinstance(e, dict) and e.get('email')] # type: ignore[misc] # JSON entries are OperatorEntry dicts
     except Exception as e:  # pylint: disable=broad-except
         _log.exception(e)
     return []
@@ -52,7 +52,7 @@ def save_operators(operators: 'list[OperatorEntry]') -> None:
     QSettings().setValue(_SETTINGS_KEY, json.dumps(operators))
 
 
-def find_operator(operators: 'list[OperatorEntry]', email: str) -> Optional[OperatorEntry]:
+def find_operator(operators: 'list[OperatorEntry]', email: str) -> OperatorEntry | None:
     for e in operators:
         if e.get('email') == email:
             return e
@@ -60,7 +60,7 @@ def find_operator(operators: 'list[OperatorEntry]', email: str) -> Optional[Oper
 
 
 def upsert_operator(operators: 'list[OperatorEntry]', email: str, nickname: str,
-                    server_url: str, account_id: Optional[str] = None) -> 'list[OperatorEntry]':
+                    server_url: str, account_id: str | None = None) -> 'list[OperatorEntry]':
     entry = find_operator(operators, email)
     if entry is not None:
         entry['nickname'] = nickname
@@ -76,7 +76,7 @@ def remove_operator(operators: 'list[OperatorEntry]', email: str) -> 'list[Opera
     return [e for e in operators if e.get('email') != email]
 
 
-def hash_pin(pin: str, salt: Optional[bytes] = None) -> 'tuple[str, str]':
+def hash_pin(pin: str, salt: bytes | None = None) -> 'tuple[str, str]':
     if salt is None:
         salt = os.urandom(16)
     dk = hashlib.pbkdf2_hmac('sha256', pin.encode('utf-8'), salt, _PIN_ITERATIONS)
@@ -104,7 +104,7 @@ def verify_pin(entry: OperatorEntry, pin: str) -> bool:
     try:
         salt = bytes.fromhex(entry['pin_salt'])         # type: ignore[arg-type]
         dk, _ = hash_pin(pin, salt)
-        return hmac.compare_digest(dk, entry['pin_hash'])   # type: ignore[arg-type]
+        return hmac.compare_digest(dk, entry['pin_hash'])   # type: ignore[type-var]
     except Exception as e:  # pylint: disable=broad-except
         _log.exception(e)
         return False

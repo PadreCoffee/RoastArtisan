@@ -52,7 +52,7 @@ application_organization_domain: Final[str] = 'roastartisan.local'
 application_desktop_file_name: Final[str] = 'com.roastartisan.desktop'
 
 
-from PyQt6.QtCore import QStandardPaths, QCoreApplication, QTime, QDate, QDateTime
+from PyQt6.QtCore import QStandardPaths, QTime, QDate, QDateTime
 from PyQt6.QtGui import QColor
 
 

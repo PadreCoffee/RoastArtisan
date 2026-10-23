@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from artisanlib.main import ApplicationWindow # noqa: F401 # pylint: disable=unused-import
 
 from plus import config, connection, stock, queue, sync, roast, util
-import plus.operators as operators
+from plus import operators
 
 
 _log: Final[logging.Logger] = logging.getLogger(__name__)
@@ -445,7 +445,8 @@ def switchOperator(email: str, server_url: str|None = None) -> bool:
     connection.clearCredentials(remove_from_keychain=False)
     if server_url is not None:
         aw.plus_server_url = server_url
-        config.server_url = server_url
+        # also re-derives the auth/API URLs; setting only config.server_url left them pointing at the old server
+        config.set_server_base_url(server_url)
     aw.plus_account = email
     aw.plus_email = email
     config.passwd = None  # force reload from keyring for the new account in authentify()
@@ -455,7 +456,7 @@ def switchOperator(email: str, server_url: str|None = None) -> bool:
         _log.exception(e)
         ok = False
     if ok:
-        connection.setToken(config.token, connection.getNickname(), force_operator=True)
+        connection.setToken(config.token or '', connection.getNickname(), force_operator=True)
     return ok
 
 

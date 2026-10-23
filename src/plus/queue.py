@@ -36,7 +36,7 @@ import requests.models
 import json
 import json.decoder
 import logging
-from typing import Final, Any, TYPE_CHECKING
+from typing import Final, Any, TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     import persistqueue # pylint: disable=unused-import
@@ -61,6 +61,56 @@ PROFILE_UPLOAD_FIELD_NAME: Final[str] = 'file'
 
 def is_profile_upload_item(item:dict[str, Any]) -> bool:
     return bool(item.get('type') == PROFILE_UPLOAD_ITEM_TYPE)
+
+
+# --- outbox reliability: roast data is never dropped silently ---
+
+DEAD_LETTER_FILE: Final[str] = 'failed.json'
+TRANSIENT_STATUS: Final[frozenset[int]] = frozenset({408, 425, 429})
+
+
+# a failure that may pass by itself: no response at all (timeout, protocol error) or a server/rate-limit status
+def is_transient_failure(r:requests.models.Response|None) -> bool:
+    return r is None or r.status_code in TRANSIENT_STATUS or r.status_code >= 500
+
+
+# exponential backoff for transient failures: retry delay, doubled per attempt, capped
+def transient_backoff(attempt:int) -> float:
+    return float(min(config.queue_retry_delay * (2 ** max(0, attempt)), config.queue_transient_max_delay))
+
+
+def dead_letter_path() -> str:
+    return os.path.join(queue_path, DEAD_LETTER_FILE)
+
+
+# keeps an outbox item that finally could not be delivered (rejected, or failing for too long) in a JSON file
+# next to the outbox queue instead of dropping it, so it can be inspected and re-sent later
+def dead_letter(item:Any, reason:str, status:int|None = None) -> None:
+    path = dead_letter_path()
+    try:
+        entries:list[Any] = []
+        if os.path.exists(path):
+            try:
+                with open(path, encoding='utf-8') as f:
+                    loaded = json.load(f)
+                if isinstance(loaded, list):
+                    entries = loaded
+            except Exception as e:  # pylint: disable=broad-except
+                _log.exception(e)
+                # never overwrite an unreadable dead-letter file: keep it aside
+                os.replace(path, f'{path}.{int(time.time())}.corrupt')
+        entries.append({'failed_at': util.epoch2ISO8601(time.time()), 'reason': reason, 'status': status, 'item': item})
+        tmp = f'{path}.tmp'
+        with open(tmp, 'w', encoding='utf-8') as f:
+            json.dump(entries, f, ensure_ascii=False, default=str)
+        os.replace(tmp, path)
+        _log.warning('outbox item kept for later in %s: %s (status %s) %s', path, reason, status,
+            (item.get('data') or {}).get('roast_id', '') if isinstance(item, dict) else '')
+        aw = config.app_window
+        if aw is not None:
+            aw.sendmessage(QApplication.translate('Plus', 'Upload to {} failed; the data is kept in the unsent list').format(config.app_display_name))
+    except Exception as e:  # pylint: disable=broad-except
+        _log.exception(e)
 
 
 def get_response_json(r:requests.models.Response|None) -> dict[str, Any]|None:
@@ -189,7 +239,7 @@ def capture_profile_upload_source(roast_id:str) -> tuple[str|None, bool]:
             suffix=f'.{config.profile_ext}',
         )
         os.close(fd)
-        serialize(tmp_path, profile)
+        serialize(tmp_path, cast(dict[str, Any], profile))
         return tmp_path, True
     except Exception as e:  # pylint: disable=broad-except
         _log.exception(e)
@@ -251,6 +301,10 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                     )
                     iters = 1 # by default, if no modified_at timestamp is given (no roast; maybe just a lock schedule message) thus we don't retry this
                     requeued = False
+                    failure_reason:str|None = None   # set while the item is failing; kept in the dead-letter file if it ends failed
+                    failure_status:int|None = None
+                    transient_attempt = 0
+                    first_failure:float|None = None
                     profile_item = is_profile_upload_item(item)
                     # roast summary save (POST /aroast); used to ensure a rejected save is never lost silently
                     save_item = (not profile_item) and item.get('url') == config.roast_url
@@ -262,7 +316,8 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                         if (config.queue_discard_after > 0 and item_age > config.queue_discard_after):
                             # old item scheduled to be removed from the queue
                             iters = 0
-                            _log.debug('-> expired item %s removed from queue (%s min)',item['data'].get('roast_id', '?'),int(round(item_age/60)))
+                            failure_reason = 'expired'
+                            _log.warning('-> expired item %s removed from queue (%s min)',item['data'].get('roast_id', '?'),int(round(item_age/60)))
                         else:
                             iters = config.queue_retries + 1
                     while iters > 0:
@@ -270,6 +325,8 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                             '-> remaining iterations: %s', iters
                         )
                         r:requests.models.Response|None = None
+                        failure_reason = None
+                        failure_status = None
                         try:
                             if profile_item:
                                 roast_id = util.normalizeUUID(item['data'].get('roast_id')) if 'data' in item else None
@@ -281,6 +338,8 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                         _log.debug('requeue profile upload for roast_id=%s while full roast is still queued', roast_id)
                                         queue.put(item)
                                         requeued = True
+                                    else:
+                                        failure_reason = 'profile_not_synced'
                                     iters = 0
                                 else:
                                     profile_path = item['data'].get('profile_path') if 'data' in item else None
@@ -293,6 +352,7 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                                     'Roast summary uploaded, but full profile upload file is unavailable'
                                                 )
                                             )  # @UndefinedVariable
+                                        failure_reason = 'profile_file_missing'
                                         iters = 0
                                     else:
                                         controller.connect(
@@ -336,9 +396,11 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                         ).format(config.app_display_name)
                                     )  # @UndefinedVariable
                                 self.addSyncItem(item)
-                                sr, h = roast.getSyncRecord()
-                                if util.normalizeUUID(item['data']['roast_id']) == util.normalizeUUID(sr['roast_id']):
-                                    sync.setSyncRecordHash(sync_record=sr, h=h)
+                                # remember what the server has now, from what was SENT (not from the live properties)
+                                aw_loaded = config.app_window
+                                loaded_roast_id = util.normalizeUUID(getattr(getattr(aw_loaded, 'qmc', None), 'roastUUID', None))
+                                if loaded_roast_id is not None and util.normalizeUUID(item['data']['roast_id']) == loaded_roast_id:
+                                    sync.setSyncRecordFromSent(item['data'], is_full_roast_record(item['data']))
 
                                 response = get_response_json(r)
                                 if response:
@@ -369,6 +431,10 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                     item['url'], item['data'], item['verb']
                                 )
                                 r.raise_for_status()
+                            elif save_item:
+                                # a roast update (diff) for a roast that is not known as synced: it used to be dropped
+                                # silently; keep it so the change is not lost
+                                failure_reason = 'not_synced'
 
                             iters = 0
                         except RequestsConnectionError as e:
@@ -387,6 +453,10 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                             time.sleep(config.queue_retry_delay)
                         except Exception as e:  # pylint: disable=broad-except
                             _log.debug('-> task failed: %s', e)
+                            failure_status = r.status_code if r is not None else None
+                            failure_reason = f'http_{failure_status}' if r is not None else f'error: {e}'
+                            if first_failure is None:
+                                first_failure = time.time()
                             if r is not None:
                                 _log.debug(
                                     '-> status code %s', r.status_code
@@ -421,6 +491,13 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                 if save_item:
                                     save_roast_id = util.normalizeUUID(item['data'].get('roast_id')) if 'data' in item else None
                                     report_save_rejected(r, save_roast_id, conflict=True)
+                            elif is_transient_failure(r) and (time.time() - first_failure) < config.queue_transient_give_up:
+                                # transient (server down, deploy, timeout, rate limit): keep retrying with backoff
+                                # instead of giving up after a few minutes
+                                delay = transient_backoff(transient_attempt)
+                                transient_attempt += 1
+                                _log.info('-> transient failure (%s), retry in %ss', failure_reason, int(delay))
+                                time.sleep(delay)
                             else:
                                 iters = iters - 1
                                 time.sleep(2*config.queue_retry_delay)
@@ -438,6 +515,8 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                             'Roast summary uploaded, but full profile upload failed'
                                         )
                                     )  # @UndefinedVariable
+                    if failure_reason is not None and not requeued:
+                        dead_letter(item, failure_reason, failure_status)
                     queue.task_done()
                     item = None
                     _log.debug(

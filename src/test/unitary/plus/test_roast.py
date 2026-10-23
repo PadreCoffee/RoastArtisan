@@ -467,23 +467,25 @@ class TestGetRoast:
             assert result['blend'] == {'label': 'Test Blend'}
             mock_trim_blend.assert_called_once_with(sample_blend_spec_comprehensive)
 
+    # getRoast() no longer serializes the background profile via getTemplate(..., background=True);
+    # the background is linked by its UUID as {'id': backgroundUUID} and flagged with
+    # 'is_reference' only when it was picked via the cloud reference selector.
+    @pytest.mark.parametrize('is_reference', [True, False])
     def test_get_roast_with_background_profile(
-        self, mock_app_window: Mock, sample_profile_data: dict[str, Any]
+        self, mock_app_window: Mock, sample_profile_data: dict[str, Any], is_reference: bool
     ) -> None:
-        """Test getRoast with background profile."""
+        """Test getRoast links the background profile by its UUID."""
         # Arrange
-        background_profile = {'title': 'Background Profile'}
         mock_app_window.getProfile.return_value = sample_profile_data
-        mock_app_window.qmc.backgroundprofile = background_profile
+        mock_app_window.qmc.backgroundprofile = {'title': 'Background Profile'}
+        mock_app_window.qmc.backgroundUUID = 'bg-uuid-1234'
+        mock_app_window.qmc.backgroundIsReference = is_reference
 
         with patch('plus.roast.config.app_window', mock_app_window), patch(
             'plus.roast.getTemplate'
         ) as mock_get_template, patch('plus.roast.util') as mock_util:
 
-            mock_get_template.side_effect = [
-                {'main': 'template'},  # First call for main profile
-                {'background': 'template'},  # Second call for background profile
-            ]
+            mock_get_template.return_value = {'main': 'template'}
             mock_util.addTempDiff2dict = Mock()
             mock_util.addAllNum2dict = Mock()
             mock_util.addString2dict = Mock()
@@ -494,10 +496,12 @@ class TestGetRoast:
             result = getRoast()
 
             # Assert
-            assert result['template'] == {'background': 'template'}
-            assert mock_get_template.call_count == 2
-            # Second call should be with background=True
-            mock_get_template.assert_any_call(background_profile, background=True)
+            expected: dict[str, Any] = {'id': 'bg-uuid-1234'}
+            if is_reference:
+                expected['is_reference'] = True
+            assert result['template'] == expected
+            # only the main profile is serialized
+            mock_get_template.assert_called_once_with(sample_profile_data)
 
     def test_get_roast_exception_handling(self, mock_app_window: Mock) -> None:
         """Test getRoast handles exceptions gracefully."""
