@@ -9,7 +9,15 @@ import tempfile
 import pytest
 import numpy as np # pylint: disable=unused-import
 import scipy.optimize # need to import globally to avoid reimport # pylint: disable=unused-import
-from typing import Any
+# same for matplotlib's core: some test modules temporarily swap sys.modules (patch.dict) while
+# importing app modules, which drops modules first imported inside that block. A later re-import
+# then yields a second copy of matplotlib.patches while the projection registry still holds the
+# first copy's Axes, and Figure.add_subplot() fails matplotlib's own isinstance(Rectangle) check.
+import matplotlib.figure # pylint: disable=unused-import
+import matplotlib.axes # pylint: disable=unused-import
+import matplotlib.patches # pylint: disable=unused-import
+import matplotlib.projections # pylint: disable=unused-import
+from typing import Any, override
 
 
 ####
@@ -68,18 +76,21 @@ from keyring.backend import KeyringBackend # noqa: E402
 
 
 class InMemoryKeyring(KeyringBackend):
-    priority = 1 # type: ignore[assignment]
+    priority = 1
 
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__() # type: ignore[no-untyped-call]
         self._store: dict[tuple[str, str], str] = {}
 
+    @override
     def get_password(self, service:str, username:str) -> str|None:
         return self._store.get((service, username))
 
+    @override
     def set_password(self, service:str, username:str, password:str) -> None:
         self._store[(service, username)] = password
 
+    @override
     def delete_password(self, service:str, username:str) -> None:
         try:
             del self._store[(service, username)]
