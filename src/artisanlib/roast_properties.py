@@ -72,7 +72,7 @@ def _fmt_date_value(v:object) -> str|None:
             return None
         if isinstance(v, (int, float)):
             ts = float(v) / (1000.0 if v > 1e11 else 1.0)   # epoch in ms or s
-            return datetime.datetime.fromtimestamp(ts).strftime('%d.%m.%Y')
+            return datetime.datetime.fromtimestamp(ts).strftime('%d.%m.%Y') # noqa: DTZ006 # local-time date is intended for display
         if isinstance(v, str) and v.strip():
             txt = v.strip().replace('Z', '+00:00')
             try:
@@ -3129,9 +3129,12 @@ class editGraphDlg(ArtisanResizeablDialog):
         ]
         for r, (key, label_text, _unit) in enumerate(rows, start=1):
             grid.addWidget(QLabel(label_text), r, 0)
-            cur_lbl = QLabel('—'); cur_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            ref_lbl = QLabel('—'); ref_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            dlt_lbl = QLabel('—'); dlt_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            cur_lbl = QLabel('—')
+            cur_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            ref_lbl = QLabel('—')
+            ref_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            dlt_lbl = QLabel('—')
+            dlt_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
             grid.addWidget(cur_lbl, r, 1)
             grid.addWidget(ref_lbl, r, 2)
             grid.addWidget(dlt_lbl, r, 3)

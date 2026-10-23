@@ -4593,7 +4593,7 @@ class ApplicationWindow(QMainWindow):
 
     @pyqtSlot()
     def populateOperatorsMenu(self) -> None:
-        import plus.operators as operators
+        from plus import operators
         self.operatorsMenu.clear()
         for entry in operators.load_operators():
             act = self.operatorsMenu.addAction(entry.get('nickname') or entry['email'])
@@ -4609,7 +4609,7 @@ class ApplicationWindow(QMainWindow):
     @pyqtSlot()
     def switchToOperator(self, entry:dict) -> None:
         import plus.controller as plus_controller
-        import plus.operators as operators
+        from plus import operators
         if operators.has_pin(entry):
             pin, okp = QInputDialog.getText(
                 self, QApplication.translate('Message', 'Operator PIN'),
@@ -18446,7 +18446,7 @@ class ApplicationWindow(QMainWindow):
             self.plus_account_id = settings.value('plus_account_id',self.plus_account_id)
             # Migration: seed the saved-operators list from a pre-existing remembered account
             try:
-                import plus.operators as operators
+                from plus import operators
                 if self.plus_account:
                     _ops = operators.load_operators()
                     if operators.find_operator(_ops, self.plus_account) is None:

@@ -4,8 +4,8 @@ from unittest.mock import Mock
 from PyQt6.QtWidgets import QApplication
 
 _app = QApplication.instance() or QApplication(sys.argv)
-import plus.config as config        # noqa: E402
-import plus.connection as connection  # noqa: E402
+from plus import config        # noqa: E402
+from plus import connection  # noqa: E402
 
 
 def _aw_with_operator(value):

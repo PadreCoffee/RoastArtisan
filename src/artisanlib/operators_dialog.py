@@ -6,7 +6,7 @@ from PyQt6.QtCore import QCoreApplication
 from PyQt6.QtWidgets import (QListWidget, QListWidgetItem, QVBoxLayout, QHBoxLayout,
                              QPushButton, QInputDialog, QLineEdit, QMessageBox, QWidget)
 
-import plus.operators as operators
+from plus import operators
 from artisanlib.dialogs import ArtisanDialog
 
 if TYPE_CHECKING:
@@ -92,7 +92,7 @@ class OperatorsDialog(ArtisanDialog):
                                 ) == QMessageBox.StandardButton.Yes:
             try:
                 import keyring
-                import plus.config as config
+                from plus import config
                 keyring.delete_password(config.get_keyring_service_name(), email)
             except Exception as e:  # pylint: disable=broad-except
                 _log.exception(e)

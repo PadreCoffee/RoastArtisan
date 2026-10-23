@@ -10,9 +10,9 @@ for _mod in ('plus.stock', 'plus.queue', 'plus.sync', 'plus.roast', 'plus.util')
 from PyQt6.QtWidgets import QApplication  # noqa: E402
 
 _app = QApplication.instance() or QApplication(sys.argv)
-import plus.config as config         # noqa: E402
-import plus.controller as controller   # noqa: E402
-import plus.connection as connection   # noqa: E402
+from plus import config         # noqa: E402
+from plus import controller   # noqa: E402
+from plus import connection   # noqa: E402
 
 
 def _patch(obj, attr, value):

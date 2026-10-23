@@ -276,7 +276,7 @@ def test_rule4_no_coffee_open_preserves_the_loaded_reference() -> None:
     o = _harness('Reference Roast #7', template_uuid='a' * 32,
                  template_label='Reference Roast #7', user_updated=False,
                  plus_coffee_selected=None, plus_blend_selected_spec=None)
-    o._getTemplatesFromSchedule = lambda: []           # no scheduler items available
+    o._getTemplatesFromSchedule = list           # no scheduler items available
     _real_enabled = plus.config.remote_profile_fetch_enabled
     plus.config.remote_profile_fetch_enabled = lambda: False
     try:
