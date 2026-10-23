@@ -244,21 +244,21 @@ class TestServiceUrls:
     def test_api_base_url(self) -> None:
         """Test API base URL configuration."""
         # Assert
-        assert config.api_base_url == 'https://artisan.plus/api/v1'
+        assert config.api_base_url == 'https://roastlocal.ru/api/v1'
         assert isinstance(config.api_base_url, str)
         assert config.api_base_url.startswith('https://')
 
     def test_web_base_url(self) -> None:
         """Test web base URL configuration."""
         # Assert
-        assert config.web_base_url == 'https://artisan.plus'
+        assert config.web_base_url == 'https://roastlocal.ru'
         assert isinstance(config.web_base_url, str)
         assert config.web_base_url.startswith('https://')
 
     def test_shop_base_url(self) -> None:
         """Test shop base URL configuration."""
         # Assert
-        assert config.shop_base_url == 'https://buy.artisan.plus/'
+        assert config.shop_base_url == 'https://roastlocal.ru'
         assert isinstance(config.shop_base_url, str)
         assert config.shop_base_url.startswith('https://')
 

@@ -47,9 +47,10 @@ schedule_date_tag: Final[str] = 'scheduleDate' # send as 's_item_date' as part o
 #web_base_url         = 'https://localhost:8088'
 
 # # CLOUD SETUP
-default_api_base_url: Final[str] = 'https://artisan.plus/api/v1'
-default_web_base_url: Final[str] = 'https://artisan.plus'
-default_shop_base_url: Final[str] = 'https://buy.artisan.plus/'
+# the client works only with the Roastlocal cloud; these are also the addresses in effect before the first login
+default_api_base_url: Final[str] = 'https://roastlocal.ru/api/v1'
+default_web_base_url: Final[str] = 'https://roastlocal.ru'
+default_shop_base_url: Final[str] = 'https://roastlocal.ru'
 
 api_base_url: str
 web_base_url: str
@@ -101,10 +102,15 @@ queue_retry_delay: Final[int] = 30  # time between retries in seconds
 # roast data must never be dropped by age: 0 = queued items are never discarded (was 3 days, which silently lost
 # roasts queued during a long offline period). Items that finally fail are kept in the outbox dead-letter file.
 queue_discard_after: Final[int] = 0
-# transient failures (no response, timeouts, 408/425/429, 5xx) are retried with exponential backoff up to this delay ..
+# transient failures (no response, timeouts, 401, 408/425/429, 5xx) are retried forever with exponential backoff
+# up to this delay ..
 queue_transient_max_delay: Final[int] = 15*60
-# .. for at most this long per item, after which the item is moved to the dead-letter file and the queue moves on
-queue_transient_give_up: Final[int] = 24*60*60
+# .. and after failing for this long an item is moved to the end of the queue (still retried), so that one item the
+# server keeps failing on cannot block the roasts queued behind it
+queue_transient_rotate_after: Final[int] = 60*60
+# items in the dead-letter file (rejected by the server) are put back into the queue at start and at this interval,
+# so they are re-sent until the server accepts them
+queue_dead_letter_retry_interval: Final[int] = 60*60
 # queque_put_timeout indicates the number of seconds to wait on putting
 # a new item into the queue (unused for now)
 queue_put_timeout: Final[float] = 0.5

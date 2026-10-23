@@ -26,7 +26,6 @@ SOURCES = \
     artisanlib/canvas.py \
     artisanlib/colors.py \
     artisanlib/comm.py \
-    artisanlib/comparator.py \
     artisanlib/cropster.py \
     artisanlib/cup_profile.py \
     artisanlib/curves.py \
@@ -43,7 +42,6 @@ SOURCES = \
     artisanlib/modbusport.py \
     artisanlib/petroncini.py \
     artisanlib/phases.py \
-    artisanlib/phases_canvas.py \
     artisanlib/pid_control.py \
     artisanlib/pid_dialogs.py \
     artisanlib/platformdlg.py \

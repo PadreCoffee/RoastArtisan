@@ -102,7 +102,6 @@ except Exception: # pylint: disable=broad-except
 #    syslog.syslog(syslog.LOG_ALERT, str(e))
 #    syslog.syslog(syslog.LOG_ALERT, str(traceback.format_exc()))
 
-QtWebEngineSupport:bool = False # set to True if the QtWebEngine was successfully imported
 
 
 from PyQt6.QtWidgets import (QApplication, QWidget, QMessageBox, QLabel, QMainWindow, QFileDialog, QGraphicsDropShadowEffect,
@@ -112,7 +111,7 @@ from PyQt6.QtWidgets import (QApplication, QWidget, QMessageBox, QLabel, QMainWi
                          QSlider, QCheckBox,
                          QColorDialog, QFrame, QScrollArea, QProgressDialog,
                          QStyleFactory, QMenuBar, QMenu, QLayout, QDockWidget)
-from PyQt6.QtGui import (QScreen, QPageLayout, QAction, QImageReader, QWindow,
+from PyQt6.QtGui import (QScreen, QAction, QImageReader, QWindow,
                             QKeySequence, QShortcut,
                             QPixmap,QColor,QDesktopServices,QIcon,
                             QRegularExpressionValidator, QDoubleValidator, QPainter, QCursor)
@@ -122,14 +121,9 @@ from PyQt6.QtCore import (QStandardPaths, QLibraryInfo, QTranslator, QLocale, QF
                           QRegularExpression, QDate, QUrl, QUrlQuery, QDir, Qt, QPoint, QEvent, QDateTime, QThread, qInstallMessageHandler)
 from PyQt6.QtNetwork import QLocalSocket
 
-#QtWebEngineWidgets must be imported before a QCoreApplication instance is created
-try:
-    from PyQt6.QtWebEngineWidgets import QWebEngineView
-    from PyQt6.QtWebEngineCore import QWebEngineProfile
-    QtWebEngineSupport = True
-except ImportError:
-    # on the RPi platform there is no native package PyQt-WebEngine nor PyQt6-WebEngine
-    pass
+# PDF reports are drawn with ReportLab (artisanlib.pdf_report); without it the PDF report items are disabled
+from artisanlib import pdf_report
+PDFReportSupport:bool = pdf_report.available()
 from PyQt6 import sip
 
 
@@ -168,7 +162,6 @@ if TYPE_CHECKING:
     from artisanlib.scale import ScaleSpec
     from artisanlib.roast_properties import editGraphDlg # pylint: disable=unused-import
     from plus.operators import OperatorEntry # pylint: disable=unused-import
-    from artisanlib.comparator import roastCompareDlg # pylint: disable=unused-import
     from artisanlib.wheels import WheelDlg # pylint: disable=unused-import
     from artisanlib.hottop import Hottop # pylint: disable=unused-import
     from artisanlib.weblcds import WebLCDs, WebGreen, WebRoasted # pylint: disable=unused-import
@@ -180,7 +173,6 @@ if TYPE_CHECKING:
     from artisanlib.mugma import Mugma # pylint: disable=unused-import
     from artisanlib.kaleido import KaleidoPort # pylint: disable=unused-import
     from artisanlib.orbiter import Orbiter # pylint: disable=unused-import
-    from artisanlib.phases_canvas import tphasescanvas # pylint: disable=unused-import
     try:
         from artisanlib.ikawa import IKAWA_BLE # pylint: disable=unused-import
     except Exception: # pylint: disable=broad-except
@@ -188,10 +180,9 @@ if TYPE_CHECKING:
     from matplotlib.text import Annotation # type:ignore[untyped-import,unused-ignore] # ty:ignore[ignore] # pylint: disable=unused-import
     from openpyxl.worksheet.worksheet import Worksheet # pylint: disable=unused-import
     import numpy.typing as npt # pylint: disable=unused-import
-    from PyQt6.QtWidgets import QTableWidgetItem, QTableWidget, QScrollBar # pylint: disable=unused-import
+    from PyQt6.QtWidgets import QTableWidgetItem, QTableWidget # pylint: disable=unused-import
     from PyQt6.QtGui import QStyleHints, QClipboard, QKeyEvent, QMouseEvent, QDropEvent, QDragEnterEvent, QCloseEvent, QResizeEvent, QValidator # pylint: disable=unused-import
     from PyQt6.QtCore import QFile, QObject, QPermission, QMessageLogContext  # noqa: F401 # pylint: disable=unused-import,reimported # QFile is reimported for mypy!?
-    from PyQt6.QtWebEngineCore import QWebEnginePage  # noqa: F401 # pylint: disable=unused-import
     from matplotlib.backend_bases import Event as MplEvent, MouseEvent # type:ignore[untyped-import,unused-ignore] # ty:ignore[ignore] # pylint: disable=unused-import
     from matplotlib.artist import Artist # type:ignore[untyped-import,unused-ignore] # ty:ignore[ignore] # pylint: disable=unused-import
     from matplotlib.lines import Line2D # type:ignore[untyped-import,unused-ignore] # ty:ignore[ignore] # pylint: disable=unused-import
@@ -379,10 +370,7 @@ class Artisan(QtSingleApplication):
                     if query.hasQueryItem('url'):
                         import requests
                         query_url = QUrl(requests.utils.unquote(query.queryItemValue('url'))) # type: ignore[attr-defined] # Module has no attribute "unquote"
-                        if aw.comparator is not None:
-                            aw.comparatorAddProfileURLSignal.emit(query_url)
-                        else:
-                            aw.importArtisanURLSignal.emit(query_url)
+                        aw.importArtisanURLSignal.emit(query_url)
                 except Exception as e: # pylint: disable=broad-except
                     _log.exception(e)
             elif url.scheme() == 'file':
@@ -401,12 +389,9 @@ class Artisan(QtSingleApplication):
 
                 if file_suffix == 'alog':
                     modifiers = QApplication.keyboardModifiers()
-                    if aw.comparator is not None:
-                        # add Artisan profile to the comparator selection
-                        aw.comparatorAddProfileSignal.emit(filename)
                     # load Artisan profile on double-click on *.alog file or as result of a drag-and-drop action to the canvas
                     # in case OPTION/ALT key is hold, load into background, else foreground
-                    elif (url_query is not None and url_query == 'template') or modifiers == Qt.KeyboardModifier.AltModifier:
+                    if (url_query is not None and url_query == 'template') or modifiers == Qt.KeyboardModifier.AltModifier:
                         aw.loadBackgroundSignal.emit(filename)
                     else:
                         aw.loadFileSignal.emit(filename)
@@ -416,22 +401,22 @@ class Artisan(QtSingleApplication):
                 elif file_suffix == 'apal' and not aw.app.artisanviewerMode:
                     # load Artisan palettes on double-click on *.apal file
                     aw.loadPalettesSignal.emit(filename)
-                elif file_suffix == 'json' and not aw.app.artisanviewerMode and aw.comparator is None:
+                elif file_suffix == 'json' and not aw.app.artisanviewerMode:
                     # import Artisan JSON profile
                     aw.importJSON(filename)
-                elif file_suffix == 'xls' and not aw.app.artisanviewerMode and aw.comparator is None:
+                elif file_suffix == 'xls' and not aw.app.artisanviewerMode:
                     # import Cropster XLS profile
                     from artisanlib.cropster import extractProfileCropsterXLS
                     aw.importExternal(extractProfileCropsterXLS, QApplication.translate('Message','Import {}').format('Cropster XLS'),'*.xls',filename)
-                elif file_suffix == 'csv' and not aw.app.artisanviewerMode and aw.comparator is None:
+                elif file_suffix == 'csv' and not aw.app.artisanviewerMode:
                     # import Giesen CSV profile
                     from artisanlib.giesen import extractProfileGiesenCSV
                     aw.importExternal(extractProfileGiesenCSV, QApplication.translate('Message','Import {}').format('Giesen CSV'),'*.csv',filename)
-                elif file_suffix == 'xlsx' and not aw.app.artisanviewerMode and aw.comparator is None:
+                elif file_suffix == 'xlsx' and not aw.app.artisanviewerMode:
                     # import Stronghold XLSX profile
                     from artisanlib.stronghold import extractProfileStrongholdXLSX
                     aw.importExternal(extractProfileStrongholdXLSX, QApplication.translate('Message','Import {}').format('Stronghold XLSX'),'*.xlsx',filename)
-                if filename.endswith(('.zip', '.rop')) and not aw.app.artisanviewerMode and aw.comparator is None:
+                if filename.endswith(('.zip', '.rop')) and not aw.app.artisanviewerMode:
                     # import Orbiter .rop/.zip profile
                     from artisanlib.orbiter import extractProfileOrbiterROP
                     aw.importExternal(extractProfileOrbiterROP, QApplication.translate('Message','Import {}').format('Orbiter'),'(*.rop *.zip)',filename)
@@ -514,10 +499,6 @@ class Artisan(QtSingleApplication):
                     # - in Wheel graph mode
                     # - while editing the cup profile
                     can_open_mode = not aw.qmc.flagon and not aw.qmc.designerflag and not aw.qmc.wheelflag and aw.qmc.flavorchart_plot is None
-                    if can_open_mode and aw.comparator is not None:
-                        # while in comparator mode with the events file already open we rather send it to another instance
-                        filename = url.toString(QUrl.UrlFormattingOption.PreferLocalFile)
-                        can_open_mode = not any(p.filepath == filename for p in aw.comparator.profiles)
                     if can_open_mode:
                         self.open_url(url)
                     else:
@@ -689,10 +670,10 @@ if multiprocessing.current_process().name == 'MainProcess':
 else:
     _log.info('child process loaded')
 
-if QtWebEngineSupport:
-    _log.info('QtWebEngine found => PDF report rendering enabled')
+if PDFReportSupport:
+    _log.info('ReportLab found => PDF report rendering enabled')
 else:
-    _log.info('QtWebEngine not found => PDF report rendering disabled')
+    _log.info('ReportLab not found => PDF report rendering disabled')
 
 if platform.system().startswith('Windows'):
     # on Windows we use the Fusion style per default which supports the dark mode
@@ -717,7 +698,6 @@ from artisanlib.widgets import (MyQLCDNumber, EventPushButton, MajorEventPushBut
 
 from artisanlib.notifications import Notification, NotificationManager, NotificationType
 from artisanlib.canvas import tgraphcanvas
-from artisanlib.phases_canvas import tphasescanvas
 from artisanlib.scale import ScaleManager
 
 
@@ -1156,7 +1136,7 @@ class VMToolbar(NavigationToolbar): # pylint: disable=abstract-method
                     else:
                         self.set_message(f"<PRE>{xs: >5}\n{channel} {'' if ys is None else ys: >{min_temp_digits}}\u00B0{self.qmc.mode}{'/min' if self.qmc.fmt_data_RoR else ''}</PRE>") # type:ignore[no-untyped-call] # ty:ignore[ignore]
             # update running LCDs
-            if not self.qmc.flagon and self.aw.comparator is None and self._last_event.xdata is not None:
+            if not self.qmc.flagon and self._last_event.xdata is not None:
                 if self.qmc.running_LCDs == 1: # show foreground profile readings at cursor position in LCDs
                     if timeindex is None:
                         timeindex = self.qmc.time2index(float(self._last_event.xdata), nearest=False)
@@ -1510,8 +1490,6 @@ class ApplicationWindow(QMainWindow):
     loadFileSignal = pyqtSignal(str)
     loadPalettesSignal = pyqtSignal(str)
     importArtisanURLSignal = pyqtSignal(QUrl)
-    comparatorAddProfileURLSignal = pyqtSignal(QUrl)
-    comparatorAddProfileSignal = pyqtSignal(str)
     updateScheduleSignal = pyqtSignal()
     disconnectPlusSignal = pyqtSignal()
 
@@ -1529,7 +1507,7 @@ class ApplicationWindow(QMainWindow):
         'WebLCDsAlerts', 'EventsDlg_activeTab', 'graphColorDlg_activeTab', 'PID_DlgControl_activeTab', 'CurveDlg_activeTab', 'editGraphDlg_activeTab',
         'backgroundDlg_activeTab', 'DeviceAssignmentDlg_activeTab', 'AlarmDlg_activeTab', 'schedule_activeTab', 'StatisticsDlg_activeTab', 'resetqsettings', 'settingspath', 'wheelpath', 'profilepath',
         'userprofilepath', 'printer', 'main_widget', 'defaultdpi', 'dpi', 'qmc', 'HottopControlActive', 'AsyncSamplingTimer', 'wheeldialog',
-        'simulator', 'simulatorpath', 'comparator', 'eventsbuttonflag', 'minieventsflags', 'seriallogflag',
+        'simulator', 'simulatorpath', 'eventsbuttonflag', 'minieventsflags', 'seriallogflag',
         'seriallog', 'ser', 'modbus', 'extraMODBUStemps', 'extraMODBUStx', 's7', 'extraS7tx', 'ws', 'extraser', 'extracomport', 'extrabaudrate',
         'extrabytesize', 'extraparity', 'extrastopbits', 'extratimeout', 'hottop', 'santokerHost', 'santokerPort', 'santokerSerial', 'santokerBLE', 'santokerEventFlags', 'santoker', 'santokerR', 'roest', 'roestEventFlags', 'lebrew_roastseeNEXT', 'thermoworksBlueDOT', 'fujipid', 'dtapid', 'pidcontrol', 'soundflag', 'recentRoasts', 'maxRecentRoasts',
         'mugmaHost','mugmaPort', 'mugma', 'mugma_default_host', 'shelly_3EMPro_host', 'shelly_PlusPlug_host',
@@ -1550,7 +1528,7 @@ class ApplicationWindow(QMainWindow):
         'flavorAction', 'switchAction', 'switchETBTAction', 'machineMenu', 'deviceAction', 'commportAction', 'calibrateDelayAction', 'curvesAction',
         'eventsAction', 'alarmAction', 'phasesGraphAction', 'StatisticsAction', 'WindowconfigAction', 'colorsAction', 'themeMenu', 'autosaveAction',
         'batchAction', 'temperatureConfMenu', 'FahrenheitAction', 'CelsiusAction', 'languageMenu', 'analyzeMenu', 'fitIdealautoAction',
-        'analyzeMenu', 'fitIdealx2Action', 'fitIdealx3Action', 'fitIdealx0Action', 'fitBkgndAction', 'clearresultsAction', 'roastCompareAction',
+        'analyzeMenu', 'fitIdealx2Action', 'fitIdealx3Action', 'fitIdealx0Action', 'fitBkgndAction', 'clearresultsAction',
         'designerAction', 'simulatorAction', 'wheeleditorAction', 'transformAction', 'temperatureMenu', 'ConvertToFahrenheitAction',
         'ConvertToCelsiusAction', 'controlsAction', 'readingsAction', 'eventsEditorAction', 'buttonsAction', 'slidersAction', 'scheduleAction', 'lcdsAction', 'deltalcdsAction',
         'pidlcdsAction', 'scalelcdsAction', 'extralcdsAction', 'phaseslcdsAction', 'fullscreenAction', 'newRoastAction', 'loadSettingsAction', 'openRecentSettingMenu',
@@ -1573,15 +1551,15 @@ class ApplicationWindow(QMainWindow):
         'e3buttonbarLayout', 'e3buttondialog', 'e4buttonbarLayout', 'e4buttondialog','e5buttonbarLayout', 'e5buttondialog', 'e6buttonbarLayout', 'e6buttondialog',
         'e7buttonbarLayout', 'e7buttondialog', 'e8buttonbarLayout', 'e8buttondialog', 'e9buttonbarLayout', 'e9buttondialog', 'e10buttonbarLayout', 'e10buttondialog',
         'keyboardmove', 'keyboardButtonList', 'keyboardmoveindex',
-        'keyboardmoveflag', 'lastkeyboardcmd', 'error_dlg', 'serial_dlg', 'message_dlg', 'ETname', 'BTname', 'level1frame', 'level1layout', 'qpc', 'splitter', 'scroller', 'EventsGroupLayout',
+        'keyboardmoveflag', 'lastkeyboardcmd', 'error_dlg', 'serial_dlg', 'message_dlg', 'ETname', 'BTname', 'level1frame', 'level1layout', 'splitter', 'scroller', 'EventsGroupLayout',
         'LCD2frame', 'LCD3frame', 'LCD4frame', 'LCD5frame', 'LCD6frame', 'LCD7frame', 'TPlabel', 'TPlcd', 'TPlcdFrame', 'TP2DRYlabel', 'TP2DRYframe',
         'DRYlabel', 'DRYlcd', 'DRYlcdFrame', 'DRY2FCslabel', 'DRY2FCsframe', 'FCslabel', 'FCslcd', 'FCslcdFrame', 'AUClabel', 'AUClcd', 'AUClcdFrame',
         'AUCLCD', 'phasesLCDs', 'extrabuttonsLayout', 'extrabuttondialogs', 'slider1', 'slider2', 'slider3', 'slider4', 'sliderLCD1', 'sliderLCD2', 'sliderLCD3',
         'sliderLCD4', 'sliderGrpBox1', 'sliderGrpBox2', 'sliderGrpBox3', 'sliderGrpBox4', 'sliderSV', 'sliderLCDSV', 'sliderGrpBoxSV', 'leftlayout',
-        'sliderFrame', 'sliderDock', 'lcdFrame', 'midlayout', 'editgraphdialog', 'html_loader', 'QtWebEngineSupport', 'artisanviewerFirstStart',
+        'sliderFrame', 'sliderDock', 'lcdFrame', 'midlayout', 'editgraphdialog', 'PDFReportSupport', 'artisanviewerFirstStart',
         'buttonpalette', 'extraeventbuttontextcolor', 'extraeventsactions', 'extraeventsdescriptions', 'extraeventstypes', 'extraeventsvalues',
         'extraeventsvisibility', 'fileSaveAsAction', 'keyboardButtonStyles', 'language_menu_actions', 'loadThemeAction', 'main_button_min_width_str',
-        'minieventleft', 'minieventright', 'notificationManager', 'notificationsflag', 'ntb', 'pdf_page_layout', 'pdf_rendering', 'productionPDFAction',
+        'minieventleft', 'minieventright', 'notificationManager', 'notificationsflag', 'ntb', 'productionPDFAction',
         'rankingPDFAction', 'roastReportMenu', 'roastReportPDFAction', 'saveAsThemeAction', 'sliderGrp12', 'sliderGrp34', 'sliderGrpBox1x', 'sliderGrpBox2x', 'sliderGrpBox3x', 'sliderGrpBox4x',
         'small_button_min_width_str', 'standard_button_min_width_px', 'tiny_button_min_width_str', 'recording_version', 'recording_revision', 'recording_build',
         'lastIOResult', 'lastArtisanResult', 'max_palettes', 'palette_entries', 'eventsliders', 'defaultSettings', 'zoomInShortcut', 'zoomOutShortcut',
@@ -1595,7 +1573,7 @@ class ApplicationWindow(QMainWindow):
 
     nLCDS: Final[int] = 10 # maximum number of LCDs and extra devices (2x10 => 20 in total!)
 
-    def __init__(self, parent:QWidget|None = None, *, locale:str, WebEngineSupport:bool, artisanviewerFirstStart:bool) -> None:
+    def __init__(self, parent:QWidget|None = None, *, locale:str, pdfReportSupport:bool, artisanviewerFirstStart:bool) -> None:
 
         self.defaultSettings: dict[str, Any] = {}
                 # holds default values of all app QSettings
@@ -1609,7 +1587,7 @@ class ApplicationWindow(QMainWindow):
         self.sample_loop_running:bool = True
         self.time_stopped:float = 0
 
-        self.QtWebEngineSupport:bool = WebEngineSupport
+        self.PDFReportSupport:bool = pdfReportSupport
         self.artisanviewerFirstStart:bool = artisanviewerFirstStart
 
 #PLUS
@@ -1643,11 +1621,6 @@ class ApplicationWindow(QMainWindow):
         self.quickEventShortCut:tuple[int, str]|None = None
         # this is None if inactive, or holds a tuple (n,s) with n a number {-1,..,4} indicating the custom event number (0-3), 4 for SV, or -1 for custom event buttons to be addressed
         # and s a string of length 0 (no digit yet), length 1 (if first digit is typed) or 2 (both digits are typed) indicating the value (00-99)
-
-        # html2pdf() state:
-        self.html_loader:QWebEngineView|None = None # pyright:ignore[reportPossiblyUnboundVariable] # holds the QWebEngineView during HTML2PDF generation in self.html2pdf()
-        self.pdf_page_layout:QPageLayout|None = None # holds the QPageLayout used during HTML2PDF generation in self.html2pdf()
-        self.pdf_rendering:bool = False # True while PDF is rendered by QWebEngineView
 
         self.eventaction_running_threads:list[EventActionThread] = []
         self.updateCheckThread:UpdateCheckThread|None = None # holds the currently running UpdateCheckThread, if any
@@ -1822,8 +1795,6 @@ class ApplicationWindow(QMainWindow):
 
         self.simulator:Simulator|None = None # holds the simulator in simulation mode
         self.simulatorpath:str = '' # points to the last profile used by the simulator
-
-        self.comparator:roastCompareDlg|None = None # holds the profile comparator dialog
 
         self.qmc.canvas.setContentsMargins(0,0,0,0)
         #events config
@@ -2390,7 +2361,7 @@ class ApplicationWindow(QMainWindow):
         fileConvertReportPDFAction = QAction(QApplication.translate('Menu', 'Roast Report PDF...'), self)
         fileConvertReportPDFAction.triggered.connect(self.fileConvertReportPDF)
         self.convMenu.addAction(fileConvertReportPDFAction)
-        if not self.QtWebEngineSupport:
+        if not self.PDFReportSupport:
             fileConvertReportPDFAction.setEnabled(False)
 
         self.saveGraphMenu:QMenu = QMenu(QApplication.translate('Menu', 'Save Graph'))
@@ -2448,7 +2419,7 @@ class ApplicationWindow(QMainWindow):
         self.roastReportPDFAction = QAction(QApplication.translate('Menu', 'PDF...'), self)
         self.roastReportPDFAction.triggered.connect(self.pdfReport)
         self.roastReportMenu.addAction(self.roastReportPDFAction)
-        if not self.QtWebEngineSupport:
+        if not self.PDFReportSupport:
             self.roastReportPDFAction.setEnabled(False)
 
         self.htmlAction = QAction(QApplication.translate('Menu', 'Web...'), self)
@@ -2461,7 +2432,7 @@ class ApplicationWindow(QMainWindow):
         self.productionPDFAction = QAction(QApplication.translate('Menu', 'PDF...'), self)
         self.productionPDFAction.triggered.connect(self.productionPDFReport)
         self.productionMenu.addAction(self.productionPDFAction)
-        if not self.QtWebEngineSupport:
+        if not self.PDFReportSupport:
             self.productionPDFAction.setEnabled(False)
         self.productionWebAction = QAction(QApplication.translate('Menu', 'Web...'), self)
         self.productionWebAction.triggered.connect(self.productionHTMLReport)
@@ -2478,7 +2449,7 @@ class ApplicationWindow(QMainWindow):
         self.rankingPDFAction = QAction(QApplication.translate('Menu', 'PDF...'), self)
         self.rankingPDFAction.triggered.connect(self.rankingPDFReport)
         self.rankingMenu.addAction(self.rankingPDFAction)
-        if not self.QtWebEngineSupport:
+        if not self.PDFReportSupport:
             self.rankingPDFAction.setEnabled(False)
         self.rankingWebAction = QAction(QApplication.translate('Menu', 'Web...'), self)
         self.rankingWebAction.triggered.connect(self.rankingHTMLReport)
@@ -2659,6 +2630,13 @@ class ApplicationWindow(QMainWindow):
         # Operators submenu (multi-operator cloud login); rebuilt each time it is about to show
         self.operatorsMenu:QMenu = QMenu(QApplication.translate('Menu', 'Operators'))
         self.operatorsMenu.aboutToShow.connect(self.populateOperatorsMenu)
+        self.unsentAction:QAction = QAction(QApplication.translate('Menu', 'Unsent cloud data…'), self)
+        self.unsentAction.triggered.connect(self.showUnsentData)
+        self.errorReportsAction:QAction = QAction(QApplication.translate('Menu', 'Send error reports to Roastlocal'), self)
+        self.errorReportsAction.setCheckable(True)
+        from artisanlib import error_reports
+        self.errorReportsAction.setChecked(error_reports.enabled())
+        self.errorReportsAction.triggered.connect(self.toggleErrorReports)
 
         self.UIModeMenu:QMenu = QMenu(QApplication.translate('Menu', 'Mode'))
         self.productionModeAction:QAction = QAction(QApplication.translate('Menu', 'Production'), self)
@@ -2706,11 +2684,6 @@ class ApplicationWindow(QMainWindow):
         self.clearresultsAction.triggered.connect(self.clearResults)
         self.clearresultsAction.setShortcut('Ctrl+Alt+K') # COMMAND+OPTION on macOS
         self.analyzeMenu.addAction(self.clearresultsAction)
-
-        self.roastCompareAction: QAction = QAction(QApplication.translate('Menu', 'Comparator'), self)
-        self.roastCompareAction.triggered.connect(self.roastCompare)
-        self.roastCompareAction.setCheckable(True)
-        self.roastCompareAction.setChecked(bool(self.comparator))
 
         self.designerAction: QAction = QAction(QApplication.translate('Menu', 'Designer') , self)
         self.designerAction.triggered.connect(self.designerTriggered)
@@ -4028,8 +4001,6 @@ class ApplicationWindow(QMainWindow):
         #level 3
         level3layout.addLayout(pidbuttonLayout,0)
 
-        self.qpc:tphasescanvas|None = None
-
         self.scroller: QScrollArea = QScrollArea()
         self.scroller.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.scroller.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -4395,8 +4366,6 @@ class ApplicationWindow(QMainWindow):
         self.loadFileSignal.connect(self.loadFileSlot, type=Qt.ConnectionType.QueuedConnection)  # type: ignore[call-arg]
         self.loadPalettesSignal.connect(self.loadPalettesSlot, type=Qt.ConnectionType.QueuedConnection)  # type: ignore[call-arg]
         self.importArtisanURLSignal.connect(self.importArtisanURLSlot, type=Qt.ConnectionType.QueuedConnection)  # type: ignore[call-arg]
-        self.comparatorAddProfileURLSignal.connect(self.comparatorAddProfileURLSlot, type=Qt.ConnectionType.QueuedConnection)  # type: ignore[call-arg]
-        self.comparatorAddProfileSignal.connect(self.comparatorAddProfileSlot, type=Qt.ConnectionType.QueuedConnection)  # type: ignore[call-arg]
         self.updateScheduleSignal.connect(self.updateSchedule, type=Qt.ConnectionType.QueuedConnection)  # type: ignore[call-arg]
 
         self.notificationManager:NotificationManager|None = None
@@ -4410,8 +4379,6 @@ class ApplicationWindow(QMainWindow):
 #PLUS
         self.updatePlusStatusSignal.connect(self.updatePlusStatusSlot)
         self.checkUpdateResultSignal.connect(self.checkUpdateResultSlot)
-
-        QTimer.singleShot(2000,self.donate)
 
         QTimer.singleShot(0, self.logStartupTime)
         QTimer.singleShot(500, self.updateBadge)
@@ -4507,6 +4474,8 @@ class ApplicationWindow(QMainWindow):
         # Operators (multi-operator cloud login)
         config_menu.addSeparator()
         config_menu.addMenu(self.operatorsMenu)
+        config_menu.addAction(self.unsentAction)
+        config_menu.addAction(self.errorReportsAction)
         # the UI mode selector should always be present
         config_menu.addSeparator()
         config_menu.addMenu(self.UIModeMenu)
@@ -4517,7 +4486,6 @@ class ApplicationWindow(QMainWindow):
         if ui_mode is not UI_MODE.PRODUCTION:
             if ui_mode is UI_MODE.EXPERT:
                 tools_menu.addMenu(self.analyzeMenu)
-            tools_menu.addAction(self.roastCompareAction)
             tools_menu.addAction(self.designerAction)
             if ui_mode is UI_MODE.EXPERT:
                 tools_menu.addAction(self.simulatorAction)
@@ -4591,6 +4559,17 @@ class ApplicationWindow(QMainWindow):
         return help_menu
 
     # Operators menu (multi-operator cloud login)
+
+    @pyqtSlot(bool)
+    def toggleErrorReports(self, checked:bool) -> None: # pylint: disable=no-self-use # used as slot
+        from artisanlib import error_reports
+        error_reports.set_enabled(checked)
+
+    @pyqtSlot()
+    @pyqtSlot(bool)
+    def showUnsentData(self, _:bool = False) -> None:
+        from artisanlib.unsent_dialog import UnsentDialog
+        UnsentDialog(self, self).exec()
 
     @pyqtSlot()
     def populateOperatorsMenu(self) -> None:
@@ -4728,14 +4707,6 @@ class ApplicationWindow(QMainWindow):
 
     #
 
-    def establish_phasescanvas(self) -> None:
-        if self.qpc is None:
-            from artisanlib.phases_canvas import tphasescanvas # pylint: disable=reimported
-            self.qpc = tphasescanvas(self.dpi, self)
-            self.qpc.canvas.setSizePolicy(QSizePolicy.Policy.Expanding,QSizePolicy.Policy.Fixed)
-            self.qpc.canvas.mpl_connect('scroll_event', self.scrollingPhases)
-            self.scroller.setWidget(self.qpc.canvas)
-
     def scale_connected_handler(self, scale_id:str, scale_name:str) -> None:
         if scale_name:
             name = (self.getScaleName((scale_name, scale_id)) if scale_id else scale_name)
@@ -4833,16 +4804,6 @@ class ApplicationWindow(QMainWindow):
 
     def zoomOut(self) -> None:
         self.setdpi(self.dpi-10)
-
-    def scrollingPhases(self, event:'MplEvent') -> Any:
-        verticalScroller: QScrollBar|None = self.scroller.verticalScrollBar()
-        if verticalScroller is not None:
-            val = verticalScroller.value()
-            if hasattr(event, 'button') and event.button == 'down': # pyright: ignore[reportAttributeAccessIssue]
-                verticalScroller.setValue(val+10)
-            else:
-                verticalScroller.setValue(val-10)
-
 
     # timer_color one of "timer" (black), "slowcoolingtimer" (red), "rstimer" (blue)
     def setTimerColor(self, timer_color:str) -> None:
@@ -5137,8 +5098,8 @@ class ApplicationWindow(QMainWindow):
             elif self.curFile:
                 # profile loaded
                 self.setWindowTitle(f'{dirtySign}{self.strippedName(self.curFile)} – {appTitle}')
-                # if not Simulator, Comparator, Designer, WheelGraph
-                if self.comparator is None and not self.qmc.designerflag and not self.qmc.wheelflag and self.qmc.ax is not None:
+                # if not Simulator, Designer, WheelGraph
+                if not self.qmc.designerflag and not self.qmc.wheelflag and self.qmc.ax is not None:
                     self.setWindowFilePath(self.curFile)
             # no profile loaded
             elif __release_sponsor_name__ != '': # pyright:ignore[reportUnnecessaryComparison]
@@ -5150,52 +5111,9 @@ class ApplicationWindow(QMainWindow):
         except Exception as e: # pylint: disable=broad-except
             _log.exception(e)
 
-    @staticmethod
-    def resetDonateCounter() -> None:
-        settings = QSettings()
-        settings.setValue('lastdonationpopup',int(libtime.time()))
-        settings.setValue('starts',0)
-        settings.sync()
-        if settings.status() != QSettings.Status.NoError:
-            _log.error('Failed to save lastdonationpopup settings')
-
     @pyqtSlot()
     def logStartupTime(self) -> None: # pylint: disable=no-self-use # used as slot
         _log.info('MODE: startup time: %.2f', libtime.process_time() - startup_time)
-
-    @pyqtSlot()
-    def donate(self) -> None:
-        try:
-            everytime = 4*30*24*60*60 # 4 month in seconds
-            everystarts = 30 # number of recordings
-            starts = None
-            lastdonationpopup = None
-            settings = QSettings()
-            if settings.contains('starts'):
-                starts = toInt(settings.value('starts'))
-            if settings.contains('lastdonationpopup'):
-                lastdonationpopup = toInt(settings.value('lastdonationpopup'))
-            now = int(libtime.time())
-            if not(settings.status() == QSettings.Status.NoError and
-                    lastdonationpopup is not None and
-                    starts is not None and
-                    (now >= lastdonationpopup > now-everytime) and
-                    0 <= starts < everystarts):
-#                message = QApplication.translate('Message', 'Artisan is free to use!<br><br>To keep it free and current please support us<br><br><a href="{0}">{0}</a><br><br>and book<br><br><a href="{1}">{1}</a><br><br>to suppress this dialog')
-#                message = message.format('https://artisan-scope.org/donate/', 'https://artisan.plus')
-                message = QApplication.translate('Message', 'Artisan is free to use!\n\nTo keep it free and current please support us with your donation and subscribe to Roastlocal Cloud to suppress this dialog!')
-                donate_message_box = QMessageBox()
-                donate_message_box.setText(message)
-                donate_message_box.setIcon(QMessageBox.Icon.Information)
-                donate_message_box.setModal(True)
-                donate_message_box.setStandardButtons(QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.Ok)
-                donate_message_box.setDefaultButton(QMessageBox.StandardButton.Ok)
-                res = donate_message_box.exec()
-                if res == QMessageBox.StandardButton.Ok:
-                    QDesktopServices.openUrl(QUrl('https://artisan-scope.org/donate/', QUrl.ParsingMode.TolerantMode)) # zuban:ignore[unreachable]
-                self.resetDonateCounter()
-        except Exception as e: # pylint: disable=broad-except
-            _log.exception(e)
 
     @pyqtSlot(str)
     def setCanvasColor(self, c:str) -> None: # pylint: disable=no-self-use # used as slot
@@ -5250,9 +5168,6 @@ class ApplicationWindow(QMainWindow):
                 try:
                     if urls and len(urls)>0:
                         self.app.open_url(urls[0])
-                    if self.comparator is not None:
-                        for url in urls[0:]:
-                            self.app.open_url(url)
                 except Exception as e:
                     _log.exception(e)
 
@@ -6633,14 +6548,13 @@ class ApplicationWindow(QMainWindow):
                                     + 'color: ' + rgba_colorname2argb_colorname(title_color) + ';'
                                     + '}' )
 
-        if self.comparator is None:
-            if self.qmc.background and self.qmc.title != '':
-                if self.qmc.roastbatchnrB == 0:
-                    titleB = self.qmc.titleB
-                else:
-                    titleB = self.qmc.roastbatchprefixB + str(self.qmc.roastbatchnrB) + ' ' + self.qmc.titleB
-                self.qmc.setProfileBackgroundTitle(titleB)
-            self.qmc.setProfileTitle(self.qmc.title,updatebackground=True)
+        if self.qmc.background and self.qmc.title != '':
+            if self.qmc.roastbatchnrB == 0:
+                titleB = self.qmc.titleB
+            else:
+                titleB = self.qmc.roastbatchprefixB + str(self.qmc.roastbatchnrB) + ' ' + self.qmc.titleB
+            self.qmc.setProfileBackgroundTitle(titleB)
+        self.qmc.setProfileTitle(self.qmc.title,updatebackground=True)
 
 
 
@@ -8676,7 +8590,7 @@ class ApplicationWindow(QMainWindow):
     pyqtSlot()
     def sliderfocusIn(self) -> None:
         sender = self.sender()
-        if not self.qmc.designerflag and self.comparator is None and sender is not None and isinstance(sender, SliderUnclickable):
+        if not self.qmc.designerflag and sender is not None and isinstance(sender, SliderUnclickable):
             try:
                 n:int = [self.slider1,self.slider2,self.slider3,self.slider4,self.sliderSV].index(sender)
                 self.quickEventShortCut = (n,'')
@@ -8945,8 +8859,6 @@ class ApplicationWindow(QMainWindow):
                     QApplication.processEvents()
                     if self.qmc.statssummary:
                         self.qmc.redraw(recomputeAllDeltas=False)
-                if self.qpc is not None:
-                    self.qpc.setdpi(dpi,moveWindow)
             except Exception as e:  # pylint: disable=broad-except
                 _log.exception(e)
 
@@ -12177,7 +12089,7 @@ class ApplicationWindow(QMainWindow):
         self.convMenu.setEnabled(True)
         self.saveGraphMenu.setEnabled(True)
         self.htmlAction.setEnabled(True)
-        if self.QtWebEngineSupport:
+        if self.PDFReportSupport:
             self.roastReportPDFAction.setEnabled(True)
         self.reportMenu.setEnabled(True)
         self.productionMenu.setEnabled(True)
@@ -12195,7 +12107,6 @@ class ApplicationWindow(QMainWindow):
         self.commportAction.setEnabled(True)
         self.curvesAction.setEnabled(True)
         self.analyzeMenu.setEnabled(True)
-        self.roastCompareAction.setEnabled(True)
         self.designerAction.setEnabled(True)
         self.simulatorAction.setEnabled(True)
         self.wheeleditorAction.setEnabled(True)
@@ -12231,18 +12142,14 @@ class ApplicationWindow(QMainWindow):
             self.saveStatisticsMenu.setEnabled(True)
         self.displayonlymenus()
 
-    def disableEditMenus(self, designer:bool = False, wheel:bool = False, compare:bool = False, sampling:bool = False) -> None:
+    def disableEditMenus(self, designer:bool = False, wheel:bool = False, sampling:bool = False) -> None:
         # FILE menu
-        if designer or wheel or compare:
+        if designer or wheel:
             self.newRoastMenu.setEnabled(False)
         else:
             self.newRoastMenu.setEnabled(True)
-        if compare:
-            self.fileLoadAction.setEnabled(True) # open
-            self.openRecentMenu.setEnabled(True) # open recent
-        else:
-            self.fileLoadAction.setEnabled(False) # open
-            self.openRecentMenu.setEnabled(False) # open recent
+        self.fileLoadAction.setEnabled(False) # open
+        self.openRecentMenu.setEnabled(False) # open recent
         self.importMenu.setEnabled(False) # import
         if not sampling:
             self.fileSaveAction.setEnabled(False)
@@ -12250,29 +12157,28 @@ class ApplicationWindow(QMainWindow):
             self.fileSaveCopyAsAction.setEnabled(False)
             self.exportMenu.setEnabled(False)
         self.convMenu.setEnabled(False)
-        if not wheel and not compare and not sampling:
+        if not wheel and not sampling:
             self.saveGraphMenu.setEnabled(False)
         self.htmlAction.setEnabled(False)
         self.roastReportPDFAction.setEnabled(False)
         self.reportMenu.setEnabled(False)
         self.productionMenu.setEnabled(False)
         self.rankingMenu.setEnabled(False)
-        if not compare and not sampling:
+        if not sampling:
             self.printAction.setEnabled(False)
         self.saveStatisticsMenu.setEnabled(False)
         # EDIT menu
         # ROAST menu
-        if compare or wheel:
+        if wheel:
             self.editGraphAction.setEnabled(False)
             self.backgroundAction.setEnabled(False)
         self.flavorAction.setEnabled(False)
         self.switchAction.setEnabled(False)
         self.switchETBTAction.setEnabled(False)
         # CONFIG menu
-        if not compare:
-            self.machineMenu.setEnabled(False)
-            self.deviceAction.setEnabled(False)
-            self.commportAction.setEnabled(False)
+        self.machineMenu.setEnabled(False)
+        self.deviceAction.setEnabled(False)
+        self.commportAction.setEnabled(False)
         if designer or wheel:
             self.curvesAction.setEnabled(False) # Curves menu
         else:
@@ -12288,10 +12194,6 @@ class ApplicationWindow(QMainWindow):
         self.languageMenu.setEnabled(False)
         # TOOLS menu
         self.analyzeMenu.setEnabled(False)
-        if not compare:
-            self.roastCompareAction.setEnabled(False)
-        else:
-            self.roastCompareAction.setEnabled(True)
         if not designer:
             self.designerAction.setEnabled(False)
         else:
@@ -12515,9 +12417,7 @@ class ApplicationWindow(QMainWindow):
                     self.toggleFullscreen()
                 elif k == Qt.Key.Key_G and no_modifier: # 71:       #G (toggle time auto axis mode)
                     if not self.qmc.designerflag and not self.qmc.wheelflag:
-                        if self.comparator is not None:
-                            self.comparator.modeComboBox.setCurrentIndex((self.comparator.modeComboBox.currentIndex()+1) % 3)
-                        elif self.qmc.autotimex:
+                        if self.qmc.autotimex:
                             self.qmc.autotimexMode = (self.qmc.autotimexMode+1) % 3
                             if self.qmc.autotimexMode == 0:
                                 self.sendmessage(QApplication.translate('Message','Auto Axis Graph Mode: Roast'))
@@ -12540,20 +12440,19 @@ class ApplicationWindow(QMainWindow):
                 elif k == Qt.Key.Key_O and no_modifier: # 79:       #O (toggle background showfull flag)
                     self.toggleBackroundShowfullFlag()
                 elif k == Qt.Key.Key_H: # 72:                       #H  (load / delete background profile)
-                    if self.comparator is None:
-                        # delete background when there are platform specific modifiers
-                        if ((alt_modifier or shift_modifier) and platform.system() != 'Windows') or (control_shift_modifier or control_alt_modifier and platform.system() == 'Windows'): #control_alt_modifier here for backward compatibility only, see note above
-                            self.deleteBackground()
-                            if not self.qmc.flagon:
-                                self.autoAdjustAxis()
-                            self.qmc.redraw()
-                        # load background when there are no modifiers
-                        elif no_modifier or control_modifier:
-                            filename = self.ArtisanOpenFileDialog(msg=QApplication.translate('Message','Load Background'),ext='*.alog')
-                            if len(filename) != 0:
-                                self.loadBackgroundSignal.emit(filename)
+                    # delete background when there are platform specific modifiers
+                    if ((alt_modifier or shift_modifier) and platform.system() != 'Windows') or (control_shift_modifier or control_alt_modifier and platform.system() == 'Windows'): #control_alt_modifier here for backward compatibility only, see note above
+                        self.deleteBackground()
+                        if not self.qmc.flagon:
+                            self.autoAdjustAxis()
+                        self.qmc.redraw()
+                    # load background when there are no modifiers
+                    elif no_modifier or control_modifier:
+                        filename = self.ArtisanOpenFileDialog(msg=QApplication.translate('Message','Load Background'),ext='*.alog')
+                        if len(filename) != 0:
+                            self.loadBackgroundSignal.emit(filename)
                 elif k == Qt.Key.Key_L and no_modifier and self.ui_mode is not UI_MODE.PRODUCTION: # 76:       #L (load alarms)
-                    if not self.qmc.designerflag and self.comparator is None:
+                    if not self.qmc.designerflag:
                         filename = self.ArtisanOpenFileDialog(msg=QApplication.translate('Message','Load Alarms'),ext='*.alrm')
                         if len(filename) == 0:
                             return
@@ -12786,7 +12685,7 @@ class ApplicationWindow(QMainWindow):
                     elif self.qmc.background and self.qmc.backgroundKeyboardControlFlag:
                         self.qmc.moveBackgroundSignal.emit('down',self.qmc.backgroundmovespeed)
                 elif k == Qt.Key.Key_A and no_modifier: # 65:               #A (automatic save)
-                    if not self.app.artisanviewerMode and self.qmc.flagon and not self.qmc.designerflag and self.comparator is None:
+                    if not self.app.artisanviewerMode and self.qmc.flagon and not self.qmc.designerflag:
                         self.automaticsave()
                 elif k == Qt.Key.Key_D and no_modifier: # 68:               #D (toggle xy coordinates between temp and RoR scale)
                     if not self.qmc.wheelflag:
@@ -12811,7 +12710,7 @@ class ApplicationWindow(QMainWindow):
                             except Exception: # pylint: disable=broad-except
                                 pass
                 elif k == Qt.Key.Key_Z and no_modifier: # 90:   #Z (toggle xy coordinates between 0: cursor, 1: BT, 2: ET, 3: BTB, 4: ETB)
-                    if not self.qmc.designerflag and not self.qmc.wheelflag and self.comparator is None:
+                    if not self.qmc.designerflag and not self.qmc.wheelflag:
                         self.qmc.nextFmtDataCurve()
                 elif k == Qt.Key.Key_U and no_modifier: # 85:    #U (toggle running LCDs on/off)
                     if not self.qmc.flagon:
@@ -12851,23 +12750,23 @@ class ApplicationWindow(QMainWindow):
                 elif k == Qt.Key.Key_T and (no_modifier or control_shift_modifier):
                     self.qmc.togglecrosslines()                        #T (toggle mouse cross)
                 elif k == Qt.Key.Key_Q and no_modifier: # 81:          #Q (quick entry of custom event 1)
-                    if not self.qmc.designerflag and self.comparator is None:
+                    if not self.qmc.designerflag:
                         self.quickEventShortCut = (0,'')
                         self.sendmessage(self.qmc.etypes[0], append=False)
                 elif k == Qt.Key.Key_W and no_modifier: # 87:          #W (quick entry of custom event 2)
-                    if not self.qmc.designerflag and self.comparator is None:
+                    if not self.qmc.designerflag:
                         self.quickEventShortCut = (1,'')
                         self.sendmessage(self.qmc.etypes[1], append=False)
                 elif k == Qt.Key.Key_E and no_modifier: # 69:          #E (quick entry of custom event 3)
-                    if not self.qmc.designerflag and self.comparator is None:
+                    if not self.qmc.designerflag:
                         self.quickEventShortCut = (2,'')
                         self.sendmessage(self.qmc.etypes[2], append=False)
                 elif k == Qt.Key.Key_R and no_modifier: # 82:          #R (quick entry of custom event 4)
-                    if not self.qmc.designerflag and self.comparator is None:
+                    if not self.qmc.designerflag:
                         self.quickEventShortCut = (3,'')
                         self.sendmessage(self.qmc.etypes[3], append=False)
                 elif k == Qt.Key.Key_V and no_modifier: # 86:          #V (set SV)
-                    if not self.qmc.designerflag and self.comparator is None:
+                    if not self.qmc.designerflag:
                         self.quickEventShortCut = (4,'')
                         self.sendmessage('SV', append=False)
                 elif k == Qt.Key.Key_B: # 66:          #B (hides/shows extra rows of event buttons / actives custom event button <nr> with ALT/CTRL+SHIFT modifier)
@@ -13347,7 +13246,7 @@ class ApplicationWindow(QMainWindow):
     def autosave(self, filename:str) -> None:
         if self.qmc.autosaveimageformat == 'PDF':
             self.saveVectorGraph(extension='.pdf',fname=filename)
-        elif self.qmc.autosaveimageformat == 'PDF Report' and self.QtWebEngineSupport:
+        elif self.qmc.autosaveimageformat == 'PDF Report' and self.PDFReportSupport:
             self.roastReport(pdf_filename=filename + '.pdf')
         elif self.qmc.autosaveimageformat == 'SVG':
             self.saveVectorGraph(extension='.svg',fname=filename)
@@ -13595,10 +13494,7 @@ class ApplicationWindow(QMainWindow):
         action = self.sender()
         if action and isinstance(action, QAction) and hasattr(action,'data'):
             filename = toString(action.data())
-            if self.comparator is not None:
-                self.comparator.addProfiles([filename])
-            else:
-                self.loadFile(filename)
+            self.loadFile(filename)
 
     def getDefaultPath(self) -> str:
         if not os.path.exists(self.userprofilepath):
@@ -13745,9 +13641,7 @@ class ApplicationWindow(QMainWindow):
     def fileLoad(self, _:bool = False) -> None:
         try:
             fileName = self.ArtisanOpenFileDialog(ext='*.alog')
-            if self.comparator is not None:
-                self.comparator.addProfiles([fileName])
-            elif fileName:
+            if fileName:
                 self.loadFile(fileName)
         except Exception as ex: # pylint: disable=broad-except
             _log.exception(ex)
@@ -13760,8 +13654,8 @@ class ApplicationWindow(QMainWindow):
 
     #loads stored profiles. Called from file menu
     def loadFile(self, filename:str, quiet:bool = False) -> None:
-        if self.comparator is not None or self.qmc.designerflag or self.qmc.wheelflag or self.qmc.ax is None:
-            # only load a profile if not in Comparator/Designer/WheelChart/FlavorChart mode
+        if self.qmc.designerflag or self.qmc.wheelflag or self.qmc.ax is None:
+            # only load a profile if not in Designer/WheelChart/FlavorChart mode
             return
         f:QFile|None = None
         try:
@@ -14281,8 +14175,8 @@ class ApplicationWindow(QMainWindow):
     # tries to load background from the given path, if that fails try to deref the given UUID
     # returns True on success, Fail otherwise
     def loadbackgroundUUID(self, filename:str|None = None, UUID:str|None = None, force_reload:bool=True) -> bool:
-        if self.comparator is not None or self.qmc.designerflag or self.qmc.wheelflag or self.qmc.ax is None:
-            # only load a background profile if not in Comparator/Designer/WheelChart/FlavorChart mode
+        if self.qmc.designerflag or self.qmc.wheelflag or self.qmc.ax is None:
+            # only load a background profile if not in Designer/WheelChart/FlavorChart mode
             return False
         if filename is not None and filename != '' and os.path.isfile(filename) and (force_reload or str(filename) != self.qmc.backgroundpath):
             try:
@@ -17967,7 +17861,7 @@ class ApplicationWindow(QMainWindow):
                         pd = cast('ProfileData', profile)
                         self.setProfile(f,pd,quiet=True)
                         self.qmc.redraw()
-                        self.roastReport(pdf_filename=fconv, batch_process=True)
+                        self.roastReport(pdf_filename=fconv)
                     else:
                         self.sendmessage(QApplication.translate('Message','Target file {0} exists. {1} not converted.').format(fconv,fname + str(ext)))
                 except Exception as e: # pylint: disable=broad-except
@@ -17976,7 +17870,6 @@ class ApplicationWindow(QMainWindow):
                 self.qmc.fileCleanSignal.emit()
                 self.qmc.reset(soundOn=False)
                 self.restoreExtradeviceSettings()
-            self.releaseQWebEngineView()
             if loaded_profile:
                 self.loadFile(loaded_profile, quiet=True)
             self.qmc.roastpropertiesflag = flag_temp
@@ -21636,8 +21529,6 @@ class ApplicationWindow(QMainWindow):
             tmp_LargeLCDs = self.LargePhasesLCDsFlag # we keep the state to properly store it in the settings
             self.largePhasesLCDs_dialog.close()
             self.LargePhasesLCDsFlag = tmp_LargeLCDs
-        if self.comparator:
-            self.comparator.close()
         # now wait until the current sampling thread is terminated
         while self.qmc.flagsamplingthreadrunning:
             QApplication.processEvents()
@@ -21750,7 +21641,6 @@ class ApplicationWindow(QMainWindow):
             # image coordinates
             size = image.size()
             rect_size = rect.size()
-            graph_height = size.height()
             rect_size.setHeight(int(round(rect_size.height()*self.devicePixelRatio())))
             rect_size.setWidth(int(round(rect_size.width()*self.devicePixelRatio())))
             size.scale(rect_size, Qt.AspectRatioMode.KeepAspectRatio)
@@ -21763,28 +21653,6 @@ class ApplicationWindow(QMainWindow):
                 painter.drawPixmap(0, 0, image)
             else:
                 painter.drawImage(0, 0, image) # pyright:ignore[reportUnknownArgumentType]
-            if self.comparator is not None and self.qpc is not None and len(self.splitter.sizes())>1 and self.splitter.sizes()[1]>0:
-                phases_image = self.qpc.canvas.grab().toImage() # a QImage on macOS
-                if not phases_image.isNull():
-                    if self.printer.pageLayout().orientation() == QPageLayout.Orientation.Landscape:
-                        self.printer.newPage()
-                        offset = 0
-                    else:
-                        offset = int(round(graph_height/self.devicePixelRatio())) # pyright:ignore[reportUnknownArgumentType] # put the phases graph below the profile graph
-                    size = phases_image.size()
-                    rect_size = rect.size()
-                    rect_size.setHeight(int(round(rect_size.height()*self.devicePixelRatio())))
-                    rect_size.setWidth(int(round(rect_size.width()*self.devicePixelRatio())))
-                    size.scale(rect_size, Qt.AspectRatioMode.KeepAspectRatio)
-                    painter.setViewport(rect.x(), rect.y(), size.width(), size.height())   # pyright:ignore[reportUnknownArgumentType] # sets device coordinate system
-                    image_rect = phases_image.rect()
-        #            image_rect.setHeight(int(round(image_rect.height()/self.devicePixelRatio())))
-        #            image_rect.setWidth(int(round(image_rect.width()/self.devicePixelRatio())))
-                    painter.setWindow(image_rect) #scale to fit page # sets logical coordinate system  # pyright:ignore[reportUnknownArgumentType]
-                    if isinstance(phases_image, QPixmap):
-                        painter.drawPixmap(0, 0, phases_image)
-                    else:
-                        painter.drawImage(0, offset, phases_image) # pyright:ignore[reportUnknownArgumentType]
             painter.end()
             del painter
 
@@ -22118,27 +21986,28 @@ class ApplicationWindow(QMainWindow):
                     total_defects_sum += (convertWeight(defects_weight,weight_units.index(last_unit),weight_units.index(unit)) if defects_weight == 0 else 0)
                     entries += self.productionData2htmlentry(d) + '\n'
 
-                html = libstring.Template(HTML_REPORT_TEMPLATE).safe_substitute(
-                    title = QApplication.translate('HTML Report Template', 'Roast Batches'),
-                    entries = entries,
-                    total_in = (f'{total_in_sum:.2f}' if unit in {'Kg', 'lb', 'oz'} else f'{total_in_sum:.0f}'),
-                    total_out = (f'{total_out_sum:.2f}' if unit in {'Kg', 'lb', 'oz'} else f'{total_out_sum:.0f}'),
-                    total_loss = float2float(self.weight_loss(total_in_sum,total_out_sum), self.percent_decimals),
-                    total_defects = (f'{total_defects_sum:.2f}' if unit in {'Kg', 'lb', 'oz'} else f'{total_defects_sum:.0f}'),
-                    total_defectsloss = float2float(self.weight_loss(total_out_sum,total_out_sum-total_defects_sum), self.percent_decimals),
-                    resources = str(getResourcePath()),
-                    batch = QApplication.translate('HTML Report Template', 'Batch'),
-                    time = QApplication.translate('HTML Report Template', 'Date'),
-                    profile = QApplication.translate('Label', 'Title'),
-                    beans = QApplication.translate('HTML Report Template', 'Beans'),
-                    weightin = QApplication.translate('HTML Report Template', 'In'),
-                    weightout = QApplication.translate('HTML Report Template', 'Out'),
-                    loss = QApplication.translate('HTML Report Template', 'Loss'),
-                    defects = QApplication.translate('HTML Report Template', 'Def.'),
-                    defectsloss = QApplication.translate('HTML Report Template', 'Def.L'),
-                    sum = QApplication.translate('HTML Report Template', 'SUM'),
-                    unit = unit.lower()
-                )
+                report_values:dict[str, Any] = {
+                    'title': QApplication.translate('HTML Report Template', 'Roast Batches'),
+                    'entries': entries,
+                    'total_in': (f'{total_in_sum:.2f}' if unit in {'Kg', 'lb', 'oz'} else f'{total_in_sum:.0f}'),
+                    'total_out': (f'{total_out_sum:.2f}' if unit in {'Kg', 'lb', 'oz'} else f'{total_out_sum:.0f}'),
+                    'total_loss': float2float(self.weight_loss(total_in_sum,total_out_sum), self.percent_decimals),
+                    'total_defects': (f'{total_defects_sum:.2f}' if unit in {'Kg', 'lb', 'oz'} else f'{total_defects_sum:.0f}'),
+                    'total_defectsloss': float2float(self.weight_loss(total_out_sum,total_out_sum-total_defects_sum), self.percent_decimals),
+                    'resources': str(getResourcePath()),
+                    'batch': QApplication.translate('HTML Report Template', 'Batch'),
+                    'time': QApplication.translate('HTML Report Template', 'Date'),
+                    'profile': QApplication.translate('Label', 'Title'),
+                    'beans': QApplication.translate('HTML Report Template', 'Beans'),
+                    'weightin': QApplication.translate('HTML Report Template', 'In'),
+                    'weightout': QApplication.translate('HTML Report Template', 'Out'),
+                    'loss': QApplication.translate('HTML Report Template', 'Loss'),
+                    'defects': QApplication.translate('HTML Report Template', 'Def.'),
+                    'defectsloss': QApplication.translate('HTML Report Template', 'Def.L'),
+                    'sum': QApplication.translate('HTML Report Template', 'SUM'),
+                    'unit': unit.lower()
+                }
+                html = libstring.Template(HTML_REPORT_TEMPLATE).safe_substitute(report_values)
 
                 f = None
                 try:
@@ -22159,7 +22028,7 @@ class ApplicationWindow(QMainWindow):
                         # select file
                         filename = self.ArtisanSaveFileDialog(msg=QApplication.translate('Message', 'Export {}').format('PDF'),ext='*.pdf')
                         if filename:
-                            self.html2pdf(full_path, filename, landscape=True)
+                            pdf_report.production_report(filename, report_values, letter=self.pdfReportLetterPaper())
                     else:
                         QDesktopServices.openUrl(QUrl(full_path, QUrl.ParsingMode.TolerantMode))
 
@@ -22927,6 +22796,7 @@ class ApplicationWindow(QMainWindow):
     def rankingReport(self, pdf:bool = False) -> None:
         try:
             import string as libstring
+            ranking_graphs:list[str] = [] # PNG copies of the charts for the PDF report
             # get profile filenames
             files = self.reportFiles()
             if files and len(files) > 0:
@@ -23294,6 +23164,8 @@ class ApplicationWindow(QMainWindow):
                                 pass
                             self.qmc.fig.set_layout_engine('tight', **self.qmc.tight_layout_params)
                             self.qmc.fig.savefig(graph_image,transparent=True)
+                            if pdf:
+                                ranking_graphs.append(self.savePDFReportGraph(self.qmc.fig, graph_image))
 
                             #add some random number to force HTML reloading
                             graph_image = path2url(graph_image)
@@ -23444,6 +23316,8 @@ class ApplicationWindow(QMainWindow):
                         except OSError:
                             pass
                         fig.savefig(graph_image_pct,transparent=True)
+                        if pdf:
+                            ranking_graphs.append(self.savePDFReportGraph(fig, graph_image_pct))
                         #add some random number to force HTML reloading
                         graph_image_pct = path2url(graph_image_pct)
                         graph_image_pct = graph_image_pct + '?dummy=' + str(int(libtime.time()))
@@ -23469,36 +23343,37 @@ class ApplicationWindow(QMainWindow):
                         _log.exception(e)
 
                     weight_fmt = ('{0:.2f}' if self.qmc.weight[2] in {'Kg', 'lb', 'oz'} else '{0:.0f}')
-                    html = libstring.Template(HTML_REPORT_TEMPLATE).safe_substitute(
-                        resources = str(getResourcePath()),
-                        title = QApplication.translate('HTML Report Template', 'Roast Ranking'),
-                        time = QApplication.translate('HTML Report Template', 'Date'),
-                        profile = QApplication.translate('Label', 'Title'),
-                        weightin = QApplication.translate('HTML Report Template', 'In'),
-                        weightloss = QApplication.translate('HTML Report Template', 'Loss'),
-                        colorHeader = QApplication.translate('HTML Report Template', 'Color'),
-                        weight_unit = self.qmc.weight[2].lower(),
-                        temp_unit = self.qmc.mode,
-                        entries = entries,
-                        charges_avg = (weight_fmt.format(charges / charges_count) if charges_count > 0 and charges > 0 else ''),
-                        charges_temp_avg = (f'{charges_temp / charges_temp_count:.1f}' if charges_temp > 0 and charges_temp_count > 0 else ''),
-                        FCs_time_avg = (eventtime2string(FCs_time / FCs_time_count) if FCs_time > 0 and FCs_time_count > 0 else ''),
-                        FCs_temp_avg = (f'{FCs_temp / FCs_temp_count:.1f}' if FCs_temp > 0 and FCs_temp_count > 0 else ''),
-                        DROP_time_avg = (eventtime2string(DROP_time / DROP_time_count) if DROP_time > 0 and DROP_time_count > 0 else ''),
-                        DROP_temp_avg = (f'{DROP_temp / DROP_temp_count:.1f}' if DROP_temp > 0 and DROP_temp_count > 0 else ''),
-                        DRY_percent_avg = (f'{DRY_percent / DRY_percent_count:.1f}' if DRY_percent > 0 and DRY_percent_count > 0 else ''),
-                        MAI_percent_avg = (f'{MAI_percent / MAI_percent_count:.1f}' if MAI_percent > 0 and MAI_percent_count > 0 else ''),
-                        DEV_percent_avg = (f'{DEV_percent / DEV_percent_count:.1f}' if DEV_percent > 0 and DEV_percent_count > 0 else ''),
-                        AUC_avg = (f'{AUC / AUC_count:.1f}' if AUC > 0 and AUC_count > 0 else ''),
-                        loss_avg = (f'{loss / loss_count:.1f}' if loss_count > 0 and loss > 0 else ''),
-                        colors_avg = (f'{colors_list / colors_count:.1f}' if colors_list > 0 and colors_count > 0 else ''),
-                        cup_avg = (f'{cuppings / cuppings_count:.2f}' if cuppings > 0 and cuppings_count > 0 else ''),
-                        energy_avg = (f'{energies / energies_count:.2f}' if energies > 0 and energies_count > 0 else ''),
-                        co2_avg = (f'{co2s / co2s_count:.2f}' if co2s > 0 and co2s_count > 0 else ''),
-                        co2kg_avg = (f'{co2kgs / co2kgs_count:.2f}' if co2kgs > 0 and co2kgs_count > 0 else ''),
-                        graph_image=graph_image,
-                        graph_image_pct=graph_image_pct
-                    )
+                    report_values:dict[str, Any] = {
+                        'resources': str(getResourcePath()),
+                        'title': QApplication.translate('HTML Report Template', 'Roast Ranking'),
+                        'time': QApplication.translate('HTML Report Template', 'Date'),
+                        'profile': QApplication.translate('Label', 'Title'),
+                        'weightin': QApplication.translate('HTML Report Template', 'In'),
+                        'weightloss': QApplication.translate('HTML Report Template', 'Loss'),
+                        'colorHeader': QApplication.translate('HTML Report Template', 'Color'),
+                        'weight_unit': self.qmc.weight[2].lower(),
+                        'temp_unit': self.qmc.mode,
+                        'entries': entries,
+                        'charges_avg': (weight_fmt.format(charges / charges_count) if charges_count > 0 and charges > 0 else ''),
+                        'charges_temp_avg': (f'{charges_temp / charges_temp_count:.1f}' if charges_temp > 0 and charges_temp_count > 0 else ''),
+                        'FCs_time_avg': (eventtime2string(FCs_time / FCs_time_count) if FCs_time > 0 and FCs_time_count > 0 else ''),
+                        'FCs_temp_avg': (f'{FCs_temp / FCs_temp_count:.1f}' if FCs_temp > 0 and FCs_temp_count > 0 else ''),
+                        'DROP_time_avg': (eventtime2string(DROP_time / DROP_time_count) if DROP_time > 0 and DROP_time_count > 0 else ''),
+                        'DROP_temp_avg': (f'{DROP_temp / DROP_temp_count:.1f}' if DROP_temp > 0 and DROP_temp_count > 0 else ''),
+                        'DRY_percent_avg': (f'{DRY_percent / DRY_percent_count:.1f}' if DRY_percent > 0 and DRY_percent_count > 0 else ''),
+                        'MAI_percent_avg': (f'{MAI_percent / MAI_percent_count:.1f}' if MAI_percent > 0 and MAI_percent_count > 0 else ''),
+                        'DEV_percent_avg': (f'{DEV_percent / DEV_percent_count:.1f}' if DEV_percent > 0 and DEV_percent_count > 0 else ''),
+                        'AUC_avg': (f'{AUC / AUC_count:.1f}' if AUC > 0 and AUC_count > 0 else ''),
+                        'loss_avg': (f'{loss / loss_count:.1f}' if loss_count > 0 and loss > 0 else ''),
+                        'colors_avg': (f'{colors_list / colors_count:.1f}' if colors_list > 0 and colors_count > 0 else ''),
+                        'cup_avg': (f'{cuppings / cuppings_count:.2f}' if cuppings > 0 and cuppings_count > 0 else ''),
+                        'energy_avg': (f'{energies / energies_count:.2f}' if energies > 0 and energies_count > 0 else ''),
+                        'co2_avg': (f'{co2s / co2s_count:.2f}' if co2s > 0 and co2s_count > 0 else ''),
+                        'co2kg_avg': (f'{co2kgs / co2kgs_count:.2f}' if co2kgs > 0 and co2kgs_count > 0 else ''),
+                        'graph_image': graph_image,
+                        'graph_image_pct': graph_image_pct
+                    }
+                    html = libstring.Template(HTML_REPORT_TEMPLATE).safe_substitute(report_values)
                     try:
                         filename = str(QDir(tmpdir).filePath('RankingReport.html'))
                         try:
@@ -23517,7 +23392,7 @@ class ApplicationWindow(QMainWindow):
                             # select file
                             filename = self.ArtisanSaveFileDialog(msg=QApplication.translate('Message', 'Export {}').format('PDF'),ext='*.pdf')
                             if filename:
-                                self.html2pdf(full_path, filename, landscape=True)
+                                pdf_report.ranking_report(filename, report_values, ranking_graphs, letter=self.pdfReportLetterPaper())
                         else:
                             QDesktopServices.openUrl(QUrl(full_path, QUrl.ParsingMode.TolerantMode))
 
@@ -23801,113 +23676,23 @@ class ApplicationWindow(QMainWindow):
     def htmlReport(self, _:bool = False) -> None:
         self.roastReport()
 
-    def releaseQWebEngineView(self) -> None:
-        try: # sip not supported on older PyQt versions (RPi!)
-            if self.pdf_page_layout is not None:
-                sip.delete(self.pdf_page_layout)
-            #print(sip.isdeleted(self.pdf_page_layout))
-        except Exception: # pylint: disable=broad-except
-            pass
-        self.pdf_page_layout = None
-        try: # sip not supported on older PyQt versions (RPi!)
-            if self.html_loader is not None:
-                sip.delete(self.html_loader)
-            #print(sip.isdeleted(self.html_loader))
-        except Exception: # pylint: disable=broad-except
-            pass
-        self.html_loader = None
-
-    # if batch_process is True, the QWebEngineView() is created only if self.html_loader is not None and never deleted
-    # the caller is responsible to release that self.html_loader via releaseQWebEngineView()
-    def html2pdf(self, html_file:str, pdf_file:str, landscape:bool = False, batch_process:bool = False) -> None:
-        def release() -> None:
-            if batch_process and self.html_loader is not None:
-                try:
-                    self.html_loader.page().pdfPrintingFinished.disconnect() # type: ignore[union-attr] # "Callable[[str, bool], None]" has no attribute "disconnect"
-                except Exception: # pylint: disable=broad-except
-                    pass
-                try:
-                    self.html_loader.loadFinished.disconnect()
-                except Exception: # pylint: disable=broad-except
-                    pass
-                try:
-                    self.html_loader.renderProcessTerminated.disconnect()
-                except Exception: # pylint: disable=broad-except
-                    pass
-            else:
-                self.releaseQWebEngineView()
-            self.pdf_rendering = False
-
-        @pyqtSlot(str,bool)
-        def printing_finished(_file:str, _success:bool) -> None:
-            release()
-
-        @pyqtSlot(bool)
-        def emit_pdf(ok:bool) -> None:
-            if ok:
-                if self.html_loader is not None and self.pdf_page_layout is not None:
-                    page = self.html_loader.page()
-                    if page is not None:
-                        page.pdfPrintingFinished.connect(printing_finished)
-                        page.printToPdf(pdf_file, self.pdf_page_layout)
-                else:
-                    self.pdf_rendering = False
-            else:
-                self.pdf_rendering = False
-
-        @pyqtSlot('QWebEnginePage::RenderProcessTerminationStatus', int)
-        def renderingTerminated(terminationStatus:'QWebEnginePage.RenderProcessTerminationStatus',exitCode:int) -> None:
-            _log.debug('renderingTerminated(%s,%s)',terminationStatus,exitCode)
-            release()
-
+    @staticmethod
+    def savePDFReportGraph(fig:'Figure', svg_path:str) -> str:
+        # the PDF reports embed a PNG copy of the SVG chart written for the HTML report
+        png_path = f'{os.path.splitext(svg_path)[0]}.png'
         try:
-            # we wait for a previous pdf conversion to terminate
-            while self.pdf_rendering:
-                QApplication.processEvents()
-                libtime.sleep(0.001)
-            self.pdf_rendering = True
-            if self.html_loader is None:
-                try:
-                    profile = QWebEngineProfile() # pyright:ignore[reportPossiblyUnboundVariable]
-                    profile.setSpellCheckEnabled(False) # disable spell checker
-                    profile.setHttpCacheType(QWebEngineProfile.HttpCacheType.NoCache) # pyright:ignore[reportPossiblyUnboundVariable]
-                    self.html_loader = QWebEngineView(profile) # pyright:ignore[reportPossiblyUnboundVariable]
-                except Exception: # pylint: disable=broad-except
-                    self.html_loader = QWebEngineView() # pyright:ignore[reportPossiblyUnboundVariable]
-                if self.html_loader is not None:
-                    self.html_loader.setZoomFactor(1)
-            if self.pdf_page_layout is None:
-                # lazy imports
-                from PyQt6.QtCore import QMarginsF
-                from PyQt6.QtGui import QPageSize
-                if QPrinter().pageLayout().pageSize().id() == QPageSize.PageSizeId.Letter: # ty:ignore[no-matching-overload]
-                    # Letter
-                    ps = QPageSize(QPageSize.PageSizeId.Letter)
-                    pu = QPageLayout.Unit.Inch
-                    pm = QMarginsF(0.7, 0.7, 0.7, 0.7)
-                else:
-                    # A4
-                    ps = QPageSize(QPageSize.PageSizeId.A4)
-                    pu = QPageLayout.Unit.Millimeter
-                    pm = QMarginsF(15, 15, 15, 15)
-                if landscape:
-                    po = QPageLayout.Orientation.Landscape
-                else:
-                    po = QPageLayout.Orientation.Portrait
-                self.pdf_page_layout = QPageLayout(ps, po, pm, pu)
-            if self.html_loader is not None:
-                self.html_loader.renderProcessTerminated.connect(renderingTerminated)
-                self.html_loader.loadFinished.connect(emit_pdf)
-                self.html_loader.load(QUrl(html_file))
-                # busy wait for the pdf conversion to terminate
-                while self.pdf_rendering:
-                    QApplication.processEvents()
-                    libtime.sleep(0.001)
-        except Exception as e: # pylint: disable=broad-except
-            _log.exception(e)
+            os.remove(png_path)
+        except OSError:
+            pass
+        fig.savefig(png_path, transparent=True, dpi=200)
+        return png_path
 
-    # if batch_process is True and pdf_filename is given, the caller needs to cleanup the QWebEngineView by calling self.releaseQWebEngineView() the after processing all reports
-    def roastReport(self, pdf_filename:str|None = None, batch_process:bool = False) -> None:
+    @staticmethod
+    def pdfReportLetterPaper() -> bool:
+        from PyQt6.QtGui import QPageSize
+        return bool(QPrinter().pageLayout().pageSize().id() == QPageSize.PageSizeId.Letter)
+
+    def roastReport(self, pdf_filename:str|None = None) -> None:
         import html as htmllib
         import string as libstring
         try:
@@ -23947,6 +23732,7 @@ class ApplicationWindow(QMainWindow):
             self.qmc.redraw(recomputeAllDeltas=False)
 
             self.qmc.fig.savefig(graph_image,transparent=True)
+            graph_png = (self.savePDFReportGraph(self.qmc.fig, graph_image) if pdf_filename else None)
             #add some random number to force HTML reloading
             graph_image = path2url(graph_image)
             graph_image = graph_image + '?dummy=' + str(int(libtime.time()))
@@ -23960,6 +23746,7 @@ class ApplicationWindow(QMainWindow):
             except OSError:
                 pass
             self.qmc.fig.savefig(flavor_image,transparent=True)
+            flavor_png = (self.savePDFReportGraph(self.qmc.fig, flavor_image) if pdf_filename else None)
             flavor_image = path2url(flavor_image)
             flavor_image = flavor_image + '?dummy=' + str(int(libtime.time()))
             #return screen to GRAPH profile mode
@@ -24072,92 +23859,93 @@ class ApplicationWindow(QMainWindow):
             cupping_score, cupping_all_default = self.cuppingSum(self.qmc.flavors)
             cupping_notes = self.note2html(self.qmc.cuppingnotes).strip()
             special_events = self.specialevents2html().strip()
-            html = libstring.Template(HTML_REPORT_TEMPLATE).safe_substitute(
-                title=title_html,
-                titlecolor=QColor(self.qmc.palette['title']).name(),
-                doc=QApplication.translate('HTML Report Template', 'Roasting Report'),
-                datatime_label=QApplication.translate('HTML Report Template', 'Date:'),
-                datetime=datetime_html,
-                beans_label=QApplication.translate('HTML Report Template', 'Beans:'),
-                beans=beans_html,
-                weight_label=QApplication.translate('HTML Report Template', 'Weight:'),
-                weight=weight,
-                defects_label=f"{QApplication.translate('Label', 'Defects')}:",
-                defects=defects,
-                volume_label=QApplication.translate('HTML Report Template', 'Volume:'),
-                volume=volume,
-                roaster_label=QApplication.translate('HTML Report Template', 'Roaster:'),
-                roaster=str(htmllib.escape(self.qmc.roastertype)),
-                operator_label=QApplication.translate('HTML Report Template', 'Operator:'),
-                operator=str(htmllib.escape(self.qmc.operator)),
-                organization_label=QApplication.translate('HTML Report Template', 'Organization:'),
-                organization=str(htmllib.escape(self.qmc.organization)),
-                cup_label=('' if cupping_all_default else QApplication.translate('HTML Report Template', 'Cupping:')),
-                cup=('' if cupping_all_default else str(float2float(cupping_score))),
-                color_label=QApplication.translate('HTML Report Template', 'Color:'),
-                color=color,
-                energy_label=QApplication.translate('HTML Report Template', 'Energy:'),
-                energy=energy,
-                CO2_label=QApplication.translate('HTML Report Template', 'CO2:').replace('CO2','CO₂'),
-                CO2=CO2,
-                charge_label=QApplication.translate('HTML Report Template', 'CHARGE:'),
-                charge=charge,
-                size_label=QApplication.translate('HTML Report Template', 'Size:'),
-                size='--' if (self.qmc.beansize_max == 0 and self.qmc.beansize_min == 0) else (str(round(int(self.qmc.beansize_min))) if self.qmc.beansize_min != 0 else ''
+            report_values:dict[str, Any] = {
+                'title': title_html,
+                'titlecolor': QColor(self.qmc.palette['title']).name(),
+                'doc': QApplication.translate('HTML Report Template', 'Roasting Report'),
+                'datatime_label': QApplication.translate('HTML Report Template', 'Date:'),
+                'datetime': datetime_html,
+                'beans_label': QApplication.translate('HTML Report Template', 'Beans:'),
+                'beans': beans_html,
+                'weight_label': QApplication.translate('HTML Report Template', 'Weight:'),
+                'weight': weight,
+                'defects_label': f"{QApplication.translate('Label', 'Defects')}:",
+                'defects': defects,
+                'volume_label': QApplication.translate('HTML Report Template', 'Volume:'),
+                'volume': volume,
+                'roaster_label': QApplication.translate('HTML Report Template', 'Roaster:'),
+                'roaster': str(htmllib.escape(self.qmc.roastertype)),
+                'operator_label': QApplication.translate('HTML Report Template', 'Operator:'),
+                'operator': str(htmllib.escape(self.qmc.operator)),
+                'organization_label': QApplication.translate('HTML Report Template', 'Organization:'),
+                'organization': str(htmllib.escape(self.qmc.organization)),
+                'cup_label': ('' if cupping_all_default else QApplication.translate('HTML Report Template', 'Cupping:')),
+                'cup': ('' if cupping_all_default else str(float2float(cupping_score))),
+                'color_label': QApplication.translate('HTML Report Template', 'Color:'),
+                'color': color,
+                'energy_label': QApplication.translate('HTML Report Template', 'Energy:'),
+                'energy': energy,
+                'CO2_label': QApplication.translate('HTML Report Template', 'CO2:').replace('CO2','CO₂'),
+                'CO2': CO2,
+                'charge_label': QApplication.translate('HTML Report Template', 'CHARGE:'),
+                'charge': charge,
+                'size_label': QApplication.translate('HTML Report Template', 'Size:'),
+                'size': '--' if (self.qmc.beansize_max == 0 and self.qmc.beansize_min == 0) else (str(round(int(self.qmc.beansize_min))) if self.qmc.beansize_min != 0 else ''
                     ) + ('/' if (self.qmc.beansize_max != 0 and self.qmc.beansize_min != 0) else '') + (str(round(int(self.qmc.beansize_max))) if (self.qmc.beansize_max != 0) else ''),
-                density_label=QApplication.translate('HTML Report Template', 'Density:'),
-                density=density,
-                moisture_label=QApplication.translate('HTML Report Template', 'Moisture:'),
-                moisture=moisture,
-                humidity_label=QApplication.translate('HTML Report Template', 'Ambient:'),
-                humidity=humidity,
-                TP_label=QApplication.translate('HTML Report Template', 'TP:'),
-                TP=self.event2html(cp,'TP_time','TP_BT'),
-                DRY_label=QApplication.translate('HTML Report Template', 'DRY:'),
-                DRY=self.event2html(cp,'DRY_time','DRY_BT'),
-                FCs_label=QApplication.translate('HTML Report Template', 'FCs:'),
-                FCs=self.event2html(cp,'FCs_time','FCs_BT'),
-                FCe_label=QApplication.translate('HTML Report Template', 'FCe:'),
-                FCe=self.event2html(cp,'FCe_time','FCe_BT'),
-                SCs_label=QApplication.translate('HTML Report Template', 'SCs:'),
-                SCs=self.event2html(cp,'SCs_time','SCs_BT'),
-                SCe_label=QApplication.translate('HTML Report Template', 'SCe:'),
-                SCe=self.event2html(cp,'SCe_time','SCe_BT'),
-                drop_label=QApplication.translate('HTML Report Template', 'DROP:'),
-                drop=self.event2html(cp,'DROP_time','DROP_BT'),
-                cool_label=QApplication.translate('HTML Report Template', 'COOL:'),
-                cool=self.event2html(cp,'COOL_time',None,'DROP_time'),
-                met_label=QApplication.translate('HTML Report Template', 'MET:'),
-                met=met,
-                cm_label=QApplication.translate('HTML Report Template', 'CM:'),
-                cm_tuple=cm_tuple,
-                dry_phase_label=QApplication.translate('HTML Report Template', 'Drying:'),
-                dry_phase=dryphase,
-                mid_phase_label=QApplication.translate('HTML Report Template', 'Maillard:'),
-                mid_phase=midphase,
-                finish_phase_label=QApplication.translate('HTML Report Template', 'Finishing:'),
-                finish_phase=finishphase,
-                cool_phase_label=QApplication.translate('HTML Report Template', 'Cooling:'),
-                cool_phase=coolphase,
-                background_label=QApplication.translate('HTML Report Template', 'Background:'),
-                background=background_html,
-                alarms_label=QApplication.translate('HTML Report Template', 'Alarms:'),
-                alarms=alarms,
-                ror_label=QApplication.translate('HTML Report Template', 'RoR:'),
-                ror= ror,
-                etbta_label=QApplication.translate('HTML Report Template', 'AUC:'),
-                etbta=etbta,
-                roasting_notes_label=(QApplication.translate('HTML Report Template', 'Roasting Notes') if self.qmc.roastingnotes != '' else ''),
-                roasting_notes=self.note2html(self.qmc.roastingnotes),
-                roast_attributes=self.roastattributes(),
-                graph_image=graph_image,
-                flavor_image=flavor_image,
-                show_cupping=('none' if cupping_all_default else 'inline'),
-                specialevents_label=QApplication.translate('HTML Report Template', 'Events'),
-                specialevents=special_events,
-                show_special_events=('none' if special_events == '' else 'inline'),
-                cupping_notes_label=(QApplication.translate('HTML Report Template', 'Cupping Notes') if self.qmc.cuppingnotes != '' else ''),
-                cupping_notes=cupping_notes)
+                'density_label': QApplication.translate('HTML Report Template', 'Density:'),
+                'density': density,
+                'moisture_label': QApplication.translate('HTML Report Template', 'Moisture:'),
+                'moisture': moisture,
+                'humidity_label': QApplication.translate('HTML Report Template', 'Ambient:'),
+                'humidity': humidity,
+                'TP_label': QApplication.translate('HTML Report Template', 'TP:'),
+                'TP': self.event2html(cp,'TP_time','TP_BT'),
+                'DRY_label': QApplication.translate('HTML Report Template', 'DRY:'),
+                'DRY': self.event2html(cp,'DRY_time','DRY_BT'),
+                'FCs_label': QApplication.translate('HTML Report Template', 'FCs:'),
+                'FCs': self.event2html(cp,'FCs_time','FCs_BT'),
+                'FCe_label': QApplication.translate('HTML Report Template', 'FCe:'),
+                'FCe': self.event2html(cp,'FCe_time','FCe_BT'),
+                'SCs_label': QApplication.translate('HTML Report Template', 'SCs:'),
+                'SCs': self.event2html(cp,'SCs_time','SCs_BT'),
+                'SCe_label': QApplication.translate('HTML Report Template', 'SCe:'),
+                'SCe': self.event2html(cp,'SCe_time','SCe_BT'),
+                'drop_label': QApplication.translate('HTML Report Template', 'DROP:'),
+                'drop': self.event2html(cp,'DROP_time','DROP_BT'),
+                'cool_label': QApplication.translate('HTML Report Template', 'COOL:'),
+                'cool': self.event2html(cp,'COOL_time',None,'DROP_time'),
+                'met_label': QApplication.translate('HTML Report Template', 'MET:'),
+                'met': met,
+                'cm_label': QApplication.translate('HTML Report Template', 'CM:'),
+                'cm_tuple': cm_tuple,
+                'dry_phase_label': QApplication.translate('HTML Report Template', 'Drying:'),
+                'dry_phase': dryphase,
+                'mid_phase_label': QApplication.translate('HTML Report Template', 'Maillard:'),
+                'mid_phase': midphase,
+                'finish_phase_label': QApplication.translate('HTML Report Template', 'Finishing:'),
+                'finish_phase': finishphase,
+                'cool_phase_label': QApplication.translate('HTML Report Template', 'Cooling:'),
+                'cool_phase': coolphase,
+                'background_label': QApplication.translate('HTML Report Template', 'Background:'),
+                'background': background_html,
+                'alarms_label': QApplication.translate('HTML Report Template', 'Alarms:'),
+                'alarms': alarms,
+                'ror_label': QApplication.translate('HTML Report Template', 'RoR:'),
+                'ror': ror,
+                'etbta_label': QApplication.translate('HTML Report Template', 'AUC:'),
+                'etbta': etbta,
+                'roasting_notes_label': (QApplication.translate('HTML Report Template', 'Roasting Notes') if self.qmc.roastingnotes != '' else ''),
+                'roasting_notes': self.note2html(self.qmc.roastingnotes),
+                'roast_attributes': self.roastattributes(),
+                'graph_image': graph_image,
+                'flavor_image': flavor_image,
+                'show_cupping': ('none' if cupping_all_default else 'inline'),
+                'specialevents_label': QApplication.translate('HTML Report Template', 'Events'),
+                'specialevents': special_events,
+                'show_special_events': ('none' if special_events == '' else 'inline'),
+                'cupping_notes_label': (QApplication.translate('HTML Report Template', 'Cupping Notes') if self.qmc.cuppingnotes != '' else ''),
+                'cupping_notes': cupping_notes}
+            html = libstring.Template(HTML_REPORT_TEMPLATE).safe_substitute(report_values)
             f = None
             try:
                 filename = str(QDir(tmpdir).filePath('Roastlog.html'))
@@ -24173,7 +23961,7 @@ class ApplicationWindow(QMainWindow):
                 else:
                     full_path = 'file:///' + filename # Explorer refuses to start otherwise
                 if pdf_filename:
-                    self.html2pdf(full_path,pdf_filename, batch_process=batch_process)
+                    pdf_report.roast_report(pdf_filename, report_values, graph_png, flavor_png, letter=self.pdfReportLetterPaper())
                 else:
                     QDesktopServices.openUrl(QUrl(full_path, QUrl.ParsingMode.TolerantMode))
 
@@ -26333,16 +26121,6 @@ class ApplicationWindow(QMainWindow):
 #        except Exception as e: # pylint: disable=broad-except
 #            _log.exception(e)
 
-    @pyqtSlot(str)
-    def comparatorAddProfileSlot(self, filename:str) -> None:
-        if self.comparator is not None:
-            self.comparator.addProfiles([filename])
-
-    @pyqtSlot('QUrl')
-    def comparatorAddProfileURLSlot(self, url:QUrl) -> None:
-        if self.comparator is not None:
-            self.comparator.addProfileFromURL(self.artisanURLextractor, url)
-
     @pyqtSlot('QUrl')
     def importArtisanURLSlot(self, url:QUrl) -> None:
         self.importExternalURL(self.artisanURLextractor, url=url)
@@ -28023,36 +27801,6 @@ class ApplicationWindow(QMainWindow):
 
     @pyqtSlot()
     @pyqtSlot(bool)
-    def roastCompare(self, _:bool = False) -> None:
-        if self.comparator is not None:
-            self.comparator.close()
-        else:
-            foreground = self.curFile
-            background = (self.qmc.backgroundpath if self.qmc.background else None)
-            self.establish_phasescanvas()
-            if self.qmc.reset():
-                filenames:list[str] = []
-                if foreground is not None and foreground.strip() != '':
-                    filenames.append(foreground)
-                if background is not None and background.strip() != '':
-                    filenames.append(background)
-                if len(filenames) == 0:
-                    filenames = self.reportFiles()
-                if filenames and len(filenames) > 0:
-                    self.deleteBackground()
-                    # disable "green flag" menu:
-                    try:
-                        self.ntb.disable_edit_curve_parameters()
-                    except Exception as e: # pylint: disable=broad-except
-                        _log.exception(e)
-                    from artisanlib.comparator import roastCompareDlg
-                    self.comparator = roastCompareDlg(self,self,foreground,background)
-                    self.comparator.addProfiles(filenames)
-                    self.comparator.show()
-            self.roastCompareAction.setChecked(bool(self.comparator))
-
-    @pyqtSlot()
-    @pyqtSlot(bool)
     def simulate(self, _:bool = False) -> None:
         modifiers = QApplication.keyboardModifiers()
         control_modifier = modifiers == Qt.KeyboardModifier.ControlModifier # command/apple key on macOS, Control key on Windows
@@ -28136,12 +27884,11 @@ def excepthook(excType:type, excValue:BaseException, tracebackobj:'TracebackType
     import traceback
     separator = '-' * 80
 #    logFile = 'simple.log'
-    notice = \
-        """An unhandled exception occurred. Please report the problem on Github:<br>"""\
-        """<a href='https://github.com/artisan-roaster-scope/artisan/issues'>https://github.com/artisan-roaster-scope/artisan/issues</a><br><br>"""\
-        """When reporting this issue, please include your settings file (export <br>"""\
-        """via menu Help >> Save Settings) and the details below.<br><br>"""\
-        """An entry has been written to the error log (menu Help >> Error).<br><br>"""
+    # problems are reported to Roastlocal support, not to the upstream Artisan project
+    notice = QApplication.translate('Message', 'An unhandled exception occurred. Please report the problem to Roastlocal support: {0}<br><br>'
+        'When reporting this issue, please include your settings file (export via menu Help >> Save Settings) and the details below.<br><br>'
+        'An entry has been written to the error log (menu Help >> Error).<br><br>').format(
+        "<a href='https://roastlocal.ru'>roastlocal.ru</a>")
     versionInfo= f'Version: {__version__}, revision: {__revision__}<br>'
     timeString = libtime.strftime('%Y-%m-%d, %H:%M:%S')
 
@@ -28171,6 +27918,11 @@ def excepthook(excType:type, excValue:BaseException, tracebackobj:'TracebackType
     msg = '\n'.join(sections)
     detailedmsg = '\n'.join([tbinfo, separator, variables])
 
+    # crash report to the Roastlocal cloud (queued locally, sent in the background)
+    from artisanlib import error_reports
+    if error_reports.report_exception(excType, excValue, tracebackobj):
+        notice += QApplication.translate('Message', 'A report about this error is being sent to Roastlocal.') + '<br><br>'
+
 #    try:
 #        with open(logFile, 'w', encoding='utf-8') as f:
 #            f.write(msg)
@@ -28186,7 +27938,7 @@ def excepthook(excType:type, excValue:BaseException, tracebackobj:'TracebackType
                 break
         if aw is not None:
             if hasattr(aw, 'qmc'):
-                aw.qmc.adderror('Error: ' + detailedmsg)
+                aw.qmc.adderror('Error: ' + detailedmsg, report=False) # already reported as a crash above
             errorbox = QMessageBox()
             errorbox.about(aw, detailedmsg, f'{notice}{versionInfo}{msg}')
 
@@ -28366,7 +28118,7 @@ def main() -> None:
     locale_str = initialize_locale(app)
     _log.info('locale: %s',locale_str)
 
-    appWindow = ApplicationWindow(locale=locale_str, WebEngineSupport=QtWebEngineSupport, artisanviewerFirstStart=artisanviewerFirstStart)
+    appWindow = ApplicationWindow(locale=locale_str, pdfReportSupport=PDFReportSupport, artisanviewerFirstStart=artisanviewerFirstStart)
 
     app.setActivationWindow(appWindow,activateOnMessage=False) # set the activation window for the QtSingleApplication
 
@@ -28404,6 +28156,13 @@ def main() -> None:
         appWindow.sendmessage(QApplication.translate('Message', 'debug logging ON'))
 
     appWindow.show()
+
+    # crash/error reports to the Roastlocal cloud: send what was queued (e.g. a crash at the last run) and future ones
+    try:
+        from artisanlib import error_reports
+        error_reports.start(appWindow)
+    except Exception as e: # pylint: disable=broad-except
+        _log.exception(e)
 
     try:
         if sys.argv and len(sys.argv) > 1:

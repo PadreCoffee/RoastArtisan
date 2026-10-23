@@ -178,6 +178,14 @@
 </context><context>
     <name>Button</name>
     <message>
+        <source>Refresh</source>
+        <translation>Обновить</translation>
+    </message>
+    <message>
+        <source>Send now</source>
+        <translation>Отправить сейчас</translation>
+    </message>
+    <message>
         <source>Set/Clear PIN</source>
         <translation>Задать/снять PIN</translation>
     </message>
@@ -4486,6 +4494,10 @@ END</source>
     </message>
 </context><context>
     <name>Form Caption</name>
+    <message>
+        <source>Unsent Cloud Data</source>
+        <translation>Неотправленные данные</translation>
+    </message>
     <message>
         <source>Manage Operators</source>
         <translation>Управление операторами</translation>
@@ -14666,6 +14678,14 @@ Fewer nodes: simpler curve but may lose detail</source>
 </context><context>
     <name>Menu</name>
     <message>
+        <source>Send error reports to Roastlocal</source>
+        <translation>Отправлять отчёты об ошибках в Roastlocal</translation>
+    </message>
+    <message>
+        <source>Unsent cloud data…</source>
+        <translation>Неотправленные данные…</translation>
+    </message>
+    <message>
         <source>Operators</source>
         <translation>Операторы</translation>
     </message>
@@ -15298,6 +15318,14 @@ Fewer nodes: simpler curve but may lose detail</source>
     </message>
 </context><context>
     <name>Message</name>
+    <message>
+        <source>A report about this error is being sent to Roastlocal.</source>
+        <translation>Отчёт об этой ошибке отправляется в Roastlocal.</translation>
+    </message>
+    <message>
+        <source>An unhandled exception occurred. Please report the problem to Roastlocal support: {0}&lt;br&gt;&lt;br&gt;When reporting this issue, please include your settings file (export via menu Help &gt;&gt; Save Settings) and the details below.&lt;br&gt;&lt;br&gt;An entry has been written to the error log (menu Help &gt;&gt; Error).&lt;br&gt;&lt;br&gt;</source>
+        <translation>Произошла непредвиденная ошибка. Пожалуйста, сообщите о ней в поддержку Roastlocal: {0}&lt;br&gt;&lt;br&gt;Приложите файл настроек (меню Помощь &gt;&gt; Сохранить настройки) и сведения ниже.&lt;br&gt;&lt;br&gt;Запись об ошибке сохранена в журнале ошибок (меню Помощь &gt;&gt; Ошибки).&lt;br&gt;&lt;br&gt;</translation>
+    </message>
     <message>
         <source>Operator PIN</source>
         <translation>PIN оператора</translation>
@@ -18100,6 +18128,58 @@ Continue?</source>
 </context><context>
     <name>Plus</name>
     <message>
+        <source>Not uploaded yet: {0}. Sending resumes when the cloud connection is back.</source>
+        <translation>Не загружено: {0}. Отправка продолжится, когда появится связь с облаком.</translation>
+    </message>
+    <message>
+        <source>Not uploaded yet: {0}. Sending is retried automatically.</source>
+        <translation>Не загружено: {0}. Отправка повторяется автоматически.</translation>
+    </message>
+    <message>
+        <source>All data is uploaded to the cloud.</source>
+        <translation>Все данные загружены в облако.</translation>
+    </message>
+    <message>
+        <source>Waiting to be sent</source>
+        <translation>Ожидает отправки</translation>
+    </message>
+    <message>
+        <source>Not accepted yet ({0}), retried hourly</source>
+        <translation>Пока не принято ({0}), повтор каждый час</translation>
+    </message>
+    <message>
+        <source>Rejected by the server ({0}), retried hourly</source>
+        <translation>Сервер отклонил ({0}), повтор каждый час</translation>
+    </message>
+    <message>
+        <source>Not sent: the profile file is gone</source>
+        <translation>Не отправится: файл профиля удалён</translation>
+    </message>
+    <message>
+        <source>Roast change</source>
+        <translation>Изменение обжарки</translation>
+    </message>
+    <message>
+        <source>Roast</source>
+        <translation>Обжарка</translation>
+    </message>
+    <message>
+        <source>Schedule lock</source>
+        <translation>Блокировка расписания</translation>
+    </message>
+    <message>
+        <source>Full profile</source>
+        <translation>Полный профиль</translation>
+    </message>
+    <message>
+        <source>Sending the log is disabled</source>
+        <translation>Отправка журнала отключена</translation>
+    </message>
+    <message>
+        <source>Upload to {} failed; it will be retried automatically</source>
+        <translation>Не удалось отправить в {}; отправка будет повторяться автоматически</translation>
+    </message>
+    <message>
         <location filename="../artisanlib/main.py" line="1213" />
         <source>debug logging ON</source>
         <translation>Журнал отладки включён</translation>
@@ -19119,6 +19199,22 @@ Continue?</source>
     </message>
 </context><context>
     <name>Table</name>
+    <message>
+        <source>State</source>
+        <translation>Состояние</translation>
+    </message>
+    <message>
+        <source>Since</source>
+        <translation>Когда</translation>
+    </message>
+    <message>
+        <source>Roast</source>
+        <translation>Обжарка</translation>
+    </message>
+    <message>
+        <source>What</source>
+        <translation>Что</translation>
+    </message>
     <message>
         <location filename="../artisanlib/cup_profile.py" line="220" />
         <location filename="../artisanlib/events.py" line="2699" />

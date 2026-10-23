@@ -66,10 +66,17 @@ def is_profile_upload_item(item:dict[str, Any]) -> bool:
 # --- outbox reliability: roast data is never dropped silently ---
 
 DEAD_LETTER_FILE: Final[str] = 'failed.json'
-TRANSIENT_STATUS: Final[frozenset[int]] = frozenset({408, 425, 429})
+# 401: the session expired or the server restarted; the next attempt re-authenticates
+TRANSIENT_STATUS: Final[frozenset[int]] = frozenset({401, 408, 425, 429})
+# dead-letter reasons that can never succeed when re-sent (the full profile file to upload is gone)
+NOT_RETRIABLE_REASONS: Final[frozenset[str]] = frozenset({'profile_file_missing'})
+DEAD_LETTER_RETRIES_KEY: Final[str] = 'dead_letter_retries'
+
+_dead_letter_lock = threading.Lock()
 
 
-# a failure that may pass by itself: no response at all (timeout, protocol error) or a server/rate-limit status
+# a failure that may pass by itself: no response at all (timeout, protocol error), an expired session or a
+# server/rate-limit status; these are retried until they pass
 def is_transient_failure(r:requests.models.Response|None) -> bool:
     return r is None or r.status_code in TRANSIENT_STATUS or r.status_code >= 500
 
@@ -85,32 +92,124 @@ def dead_letter_path() -> str:
 
 # keeps an outbox item that finally could not be delivered (rejected, or failing for too long) in a JSON file
 # next to the outbox queue instead of dropping it, so it can be inspected and re-sent later
+def _read_dead_letters(path:str) -> list[Any]:
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path, encoding='utf-8') as f:
+            loaded = json.load(f)
+        return loaded if isinstance(loaded, list) else []
+    except Exception as e:  # pylint: disable=broad-except
+        _log.exception(e)
+        # never overwrite an unreadable dead-letter file: keep it aside
+        os.replace(path, f'{path}.{int(time.time())}.corrupt')
+        return []
+
+
+def _write_dead_letters(path:str, entries:list[Any]) -> None:
+    tmp = f'{path}.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(entries, f, ensure_ascii=False, default=str)
+    os.replace(tmp, path)
+
+
 def dead_letter(item:Any, reason:str, status:int|None = None) -> None:
     path = dead_letter_path()
     try:
-        entries:list[Any] = []
-        if os.path.exists(path):
-            try:
-                with open(path, encoding='utf-8') as f:
-                    loaded = json.load(f)
-                if isinstance(loaded, list):
-                    entries = loaded
-            except Exception as e:  # pylint: disable=broad-except
-                _log.exception(e)
-                # never overwrite an unreadable dead-letter file: keep it aside
-                os.replace(path, f'{path}.{int(time.time())}.corrupt')
-        entries.append({'failed_at': util.epoch2ISO8601(time.time()), 'reason': reason, 'status': status, 'item': item})
-        tmp = f'{path}.tmp'
-        with open(tmp, 'w', encoding='utf-8') as f:
-            json.dump(entries, f, ensure_ascii=False, default=str)
-        os.replace(tmp, path)
+        with _dead_letter_lock:
+            entries = _read_dead_letters(path)
+            entries.append({'failed_at': util.epoch2ISO8601(time.time()), 'reason': reason, 'status': status, 'item': item})
+            _write_dead_letters(path, entries)
         _log.warning('outbox item kept for later in %s: %s (status %s) %s', path, reason, status,
             (item.get('data') or {}).get('roast_id', '') if isinstance(item, dict) else '')
+        # tell the roaster once; an item that fails again after an automatic re-send stays quiet
         aw = config.app_window
-        if aw is not None:
-            aw.sendmessage(QApplication.translate('Plus', 'Upload to {} failed; the data is kept in the unsent list').format(config.app_display_name))
+        if aw is not None and not (isinstance(item, dict) and item.get(DEAD_LETTER_RETRIES_KEY)):
+            aw.sendmessage(QApplication.translate('Plus', 'Upload to {} failed; it will be retried automatically').format(config.app_display_name))
     except Exception as e:  # pylint: disable=broad-except
         _log.exception(e)
+
+
+# puts the dead-letter items back into the outbox queue so they are sent again; returns the number re-queued
+def requeue_dead_letters() -> int:
+    q = queue
+    if q is None:
+        return 0
+    path = dead_letter_path()
+    requeued = 0
+    try:
+        with _dead_letter_lock:
+            entries = _read_dead_letters(path)
+            if not entries:
+                return 0
+            kept:list[Any] = []
+            for entry in entries:
+                item = entry.get('item') if isinstance(entry, dict) else None
+                if not isinstance(item, dict) or 'url' not in item or entry.get('reason') in NOT_RETRIABLE_REASONS:
+                    kept.append(entry)
+                    continue
+                item[DEAD_LETTER_RETRIES_KEY] = int(item.get(DEAD_LETTER_RETRIES_KEY, 0)) + 1
+                try:
+                    q.put(item)
+                    requeued += 1
+                except Exception as e:  # pylint: disable=broad-except
+                    _log.exception(e)
+                    kept.append(entry)
+            if kept:
+                _write_dead_letters(path, kept)
+            else:
+                os.remove(path)
+        if requeued:
+            _log.info('re-queued %s outbox item(s) from %s', requeued, path)
+    except Exception as e:  # pylint: disable=broad-except
+        _log.exception(e)
+    return requeued
+
+
+# the dead-letter entries ({failed_at, reason, status, item}), for display
+def dead_letter_entries() -> list[dict[str, Any]]:
+    with _dead_letter_lock:
+        return [e for e in _read_dead_letters(dead_letter_path()) if isinstance(e, dict)]
+
+
+# the items still waiting in the outbox queue (incl. the one being sent), for display. Read straight from the
+# persist-queue SQLite file in read-only mode: a SQLiteQueue.get() would need the write lock the worker holds
+# while it is sending or backing off.
+def pending_items() -> list[dict[str, Any]]:
+    import pickle
+    import sqlite3
+    db = os.path.join(queue_path, 'data.db')
+    if not os.path.exists(db):
+        return []
+    res:list[dict[str, Any]] = []
+    try:
+        from contextlib import closing
+        with closing(sqlite3.connect(f'file:{db}?mode=ro', uri=True, timeout=1)) as con:
+            for (data,) in con.execute('SELECT data FROM queue_default ORDER BY _id'):
+                item = pickle.loads(data) # the app's own outbox file
+                if isinstance(item, dict):
+                    res.append(item)
+    except Exception as e:  # pylint: disable=broad-except
+        _log.exception(e)
+    return res
+
+
+_dead_letter_retry_thread:threading.Thread|None = None
+
+
+def _dead_letter_retry_loop() -> None:
+    while True:
+        time.sleep(config.queue_dead_letter_retry_interval)
+        requeue_dead_letters()
+
+
+# re-sends the dead-letter items now and then periodically for the lifetime of the app
+def start_dead_letter_retries() -> None:
+    global _dead_letter_retry_thread # pylint: disable=global-statement
+    requeue_dead_letters()
+    if _dead_letter_retry_thread is None:
+        _dead_letter_retry_thread = threading.Thread(target=_dead_letter_retry_loop, name='outbox-dead-letter-retry', daemon=True)
+        _dead_letter_retry_thread.start()
 
 
 def get_response_json(r:requests.models.Response|None) -> dict[str, Any]|None:
@@ -479,9 +578,8 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                         )
                                 except Exception as ex:  # pylint: disable=broad-except
                                     _log.exception(ex)
-                                iters = iters - 1
-                                time.sleep(config.queue_retry_delay)
-                            elif (
+                                # the next attempt re-authenticates; retried like any other transient failure below
+                            if (
                                 r is not None and r.status_code == 409
                             ):
                                 # genuine conflict (e.g. server has a newer version / rejected save):
@@ -491,9 +589,16 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                 if save_item:
                                     save_roast_id = util.normalizeUUID(item['data'].get('roast_id')) if 'data' in item else None
                                     report_save_rejected(r, save_roast_id, conflict=True)
-                            elif is_transient_failure(r) and (time.time() - first_failure) < config.queue_transient_give_up:
-                                # transient (server down, deploy, timeout, rate limit): keep retrying with backoff
-                                # instead of giving up after a few minutes
+                            elif is_transient_failure(r) and (time.time() - first_failure) >= config.queue_transient_rotate_after:
+                                # failing for long: retry it later from the end of the queue so the items behind it go first
+                                _log.info('-> transient failure (%s) for %s min, moved to the end of the queue', failure_reason,
+                                    int((time.time() - first_failure) / 60))
+                                queue.put(item)
+                                requeued = True
+                                iters = 0
+                            elif is_transient_failure(r):
+                                # transient (no connection, server down, deploy, timeout, expired session, rate limit):
+                                # retried with backoff until it passes, never given up
                                 delay = transient_backoff(transient_attempt)
                                 transient_attempt += 1
                                 _log.info('-> transient failure (%s), retry in %ss', failure_reason, int(delay))
@@ -583,6 +688,8 @@ def start() -> None:
         elif worker is not None:
             worker.resume()
             _log.debug('queue resumed')
+        # (re)connected: re-send what the server rejected before, and keep doing so periodically
+        start_dead_letter_retries()
     finally:
         if queueWorkerSemaphore.available() < 1:
             queueWorkerSemaphore.release(1)
