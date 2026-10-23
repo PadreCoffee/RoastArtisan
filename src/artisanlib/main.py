@@ -2632,6 +2632,11 @@ class ApplicationWindow(QMainWindow):
         self.operatorsMenu.aboutToShow.connect(self.populateOperatorsMenu)
         self.unsentAction:QAction = QAction(QApplication.translate('Menu', 'Unsent cloud data…'), self)
         self.unsentAction.triggered.connect(self.showUnsentData)
+        self.errorReportsAction:QAction = QAction(QApplication.translate('Menu', 'Send error reports to Roastlocal'), self)
+        self.errorReportsAction.setCheckable(True)
+        from artisanlib import error_reports
+        self.errorReportsAction.setChecked(error_reports.enabled())
+        self.errorReportsAction.triggered.connect(self.toggleErrorReports)
 
         self.UIModeMenu:QMenu = QMenu(QApplication.translate('Menu', 'Mode'))
         self.productionModeAction:QAction = QAction(QApplication.translate('Menu', 'Production'), self)
@@ -4470,6 +4475,7 @@ class ApplicationWindow(QMainWindow):
         config_menu.addSeparator()
         config_menu.addMenu(self.operatorsMenu)
         config_menu.addAction(self.unsentAction)
+        config_menu.addAction(self.errorReportsAction)
         # the UI mode selector should always be present
         config_menu.addSeparator()
         config_menu.addMenu(self.UIModeMenu)
@@ -4553,6 +4559,11 @@ class ApplicationWindow(QMainWindow):
         return help_menu
 
     # Operators menu (multi-operator cloud login)
+
+    @pyqtSlot(bool)
+    def toggleErrorReports(self, checked:bool) -> None: # pylint: disable=no-self-use # used as slot
+        from artisanlib import error_reports
+        error_reports.set_enabled(checked)
 
     @pyqtSlot()
     @pyqtSlot(bool)
@@ -27907,6 +27918,11 @@ def excepthook(excType:type, excValue:BaseException, tracebackobj:'TracebackType
     msg = '\n'.join(sections)
     detailedmsg = '\n'.join([tbinfo, separator, variables])
 
+    # crash report to the Roastlocal cloud (queued locally, sent in the background)
+    from artisanlib import error_reports
+    if error_reports.report_exception(excType, excValue, tracebackobj):
+        notice += QApplication.translate('Message', 'A report about this error is being sent to Roastlocal.') + '<br><br>'
+
 #    try:
 #        with open(logFile, 'w', encoding='utf-8') as f:
 #            f.write(msg)
@@ -27922,7 +27938,7 @@ def excepthook(excType:type, excValue:BaseException, tracebackobj:'TracebackType
                 break
         if aw is not None:
             if hasattr(aw, 'qmc'):
-                aw.qmc.adderror('Error: ' + detailedmsg)
+                aw.qmc.adderror('Error: ' + detailedmsg, report=False) # already reported as a crash above
             errorbox = QMessageBox()
             errorbox.about(aw, detailedmsg, f'{notice}{versionInfo}{msg}')
 
@@ -28140,6 +28156,13 @@ def main() -> None:
         appWindow.sendmessage(QApplication.translate('Message', 'debug logging ON'))
 
     appWindow.show()
+
+    # crash/error reports to the Roastlocal cloud: send what was queued (e.g. a crash at the last run) and future ones
+    try:
+        from artisanlib import error_reports
+        error_reports.start(appWindow)
+    except Exception as e: # pylint: disable=broad-except
+        _log.exception(e)
 
     try:
         if sys.argv and len(sys.argv) > 1:

@@ -259,6 +259,12 @@ def connect(clear_on_failure: bool =False, interactive: bool = True) -> None:
                         )  # @UndefinedVariable
                         _log.info('artisan.plus connected')
                         try:
+                            # shown with crash reports sent while nobody is logged in
+                            from artisanlib import error_reports
+                            error_reports.remember_login(aw.plus_account, getattr(aw.qmc, 'organization_setup', ''))
+                        except Exception as e:  # pylint: disable=broad-except
+                            _log.exception(e)
+                        try:
                             queue.start()  # start the outbox queue
                         except Exception as e:  # pylint: disable=broad-except
                             _log.exception(e)

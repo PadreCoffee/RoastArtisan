@@ -18020,7 +18020,11 @@ class tgraphcanvas(QObject):
 
 
     #adds errors (can be called also outside the GUI thread, eg. from the sampling thread as actual message is written by updategraphics in the GUI thread)
-    def adderror(self, error:str, line:Any=None) -> None:
+    def adderror(self, error:str, line:Any=None, report:bool = True) -> None:
+        if report:
+            # error report to the Roastlocal cloud (deduplicated, rate limited, sent in the background)
+            from artisanlib import error_reports
+            error_reports.report_error(error, line)
         try:
             #### lock shared resources #####
             self.errorsemaphore.acquire(1)
