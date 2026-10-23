@@ -59,7 +59,7 @@ def break_babel_locale(monkeypatch: pytest.MonkeyPatch):
         def fake_exists(name: object) -> bool:
             return False if str(name) in missing_set else orig_exists(name)
 
-        def fake_load(name: object, merge_inherited: bool = True):  # type: ignore[no-untyped-def]
+        def fake_load(name: object, merge_inherited: bool = True):
             if str(name) in missing_set:
                 raise UnknownLocaleError(str(name))
             return orig_load(name, merge_inherited)

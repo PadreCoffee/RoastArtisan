@@ -2882,12 +2882,12 @@ class tgraphcanvas(QObject):
         try:
             cv = self.fig.canvas
             try:
-                w:object = cv.width()
-                h:object = cv.height()
+                w:object = cv.width() # type: ignore[attr-defined] # a Qt canvas at runtime
+                h:object = cv.height() # type: ignore[attr-defined]
             except Exception:  # pylint: disable=broad-except
                 w = h = -1
             try:
-                dpr:object = cv.devicePixelRatioF()
+                dpr:object = cv.devicePixelRatioF() # type: ignore[attr-defined]
             except Exception:  # pylint: disable=broad-except
                 dpr = -1.0
             _log.info('[greyscreen] %s: canvas=%sx%s dpr=%s ax_is_None=%s delta_ax_is_None=%s '
@@ -9542,7 +9542,7 @@ class tgraphcanvas(QObject):
             # Recover from a removed axis (flavorchart()/graphwheel()/roastReport() null self.ax)
             # so redraw() can never be a silent no-op -- root-cause fix for the "grey screen" bug.
             self._ensureStandardAxis()
-            ax:Axes = self.ax
+            ax:Axes = self.ax # type: ignore[assignment] # _ensureStandardAxis() guarantees an axis
             titleB = ''
             try:
                 #### lock shared resources   ####

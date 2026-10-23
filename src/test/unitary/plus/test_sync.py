@@ -220,6 +220,21 @@ sys.modules['artisanlib.util'].convertWeight = Mock(return_value=500.0) # type: 
 sys.modules['artisanlib.util'].getDataDirectory = Mock(return_value='/tmp/data') # type: ignore[attr-defined]
 
 sys.modules['plus.util'].ISO86012epoch = Mock(return_value=1640995200.0) # type: ignore[attr-defined]
+
+
+# addSync()/getSync()/delSync() key the sync cache by the normalized UUID
+# (plus.util.normalizeUUID); the mocked plus.util must normalize like the real implementation.
+def _normalize_uuid(value: str|None) -> str|None:
+    import uuid as uuidlib
+    if value is None or value.strip() == '':
+        return None
+    try:
+        return uuidlib.UUID(value.strip()).hex
+    except Exception:  # pylint: disable=broad-except
+        return value.strip()
+
+
+sys.modules['plus.util'].normalizeUUID = Mock(side_effect=_normalize_uuid) # type: ignore[attr-defined]
 sys.modules['plus.connection'].getData = Mock() # type: ignore[attr-defined]
 sys.modules['plus.controller'].is_connected = Mock(return_value=True) # type: ignore[attr-defined]
 
@@ -401,8 +416,9 @@ class TestAddSync:
             mock_lock_context.__enter__ = Mock(return_value=mock_lock)
             mock_lock_context.__exit__ = Mock(return_value=None)
             mock_portalocker.Lock.return_value = mock_lock_context
+            # delegate to the stored original import: calling the patched __import__ here recursed
             mock_import.side_effect = lambda name, *args, **kwargs: (
-                mock_portalocker if name == 'portalocker' else __import__(name, *args, **kwargs)
+                mock_portalocker if name == 'portalocker' else _original_import(name, *args, **kwargs)
             )
 
             # Act
@@ -410,7 +426,8 @@ class TestAddSync:
 
             # Assert
             assert mock_semaphore.acquire(1) is True
-            mock_add_sync_shelve.assert_called_once_with(sample_uuid, sample_timestamp, mock_lock)
+            # the cache key is the normalized (dash-less hex) UUID
+            mock_add_sync_shelve.assert_called_once_with(_normalize_uuid(sample_uuid), sample_timestamp, mock_lock)
 
     def test_add_sync_general_exception(
         self, sample_uuid:str, sample_timestamp:float, mock_semaphore:MockQSemaphore
@@ -564,7 +581,7 @@ class TestDelSync:
 
             # Assert
             assert mock_semaphore.acquire(1) is True
-            mock_shelve_db.__delitem__.assert_called_once_with(sample_uuid)
+            mock_shelve_db.__delitem__.assert_called_once_with(_normalize_uuid(sample_uuid))
 
     def test_del_sync_not_found(self, sample_uuid:str, mock_shelve_db:Mock, mock_semaphore:MockQSemaphore) -> None:
         """Test delSync with UUID not found."""

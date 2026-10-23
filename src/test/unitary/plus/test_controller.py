@@ -317,9 +317,9 @@ def mock_app_window() -> Mock:
 
 
 @pytest.fixture
-def mock_login_response() -> tuple[str,str,bool,bool]:
-    """Create a mock login response."""
-    return ('test@example.com', 'password123', True, True)
+def mock_login_response() -> tuple[str,str,str,bool,int]:
+    """Create a mock login response: plus_login() returns (login, passwd, server_url, remember, res)."""
+    return ('test@example.com', 'password123', 'https://roastlocal.ru', True, 1)
 
 
 class TestConnectionState:
@@ -683,7 +683,7 @@ class TestConnectFunction:
         """Test connect handles cancelled login dialog."""
         # Arrange
         mock_app_window.plus_account = None
-        cancelled_response = ('', '', False, False)  # Login cancelled
+        cancelled_response = ('', '', 'https://roastlocal.ru', False, 0)  # Login cancelled (res == 0)
 
         with patch('plus.controller.is_connected', return_value=False), patch(
             'plus.controller.connect_semaphore', mock_qsemaphore

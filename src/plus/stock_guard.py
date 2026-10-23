@@ -41,7 +41,7 @@ def _coffees(stock:Any) -> list[dict[str, Any]]|None:
     return coffees if isinstance(coffees, list) else None
 
 
-def _find(coffees:list[dict[str, Any]], hr_id:str|None) -> dict[str, Any]|None:
+def _find(coffees:list[Any], hr_id:str|None) -> dict[str, Any]|None:
     if not hr_id:
         return None
     return next((c for c in coffees if isinstance(c, dict) and c.get('hr_id') == hr_id), None)
@@ -66,7 +66,7 @@ def _label(coffee:dict[str, Any]|None, fallback:str|None, hr_id:str|None) -> str
         try:
             from plus.stock import coffeeLabel
             lbl = coffeeLabel(coffee)  # type: ignore[arg-type]
-            if isinstance(lbl, str) and lbl:
+            if isinstance(lbl, str) and lbl: # type: ignore[redundant-expr] # defensive
                 return lbl
         except Exception:  # pylint: disable=broad-except
             pass

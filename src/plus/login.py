@@ -47,7 +47,7 @@ class Login(ArtisanDialog):
         aw:'ApplicationWindow',
         email:str|None = None,
         saved_password:str|None = None,
-        server_url:str|None = None,
+        server_url:str|None = None, # noqa: ARG002 # pylint: disable=unused-argument # kept for API compatibility; the server is fixed
         remember_credentials: bool = True,
     ) -> None:
         super().__init__(parent,aw)
