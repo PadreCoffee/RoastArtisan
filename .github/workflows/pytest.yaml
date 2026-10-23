@@ -62,5 +62,8 @@ jobs:
           pip install --upgrade -r src/requirements-dev.txt
           pip install -r src/requirements.txt
       - name: Test with pytest
+        # run from src/ so that src/pyproject.toml [tool.pytest.ini_options] (testpaths, pythonpath,
+        # filterwarnings) and src/conftest.py (test isolation) apply as the rootdir configuration
+        working-directory: src
         run: |
           pytest
