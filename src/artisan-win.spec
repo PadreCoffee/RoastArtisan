@@ -424,7 +424,9 @@ for dp in [
     r'_internal\PyQt6\Qt6\qml',
     r'_internal\matplotlib\mpl-data\sample_data',
     ]:
-    remove_dir(f'{TARGET}{dp}', True)
+    # some folders only existed while QtWebEngine (and the QtQuick/QtPositioning it pulled in) was bundled
+    if os.path.isdir(f'{TARGET}{dp}'):
+        remove_dir(f'{TARGET}{dp}', True)
 
 
 ###################################
