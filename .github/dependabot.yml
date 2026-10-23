@@ -4,8 +4,9 @@ updates:
   directory: "/src"
   schedule:
     interval: weekly
+  # no "[skip ci]": dependency bumps must run the checks (a lone PyQt6-WebEngine bump vs PyQt6 must show red)
   commit-message:
-    prefix: "[skip ci]"
+    prefix: "deps"
   open-pull-requests-limit: 10
   allow:
     # Allow both direct and indirect updates for all packages
