@@ -323,6 +323,19 @@ def update() -> None:
             if fetch_semaphore.available() < 1:
                 fetch_semaphore.release(1)
 
+# update stock right away, independent of config.stock_cache_expiration (used on ON to check the coffee about to be
+# roasted against the current cloud stock). Offline the fetch fails and the cached stock stays in use.
+def update_now() -> None:
+    _log.debug('update_now()')
+    try:
+        stock_semaphore.acquire(1)
+        if stock is not None:
+            stock.pop('retrieved', None)
+    finally:
+        if stock_semaphore.available() < 1:
+            stock_semaphore.release(1)
+    update()
+
 # update stock if config.schedule_cache_expiration (<config.stock_cache_expiration) and the schedule on the server has changed (by sending the
 # 'lsrt' (last schedule retrieved time) parameter along.
 # Those requests are send more frequently to the server than regular stock.update() requests, but only return results if the schedule changed

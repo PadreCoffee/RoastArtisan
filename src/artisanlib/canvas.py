@@ -219,6 +219,7 @@ class tgraphcanvas(QObject):
     markSCeSignal = pyqtSignal(bool)
     markDropSignal = pyqtSignal(bool)
     markCoolSignal = pyqtSignal(bool)
+    stockGuardRecheckSignal = pyqtSignal() # emitted (queued) when a stock refresh triggered on ON arrived
     onMonitorSignal = pyqtSignal()
     toggleMonitorSignal = pyqtSignal()
     toggleRecorderSignal = pyqtSignal()
@@ -292,7 +293,7 @@ class tgraphcanvas(QObject):
         'backgroundReproduce', 'backgroundReproduceBeep', 'backgroundPlaybackEvents', 'backgroundPlaybackDROP', 'Betypes', 'backgroundFlavors', 'flavorbackgroundflag',
         'E1backgroundtimex', 'E2backgroundtimex', 'E3backgroundtimex', 'E4backgroundtimex', 'E1backgroundvalues', 'E2backgroundvalues', 'E3backgroundvalues',
         'E4backgroundvalues', 'l_backgroundeventtype1dots', 'l_backgroundeventtype2dots', 'l_backgroundeventtype3dots', 'l_backgroundeventtype4dots',
-        'DeltaETBflag', 'DeltaBTBflag', 'clearBgbeforeprofileload', 'setBatchSizeFromBackground', 'weight_manually_set', 'hideBgafterprofileload', 'heating_types', 'operator', 'organization', 'roastertype', 'roastersize', 'roasterheating', 'drumspeed',
+        'DeltaETBflag', 'DeltaBTBflag', 'clearBgbeforeprofileload', 'setBatchSizeFromBackground', 'weight_manually_set', 'stock_guard_pending', 'stock_guard_connected', 'stock_guard_box', 'hideBgafterprofileload', 'heating_types', 'operator', 'organization', 'roastertype', 'roastersize', 'roasterheating', 'drumspeed',
         'organization_setup', 'operator_setup', 'roastertype_setup', 'roastersize_setup', 'roastersize_setup_default', 'roasterheating_setup', 'roasterheating_setup_default', 'drumspeed_setup', 'last_batchsize', 'machinesetup_energy_ratings',
         'machinesetup', 'roastingnotes', 'cuppingnotes', 'roastdate', 'roastepoch', 'roastepoch_timeout', 'lastroastepoch', 'batchcounter', 'batchsequence', 'batchprefix', 'neverUpdateBatchCounter',
         'roastbatchnr', 'roastbatchprefix', 'roastbatchpos', 'roasttzoffset', 'roastUUID', 'scheduleID', 'scheduleDate', 'plus_default_store', 'plus_store', 'plus_store_label', 'plus_coffee',
@@ -1585,6 +1586,10 @@ class tgraphcanvas(QObject):
         # True once the roaster set this roast's green weight by hand (typed it or took it from the scale in
         # Roast Properties); while set, neither a background/reference load nor the scheduler overwrite it
         self.weight_manually_set:bool = False
+        # no roasting from an empty stock: a stock refresh requested on ON re-checks the selection once it arrives
+        self.stock_guard_pending:bool = False
+        self.stock_guard_connected:bool = False
+        self.stock_guard_box:QMessageBox|None = None
         self.hideBgafterprofileload:bool = False
 
         self.heating_types: Final[list[str]] = [
@@ -2601,6 +2606,7 @@ class tgraphcanvas(QObject):
         self.markSCsSignal.connect(self.mark2Cstart, type=Qt.ConnectionType.QueuedConnection) # type: ignore[call-arg]
         self.markSCeSignal.connect(self.mark2Cend, type=Qt.ConnectionType.QueuedConnection) # type: ignore[call-arg]
         self.markDropSignal.connect(self.markDrop, type=Qt.ConnectionType.QueuedConnection) # type: ignore[call-arg]
+        self.stockGuardRecheckSignal.connect(self.stockGuardRecheck, type=Qt.ConnectionType.QueuedConnection) # type: ignore[call-arg]
         self.markCoolSignal.connect(self.markCoolEnd, type=Qt.ConnectionType.QueuedConnection) # type: ignore[call-arg]
         self.onMonitorSignal.connect(self.OnMonitor, type=Qt.ConnectionType.QueuedConnection) # type: ignore[call-arg]
         self.toggleMonitorSignal.connect(self.toggleMonitorTigger)
@@ -13410,6 +13416,80 @@ class tgraphcanvas(QObject):
             if self.samplingSemaphore.available() < 1:
                 self.samplingSemaphore.release(1)
 
+    # Roastlocal rule: a coffee whose cloud stock is <= 0 cannot be used for a NEW batch (see plus/stock_guard.py).
+    # Clears the coffee/lot/blend about to be roasted if its stock is used up and tells the operator; the batch
+    # itself is not blocked (another coffee can be picked) and a batch already CHARGEd is never touched.
+    def applyRoastStockGuard(self) -> None:
+        try:
+            if self.aw.plus_account is None or self.timeindex[0] > -1:
+                return
+            if not self.plus_coffee and not self.plus_blend_spec:
+                return
+            import plus.stock
+            from plus.stock_guard import check_selection
+            gotlock = plus.stock.stock_semaphore.tryAcquire(1, 500)
+            try:
+                verdict = check_selection(plus.stock.stock, self.plus_coffee, self.plus_coffee_label, self.plus_store,
+                    self.plus_lot_id, self.plus_blend_spec, self.plus_blend_label)
+            finally:
+                if gotlock:
+                    plus.stock.stock_semaphore.release(1)
+            if verdict.clear_coffee:
+                self.plus_coffee = None
+                self.plus_coffee_label = None
+            if verdict.clear_lot:
+                self.plus_lot_id = None
+            if verdict.clear_blend:
+                self.plus_blend_spec = None
+                self.plus_blend_label = None
+                self.plus_blend_spec_labels = None
+            if verdict.messages:
+                for m in verdict.messages:
+                    _log.info('stock guard: %s', m)
+                    self.aw.sendmessage(m)
+                self.showStockGuardMessage('\n\n'.join(verdict.messages))
+        except Exception as e: # pylint: disable=broad-except
+            _log.exception(e)
+
+    # non-modal, so it never blocks sampling or the ON sequence
+    def showStockGuardMessage(self, text:str) -> None:
+        try:
+            box = QMessageBox(self.aw)
+            box.setIcon(QMessageBox.Icon.Warning)
+            box.setWindowTitle('Roastlocal Cloud')
+            box.setText(text)
+            box.setStandardButtons(QMessageBox.StandardButton.Ok)
+            box.setModal(False)
+            box.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+            self.stock_guard_box = box
+            box.show()
+        except Exception as e: # pylint: disable=broad-except
+            _log.exception(e)
+
+    # requests a fresh stock from the cloud (falls back to the cache when offline) and re-checks once it arrived
+    def armStockGuardRefresh(self) -> None:
+        try:
+            import plus.stock
+            worker = plus.stock.getWorker()
+            if worker is None:
+                return
+            if not self.stock_guard_connected:
+                worker.updatedSignal.connect(self.stockGuardRecheckSignal)
+                worker.upToDateSignal.connect(self.stockGuardRecheckSignal)
+                self.stock_guard_connected = True
+            self.stock_guard_pending = True
+            plus.stock.update_now()
+        except Exception as e: # pylint: disable=broad-except
+            _log.exception(e)
+
+    @pyqtSlot()
+    def stockGuardRecheck(self) -> None:
+        if not self.stock_guard_pending:
+            return
+        self.stock_guard_pending = False
+        if self.flagon and self.timeindex[0] == -1: # only before CHARGE of the batch that was started on ON
+            self.applyRoastStockGuard()
+
     @pyqtSlot()
     def OnMonitor(self) -> None:
         try:
@@ -13425,6 +13505,14 @@ class tgraphcanvas(QObject):
                 # NOTE: scheduler is only active if connected to artisan.plus
                 self.aw.schedule_window.set_selected_remaining_item_roast_properties()
                 self.aw.schedule_window.load_selected_remaining_item_template()
+
+            # no roasting from an empty stock: ON is where the next batch's coffee is settled (properties carried
+            # over by reset, or set by the scheduler) and the operator can still pick another one before CHARGE.
+            # Check on the cached stock now and again once a fresh stock arrives from the cloud.
+            self.stock_guard_pending = False
+            if self.aw.plus_account is not None:
+                self.applyRoastStockGuard()
+                self.armStockGuardRefresh()
 
             if self.aw.simulator is None:
                 self.startPhidgetManager()
