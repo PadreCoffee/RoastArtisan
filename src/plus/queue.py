@@ -56,6 +56,14 @@ queue:'persistqueue.SQLiteQueue|None' = None # holdes the persistqueue.SQLiteQue
 #   verb  : the HTTP verb to be used (POST or PUT)
 
 PROFILE_UPLOAD_ITEM_TYPE: Final[str] = 'profile_upload'
+# each queue item carries one idempotency key from the moment it is queued; it is sent with every attempt
+# (retries, re-queues, re-sends from failed.json), so the cloud can tell a repeat from a new request
+IDEMPOTENCY_KEY: Final[str] = 'idempotency_key'
+
+
+def new_idempotency_key() -> str:
+    import uuid
+    return uuid.uuid4().hex
 PROFILE_UPLOAD_FIELD_NAME: Final[str] = 'file'
 
 
@@ -405,6 +413,8 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                     transient_attempt = 0
                     first_failure:float|None = None
                     profile_item = is_profile_upload_item(item)
+                    # items queued by older versions have no key yet: give them one now, kept from here on
+                    idempotency_key = item.setdefault(IDEMPOTENCY_KEY, new_idempotency_key())
                     # roast summary save (POST /aroast); used to ensure a rejected save is never lost silently
                     save_item = (not profile_item) and item.get('url') == config.roast_url
                     if 'url' not in item:
@@ -458,7 +468,8 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                             clear_on_failure=False, interactive=False
                                         )
                                         r = connection.sendFile(
-                                            item['url'], profile_path, field_name=PROFILE_UPLOAD_FIELD_NAME
+                                            item['url'], profile_path, field_name=PROFILE_UPLOAD_FIELD_NAME,
+                                            idempotency_key=idempotency_key,
                                         )
                                         r.raise_for_status()
                                         aw = config.app_window
@@ -483,7 +494,7 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                     clear_on_failure=False, interactive=False
                                 )
                                 r = connection.sendData(
-                                    item['url'], item['data'], item['verb']
+                                    item['url'], item['data'], item['verb'], idempotency_key=idempotency_key
                                 )
                                 r.raise_for_status()
                                 aw = config.app_window
@@ -527,7 +538,7 @@ class Worker(QObject): # pyright: ignore [reportGeneralTypeIssues]
                                     clear_on_failure=False, interactive=False
                                 )
                                 r = connection.sendData(
-                                    item['url'], item['data'], item['verb']
+                                    item['url'], item['data'], item['verb'], idempotency_key=idempotency_key
                                 )
                                 r.raise_for_status()
                             elif save_item:
@@ -767,7 +778,7 @@ def queue_roast_item(
             '-> roast not queued as queue'
                 ' is not running')
     elif last_queued_roast_item is None or not roast_subset_of(roast_item, last_queued_roast_item):
-        queue_item:dict[str, Any] = {'url': config.roast_url, 'data': roast_item, 'verb': 'POST'}
+        queue_item:dict[str, Any] = {'url': config.roast_url, 'data': roast_item, 'verb': 'POST', IDEMPOTENCY_KEY: new_idempotency_key()}
         if profile_path is not None:
             queue_item['profile_path'] = profile_path
             queue_item['cleanup_profile_path'] = cleanup_profile_path
@@ -819,6 +830,7 @@ def addProfileUpload(
             },
             'verb': 'POST',
             'cleanup_profile_path': cleanup_profile_path,
+            IDEMPOTENCY_KEY: new_idempotency_key(),
         },
     )
     last_queued_profile_item = signature
@@ -923,7 +935,8 @@ def sendLockSchedule() -> None:
             )
         else:
             queue.put(
-                {'url': f'{config.lock_schedule_url}?today={datetime.datetime.now().astimezone().date()}', 'data': {}, 'verb': 'POST'},
+                {'url': f'{config.lock_schedule_url}?today={datetime.datetime.now().astimezone().date()}', 'data': {}, 'verb': 'POST',
+                 IDEMPOTENCY_KEY: new_idempotency_key()},
                 # timeout=config.queue_put_timeout
                 # sql queue does not feature a timeout
             )
