@@ -114,6 +114,9 @@ class _Resp:
             raise RuntimeError(f'HTTP {self.status_code}')
 
 
+_KEYS: list[Any] = []   # idempotency keys sent by the last _run, in order
+
+
 def _run(monkeypatch, tmp_path, items, responses):
     import plus.queue as qm
     fq = _FakeQueue(items)
@@ -128,8 +131,11 @@ def _run(monkeypatch, tmp_path, items, responses):
     monkeypatch.setattr(qm.controller, 'disconnect', lambda **k: None)
     seq = list(responses)
     sent: list[Any] = []
-    def send(url, data, verb):
+    keys = _KEYS
+    keys.clear()
+    def send(url, data, verb, idempotency_key=None):
         sent.append(data.get('roast_id'))
+        keys.append(idempotency_key)
         return _Resp(seq.pop(0))
     monkeypatch.setattr(qm.connection, 'sendData', send)
     monkeypatch.setattr(qm.Worker, 'addSyncItem', staticmethod(lambda item: None))
@@ -207,3 +213,29 @@ def test_requeue_without_dead_letters_is_a_no_op(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(q, 'queue', _FakeQueue([]))
     assert q.requeue_dead_letters() == 0
     assert not (tmp_path / q.DEAD_LETTER_FILE).exists()
+
+
+def test_retries_of_one_item_reuse_its_idempotency_key(monkeypatch, tmp_path) -> None:
+    # a new key per attempt made every retry look like a new request to the cloud
+    item = _full('r1')
+    item[q.IDEMPOTENCY_KEY] = 'k-r1'
+    fq, sent, _, _ = _run(monkeypatch, tmp_path, [item], [503, 401, 500, 200])
+    assert sent == ['r1'] * 4 and _KEYS == ['k-r1'] * 4 and fq.done == 1
+
+
+def test_item_from_an_older_version_gets_one_key_for_all_attempts(monkeypatch, tmp_path) -> None:
+    fq, _, _, _ = _run(monkeypatch, tmp_path, [_full('r1')], [503, 200])   # queued without a key
+    assert _KEYS[0] and _KEYS[0] == _KEYS[1] and fq.done == 1
+
+
+def test_rotated_and_dead_letter_items_keep_their_key(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(config, 'queue_transient_rotate_after', 0)
+    item = _full('r1')
+    item[q.IDEMPOTENCY_KEY] = 'k-r1'
+    fq, _, _, _ = _run(monkeypatch, tmp_path, [item], [503])
+    assert fq.put_back[0][q.IDEMPOTENCY_KEY] == 'k-r1'                     # moved to the end of the queue
+    monkeypatch.setattr(config, 'app_window', None)
+    q.dead_letter(fq.put_back[0], 'http_409', 409)
+    fq2 = _FakeQueue([])
+    monkeypatch.setattr(q, 'queue', fq2)
+    assert q.requeue_dead_letters() == 1 and fq2.put_back[0][q.IDEMPOTENCY_KEY] == 'k-r1'   # re-sent from failed.json

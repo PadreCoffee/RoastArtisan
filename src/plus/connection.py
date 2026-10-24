@@ -375,11 +375,14 @@ def getHeaders(
         return headers
     return {}
 
-def getHeadersAndData(authorized: bool, compress: bool, jsondata: JSON, verb: str) -> tuple[dict[str, str],bytes]:
+# idempotency_key: the key of the item being sent; every retry of the same item must send the same key so the
+# cloud can recognise a repeat (a fresh key per attempt made each retry look like a new request)
+def getHeadersAndData(authorized: bool, compress: bool, jsondata: JSON, verb: str,
+        idempotency_key: str|None = None) -> tuple[dict[str, str],bytes]:
     headers = getHeaders(authorized, decompress=compress)
     headers['Content-Type'] = 'application/json; charset=utf-8'
     if verb == 'POST':
-        headers['Idempotency-Key'] = uuid.uuid4().hex
+        headers['Idempotency-Key'] = idempotency_key or uuid.uuid4().hex
     if compress and len(jsondata) > config.post_compression_threshold:
         postdata = gzip.compress(jsondata)
         _log.debug('-> compressed size %s', len(postdata))
@@ -395,13 +398,16 @@ def sendData(
     verb: str, # POST or PUT
     authorized: bool = True,
     compress: bool = config.compress_posts,
+    idempotency_key: str|None = None,
 ) -> requests.models.Response:
+    # one key for this request, kept when it is re-sent after a re-authentication below
+    idempotency_key = idempotency_key or uuid.uuid4().hex
     # don't log POST data as it might contain credentials!
     _log.debug('sendData(%s,_data_,%s,%s)', url, verb, authorized)
     jsondata = json.dumps(data, indent=None, separators=(',', ':'), ensure_ascii=False).encode('utf8')
     _log.debug('-> size %s', len(jsondata))
 #    _log.debug("PRINT jsondata: %s",jsondata)
-    headers, postdata = getHeadersAndData(authorized, compress, jsondata, verb)
+    headers, postdata = getHeadersAndData(authorized, compress, jsondata, verb, idempotency_key)
 
     try:
         if verb == 'POST':
@@ -428,8 +434,8 @@ def sendData(
             if authentify():
                 time.sleep(0.3) # a little delay not to stress out the server too much
                 headers, postdata = getHeadersAndData(
-                    authorized, compress, jsondata, verb
-                )  # recreate header with new token
+                    authorized, compress, jsondata, verb, idempotency_key
+                )  # recreate header with new token, same idempotency key
                 if verb == 'POST':
                     r = requests.post(
                         url,
@@ -460,9 +466,12 @@ def sendFile(
     file_path: str,
     field_name: str = 'file',
     authorized: bool = True,
+    idempotency_key: str|None = None,
 ) -> requests.models.Response:
     _log.debug('sendFile(%s,%s,%s)', url, file_path, authorized)
+    idempotency_key = idempotency_key or uuid.uuid4().hex
     headers = getHeaders(authorized)
+    headers['Idempotency-Key'] = idempotency_key
 
     def post_file(request_headers: dict[str, str]) -> requests.models.Response:
         with open(file_path, 'rb') as fh:
@@ -484,6 +493,7 @@ def sendFile(
             if authentify():
                 time.sleep(0.3)
                 headers = getHeaders(authorized)
+                headers['Idempotency-Key'] = idempotency_key
                 r = post_file(headers)
                 updateReadTimeoutOnSuccess()
                 _log.debug('on retry: -> status %s, time %s', r.status_code, r.elapsed.total_seconds())
