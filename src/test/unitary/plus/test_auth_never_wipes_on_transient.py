@@ -83,7 +83,9 @@ def test_definitive_rejection_still_clears(env, monkeypatch) -> None:
     aw, deleted = env
     _reply(monkeypatch, _Resp(401, {'content-type': 'application/json'}, {'success': False, 'error': 'wrong password'}))
     assert connection.authentify() is False
-    assert len(deleted) == 1 and aw.plus_account is None
+    # removed under the current keyring name and the legacy one 1.0.14/1.0.15 used
+    assert {d[1] for d in deleted} == {'roaster@example.com'} and aw.plus_account is None
+    assert (config.get_keyring_service_name(), 'roaster@example.com') in deleted
 
 
 def test_keychain_read_failure_does_not_delete_the_entry(env, monkeypatch) -> None:

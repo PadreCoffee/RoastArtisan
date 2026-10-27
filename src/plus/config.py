@@ -51,6 +51,11 @@ schedule_date_tag: Final[str] = 'scheduleDate' # send as 's_item_date' as part o
 default_api_base_url: Final[str] = 'https://roastlocal.ru/api/v1'
 default_web_base_url: Final[str] = 'https://roastlocal.ru'
 default_shop_base_url: Final[str] = 'https://roastlocal.ru'
+# the upstream Artisan cloud. The fork-only features (full profile upload, cloud reference profiles) and the
+# keyring service name are tied to "not the upstream server". They compared against default_web_base_url, which
+# was the upstream until 1.0.14 made roastlocal.ru the default; that silently switched both features off and
+# moved saved passwords to another keyring name.
+upstream_web_base_url: Final[str] = 'https://artisan.plus'
 
 api_base_url: str
 web_base_url: str
@@ -232,17 +237,23 @@ def set_server_base_url(url: str|None) -> None:
 
 
 def get_keyring_service_name() -> str:
-    if server_url == default_web_base_url:
+    if server_url == upstream_web_base_url:
         return app_name
     return f'{app_name}@{server_url}'
 
 
+# keyring service names an older version may have saved this server's password under: 1.0.14/1.0.15 used the bare
+# app_name for roastlocal.ru
+def legacy_keyring_service_names() -> list[str]:
+    return [app_name] if get_keyring_service_name() != app_name else []
+
+
 def profile_upload_enabled() -> bool:
-    return server_url != default_web_base_url
+    return server_url != upstream_web_base_url
 
 
 def remote_profile_fetch_enabled() -> bool:
-    return server_url != default_web_base_url
+    return server_url != upstream_web_base_url
 
 
 def get_profile_upload_url(roast_id: str) -> str:

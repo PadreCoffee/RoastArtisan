@@ -161,9 +161,7 @@ def connect(clear_on_failure: bool =False, interactive: bool = True) -> None:
                 if account is not None:  # @UndefinedVariable
                     try:
                         # try-catch as the keyring might not work
-                        config.passwd = keyring.get_password(
-                            config.get_keyring_service_name(), account
-                        )  # @UndefinedVariable
+                        config.passwd = connection.read_saved_password(account)
                         if config.passwd is None:
                             _log.debug(
                                 '-> keyring.get_password'
