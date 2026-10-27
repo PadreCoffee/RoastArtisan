@@ -92,9 +92,8 @@ class OperatorsDialog(ArtisanDialog):
                                 _tr('Message', 'Also delete the saved password for {0}?').format(email)
                                 ) == QMessageBox.StandardButton.Yes:
             try:
-                import keyring
-                from plus import config
-                keyring.delete_password(config.get_keyring_service_name(), email)
+                from plus import connection
+                connection.delete_saved_password(email)
             except Exception as e:  # pylint: disable=broad-except
                 _log.exception(e)
         self._reload()
