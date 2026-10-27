@@ -67,31 +67,31 @@ def updateReadTimeoutOnTimeout() -> None:
 
 #
 
-# the saved password of account for the current server; raises if the keyring cannot be read (callers tell an
+# the saved password of login for the current server; raises if the keyring cannot be read (callers tell an
 # unreadable keyring from a missing password). A password found only under a legacy service name (saved by
 # 1.0.14/1.0.15) is copied to the current name.
-def read_saved_password(account:str) -> str|None:
+def read_saved_password(login:str) -> str|None:
     import keyring
     primary = config.get_keyring_service_name()
-    passwd = keyring.get_password(primary, account)
+    passwd = keyring.get_password(primary, login)
     if passwd is None:
         for legacy in config.legacy_keyring_service_names():
-            passwd = keyring.get_password(legacy, account)
+            passwd = keyring.get_password(legacy, login)
             if passwd is not None:
                 try:
-                    keyring.set_password(primary, account, passwd)
+                    keyring.set_password(primary, login, passwd)
                 except Exception as e:  # pylint: disable=broad-except
                     _log.error(e)
                 break
     return passwd
 
 
-# removes the saved password of account for the current server, under the current and any legacy service name
-def delete_saved_password(account:str) -> None:
+# removes the saved password of login for the current server, under the current and any legacy service name
+def delete_saved_password(login:str) -> None:
     import keyring
     for service in [config.get_keyring_service_name(), *config.legacy_keyring_service_names()]:
         try:
-            keyring.delete_password(service, account)
+            keyring.delete_password(service, login)
         except Exception as e:  # pylint: disable=broad-except
             _log.debug(e)
 
