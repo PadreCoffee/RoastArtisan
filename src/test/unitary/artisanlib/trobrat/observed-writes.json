@@ -1,0 +1,65 @@
+[
+  {
+    "tag": "Recipe[DB20]-M1:SP",
+    "value": 55.0,
+    "reference": 513,
+    "request_original_frame": 16967,
+    "response_original_frame": 16968,
+    "request_hex": "0300002f02f0803201000002010016000805011212b2ff8a0e0014b128def42000001d40000009ff040020425c0000",
+    "response_hex": "0300001602f0803203000002010002000100000501ff"
+  },
+  {
+    "tag": "HMI_PIDAir[DB24]-SP",
+    "value": 60.0,
+    "reference": 513,
+    "request_original_frame": 19685,
+    "response_original_frame": 19686,
+    "request_hex": "0300002b02f080320100000201001200080501120eb2ff8a0e0018590ef01d40000011ff04002042700000",
+    "response_hex": "0300001602f0803203000002010002000100000501ff"
+  },
+  {
+    "tag": "HMI_PIDAir[DB24]-SP",
+    "value": 120.0,
+    "reference": 513,
+    "request_original_frame": 23505,
+    "response_original_frame": 23506,
+    "request_hex": "0300002b02f080320100000201001200080501120eb2ff8a0e0018590ef01d40000011ff04002042f00000",
+    "response_hex": "0300001602f0803203000002010002000100000501ff"
+  },
+  {
+    "tag": "Act_Recipe[DB20]-PID_Gas:SP",
+    "value": 1.5,
+    "reference": 513,
+    "request_original_frame": 30840,
+    "response_original_frame": 30841,
+    "request_hex": "0300002b02f080320100000201001200080501120eb2ff8a0e0014ac57763340000028ff0400203fc00000",
+    "response_hex": "0300001602f0803203000002010002000100000501ff"
+  },
+  {
+    "tag": "Act_Recipe[DB20]-PID_Gas:SP",
+    "value": 10.0,
+    "reference": 513,
+    "request_original_frame": 41079,
+    "response_original_frame": 41080,
+    "request_hex": "0300002b02f080320100000201001200080501120eb2ff8a0e0014ac57763340000028ff04002041200000",
+    "response_hex": "0300001602f0803203000002010002000100000501ff"
+  },
+  {
+    "tag": "Act_Recipe[DB20]-PID_Gas:SP",
+    "value": 5.0,
+    "reference": 513,
+    "request_original_frame": 43817,
+    "response_original_frame": 43818,
+    "request_hex": "0300002b02f080320100000201001200080501120eb2ff8a0e0014ac57763340000028ff04002040a00000",
+    "response_hex": "0300001602f0803203000002010002000100000501ff"
+  },
+  {
+    "tag": "Act_Recipe[DB20]-PID_Gas:SP",
+    "value": 0.0,
+    "reference": 513,
+    "request_original_frame": 46993,
+    "response_original_frame": 46994,
+    "request_hex": "0300002b02f080320100000201001200080501120eb2ff8a0e0014ac57763340000028ff04002000000000",
+    "response_hex": "0300001602f0803203000002010002000100000501ff"
+  }
+]

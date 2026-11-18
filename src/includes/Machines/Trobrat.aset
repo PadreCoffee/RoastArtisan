@@ -1,0 +1,159 @@
+[General]
+Mode=C
+swapETBT=false
+swaplcds=false
+
+[Device]
+id=79
+
+[S7]
+area=6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0
+db_nr=16, 16, 16, 0, 0, 0, 0, 0, 1, 1, 1, 1
+start=0, 4, 12, 12, 12, 0, 12, 12, 0, 0, 0, 0
+type=1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
+mode=1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0
+div=0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+host=192.168.0.1
+port=102
+rack=0
+slot=0
+optimizer=true
+fetch_max_blocks=false
+PID_area=0
+
+[Trobrat]
+enabled=true
+host=192.168.0.1
+
+[Modbus]
+type=3
+host=127.0.0.1
+port=15020
+wordorderLittle=false
+IP_timeout=0.2
+IP_retries=1
+optimizer=true
+fetch_max_blocks=false
+input1deviceId=1
+input1register=0
+input1float=true
+input1bcd=false
+input1code=3
+input1div=0
+input1mode=
+input1FloatsAsInt=false
+input1BCDsAsInt=false
+input1Signed=false
+input2deviceId=1
+input2register=2
+input2float=true
+input2bcd=false
+input2code=3
+input2div=0
+input2mode=
+input2FloatsAsInt=false
+input2BCDsAsInt=false
+input2Signed=false
+input3deviceId=1
+input3register=4
+input3float=true
+input3bcd=false
+input3code=3
+input3div=0
+input3mode=
+input3FloatsAsInt=false
+input3BCDsAsInt=false
+input3Signed=false
+input4deviceId=1
+input4register=6
+input4float=true
+input4bcd=false
+input4code=3
+input4div=0
+input4mode=
+input4FloatsAsInt=false
+input4BCDsAsInt=false
+input4Signed=false
+
+[ExtraDev]
+extradevices=25, 80, 29, 33
+extraname1=Цель DTR%, Gas%, Extra 1, Extra 1
+extraname2=Extra 2, Extra 2, Extra 2, Extra 2
+extramathexpression1="(100*(b{DROP}-b{FCs})/(b{DROP}-b{CHARGE}) if b{FCs} !=-1 else 0)", , ,
+extramathexpression2=, , ,
+extradevicecolor1=#000000, #000000, #000000, #000000
+extradevicecolor2=#000000, #000000, #000000, #000000
+extraLCDvisibility1=true, true, true, true, false, false, false, true, true, true
+extraLCDvisibility2=false, false, true, true, false, false, false, true, true, true
+extraCurveVisibility1=false, false, false, false, true, true, true, true, true, true
+extraCurveVisibility2=false, false, false, false, true, true, true, true, true, true
+extraDelta1=false, false, false, false, false, false, false, false, false, false
+extraDelta2=false, false, false, false, false, false, false, false, false, false
+extraFill1=0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+extraFill2=0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+devicetablecolumnwidths=103, 80, 80, 80, 80, 260, 40, 93, 93, 63, 63, 55, 55, 69, 69
+
+[ExtraComm]
+extracomport=COM1, COM1, COM1, COM1
+extrabaudrate=9600, 19200, 115200, 38400
+extrabytesize=8, 8, 8, 8
+extraparity=N, E, N, E
+extrastopbits=1, 1, 1, 1
+extratimeout=0.5, 0.5, 0.4, 0.5
+
+[Sliders]
+slidervisibilities=1, 1, 0, 1
+eventsliderKeyboardControl=true
+eventsliderAlternativeLayout=false
+slideractions=2, 2, 2, 2
+slidercommands="writeWord(1,102,{})", "writeWord(1,100,{})", , "writeWord(1,104,{})"
+slideroffsets=0, 0, 0, 0
+sliderfactors=1, 1, 0.1, 0.1
+slidermin=0, 0, 0, 0
+slidermax=300, 65, 200, 200
+eventslidersflags=0, 1, 1
+eventsliderBernoulli=0, 0, 0, 0
+eventslidercoarse=0, 0, 0, 0
+eventslidertemp=0, 0, 0, 0
+eventsliderunits=Pa, Rpm, " mbar", mbar
+ModeTempSliders=C
+
+[ExtraEventButtons]
+buttonlistmaxlen=13
+extraeventstypes=4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+extraeventsvalues=1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+extraeventsactionstrings="writeWord(1,104,0)", "writeWord(1,104,1.5)", "writeWord(1,104,5)", "writeWord(1,100,48)", "writeWord(1,100,55)", "writeWord(1,102,100)", "writeWord(1,102,120)", "writeWord(1,106,1)", "writeWord(1,106,0)", "writeWord(1,108,1)", "writeWord(1,108,0)", "writeWord(1,110,1)", "writeWord(1,110,0)"
+extraeventsactions=4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+extraeventsdescriptions=, , , , , ,, , , , , ,
+extraeventsvisibility=1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+extraeventslabels=Газ Выкл, Газ мин, Газ 5 mbar, Барабан 48 RPM, Барабан 55 RPM, Вытяжка 100 Pa, Вытяжка 120 Pa, Миксер Вкл, Миксер Выкл, Охладитель Вкл, Охладитель Выкл, Дестонер Вкл, Дестонер Выкл
+extraeventbuttoncolor=#47616f, #705a4a, #705a4a, #466064, #466064, #465c70, #465c70, #466064, #466064, #466064, #466064, #466064, #466064
+extraeventbuttontextcolor=#ffffff, #ffffff, #ffffff, #ffffff, #ffffff, #ffffff, #ffffff, #ffffff, #ffffff, #ffffff, #ffffff, #ffffff, #ffffff
+extraeventsbuttonsflags=0, 1, 1
+buttonpalettemaxlen=13, 14, 14, 14, 14, 14, 14, 14, 14, 14
+buttonpalette_buttonsize=1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+buttonpalette_mark_last_button_pressed=true, true, true, true, true, true, true, true, true, true
+buttonpalette_tooltips=false, false, false, false, false, false, false, false, false, false
+buttonpalette_slider_alternative_layout=false, false, false, false, false, false, false, false, false, false
+buttonpalette_shortcuts=true
+eventbuttontablecolumnwidths=70, 297, 100, 50, 150, 109, 84, 90, 90
+buttonsize=1
+marklastbuttonpressed=true
+showextrabuttontooltips=false
+buttonpalette_label=Trobrat: ручное управление
+buttonpalette=
+
+[DefaultButtons]
+buttonvisibility=true, true, true, false, false, false, true, false
+buttonactions=0, 0, 0, 0, 0, 0, 0, 0
+buttonactionstrings=, , , , , , ,
+extrabuttonactions=0, 0, 0
+extrabuttonactionstrings=, ,
+xextrabuttonactions=0, 0
+xextrabuttonactionstrings=,
+
+[events]
+eventsbuttonflag=1
+etypes=, Drum, SP, ,
+eventsshowflag=1
+showEtypes=true, true, false, true, false

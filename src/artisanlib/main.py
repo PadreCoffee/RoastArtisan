@@ -1508,7 +1508,7 @@ class ApplicationWindow(QMainWindow):
         'backgroundDlg_activeTab', 'DeviceAssignmentDlg_activeTab', 'AlarmDlg_activeTab', 'schedule_activeTab', 'StatisticsDlg_activeTab', 'resetqsettings', 'settingspath', 'wheelpath', 'profilepath',
         'userprofilepath', 'printer', 'main_widget', 'defaultdpi', 'dpi', 'qmc', 'HottopControlActive', 'AsyncSamplingTimer', 'wheeldialog',
         'simulator', 'simulatorpath', 'eventsbuttonflag', 'minieventsflags', 'seriallogflag',
-        'seriallog', 'ser', 'modbus', 'extraMODBUStemps', 'extraMODBUStx', 's7', 'extraS7tx', 'ws', 'extraser', 'extracomport', 'extrabaudrate',
+        'seriallog', 'ser', 'modbus', 'extraMODBUStemps', 'extraMODBUStx', 's7', 'extraS7tx', 'trobrat_enabled', 'trobrat_host', 'trobrat_service', 'ws', 'extraser', 'extracomport', 'extrabaudrate',
         'extrabytesize', 'extraparity', 'extrastopbits', 'extratimeout', 'hottop', 'santokerHost', 'santokerPort', 'santokerSerial', 'santokerBLE', 'santokerEventFlags', 'santoker', 'santokerR', 'roest', 'roestEventFlags', 'lebrew_roastseeNEXT', 'thermoworksBlueDOT', 'fujipid', 'dtapid', 'pidcontrol', 'soundflag', 'recentRoasts', 'maxRecentRoasts',
         'mugmaHost','mugmaPort', 'mugma', 'mugma_default_host', 'shelly_3EMPro_host', 'shelly_PlusPlug_host',
         'kaleido_default_host', 'kaleidoHost', 'kaleidoPort', 'kaleidoSerial', 'kaleidoPID', 'kaleido', 'kaleidoEventFlags', 'colorTrack_mean_window_size', 'colorTrack_median_window_size', 'ikawa',
@@ -1821,6 +1821,9 @@ class ApplicationWindow(QMainWindow):
         #create an s7 port object (main s7 device)
         self.s7:s7port = s7port(self)
         self.extraS7tx:float = 0.
+        self.trobrat_enabled:bool = False
+        self.trobrat_host:str = '192.168.0.1'
+        self.trobrat_service:Any|None = None
         #create an WebSocket port object (main device eg Probat Sample)
         self.ws:wsport = wsport(self)
         #list with extra serial ports (extra devices)
@@ -18725,6 +18728,12 @@ class ApplicationWindow(QMainWindow):
             settings.endGroup()
 #--- END GROUP S7
 
+            if not theme:
+                settings.beginGroup('Trobrat')
+                self.trobrat_enabled = toBool(settings.value('enabled', False))
+                self.trobrat_host = toString(settings.value('host', '192.168.0.1'))
+                settings.endGroup()
+
 #--- BEGIN GROUP Modbus
             #restore modbus port
             settings.beginGroup('Modbus')
@@ -19824,7 +19833,25 @@ class ApplicationWindow(QMainWindow):
             _, _, exc_tb = sys.exc_info()
             QMessageBox.information(self,QApplication.translate('Error Message', 'Error'),QApplication.translate('Error Message', 'Exception:') + ' settingsLoad()  @line ' + str(getattr(exc_tb, 'tb_lineno', '?')))
 
+        if res and not theme:
+            self.syncTrobratService()
         return res
+
+    def syncTrobratService(self) -> None:
+        """Start the roaster-specific gateway only for its selected settings."""
+        if self.trobrat_service is not None and (not self.trobrat_enabled or self.trobrat_service.host != self.trobrat_host):
+            self.trobrat_service.stop()
+            self.trobrat_service = None
+        if self.trobrat_enabled and self.trobrat_service is None:
+            try:
+                from artisanlib.trobrat.service import TrobratService
+                service = TrobratService(self.trobrat_host)
+                service.start()
+                self.trobrat_service = service
+                _log.info('Trobrat gateway started for %s', self.trobrat_host)
+            except Exception as exc: # pylint: disable=broad-except
+                _log.exception('Trobrat gateway could not start: %s', exc)
+                self.qmc.adderror('Trobrat gateway could not start: ' + str(exc))
 
     ## WebLCDs
 
@@ -20687,6 +20714,11 @@ class ApplicationWindow(QMainWindow):
             self.settingsSetValue(settings, default_settings, 'fetch_max_blocks',self.s7.fetch_max_blocks, read_defaults)
             settings.endGroup()
 #--- END GROUP S7
+
+            settings.beginGroup('Trobrat')
+            self.settingsSetValue(settings, default_settings, 'enabled', self.trobrat_enabled, read_defaults)
+            self.settingsSetValue(settings, default_settings, 'host', self.trobrat_host, read_defaults)
+            settings.endGroup()
 
 #--- BEGIN GROUP Modbus
             #save modbus port
@@ -21562,6 +21594,9 @@ class ApplicationWindow(QMainWindow):
 
 
                 self.stopActivities() # also disconnect from connected scales and stops BLE scanning
+                if self.trobrat_service is not None:
+                    self.trobrat_service.stop()
+                    self.trobrat_service = None
                 # if BLE was used we need to terminate its singular thread/asyncloop running the bleak scan and connect:
                 # BLE is not stopped in self.stopActivities() as that one is also called on settings load and we need to keep
                 # the same BLE thread/loop running over the whole runtime of the app to avoid ble._scan_and_connect_lock and ble._terminate_scan_event

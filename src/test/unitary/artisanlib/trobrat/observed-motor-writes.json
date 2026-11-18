@@ -1,0 +1,26 @@
+[
+  {
+    "tag": "MArea-M3:GM",
+    "value": 1,
+    "reference": 513,
+    "request_hex": "0300002802f080320100000201001200050501120eb2ff000000525e8e3ee040000021ff030001ff"
+  },
+  {
+    "tag": "MArea-M3:GM",
+    "value": 0,
+    "reference": 513,
+    "request_hex": "0300002802f080320100000201001200050501120eb2ff000000525e8e3ee040000021ff03000100"
+  },
+  {
+    "tag": "MArea-M4:GM",
+    "value": 1,
+    "reference": 513,
+    "request_hex": "0300002802f080320100000201001200050501120eb2ff00000052ecc83cb440000023ff030001ff"
+  },
+  {
+    "tag": "MArea-M4:GM",
+    "value": 0,
+    "reference": 513,
+    "request_hex": "0300002802f080320100000201001200050501120eb2ff00000052ecc83cb440000023ff03000100"
+  }
+]
