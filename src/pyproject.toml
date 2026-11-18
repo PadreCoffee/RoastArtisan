@@ -310,6 +310,10 @@ module = [
     "test_auth_never_wipes_on_transient",
     "test_outbox_never_drops",
     "test_sync_silent_losses",
+    "test_control",
+    "test_reader",
+    "test_motors",
+    "test_integration",
 ]
 disallow_untyped_defs = false
 disallow_incomplete_defs = false

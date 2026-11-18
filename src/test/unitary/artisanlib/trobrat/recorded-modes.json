@@ -1,0 +1,18 @@
+[
+  {
+    "tag": "HMI_PIDAir[DB24]-Mode",
+    "request_hex": "0300002302f080320100000101001200000401120eb2ff8a0e0018f024fdb14000000a",
+    "response_hex": "0300001b02f0803203000001010002000600000401ff0500100003",
+    "reference": 257,
+    "item_index": 0,
+    "value": 3
+  },
+  {
+    "tag": "Act_Recipe[DB20]-PID_Gas:Mode",
+    "request_hex": "0300002302f080320100000101001200000401120eb2ff8a0e001474a350ee40000029",
+    "response_hex": "0300001b02f0803203000001010002000600000401ff0500100003",
+    "reference": 257,
+    "item_index": 0,
+    "value": 3
+  }
+]
