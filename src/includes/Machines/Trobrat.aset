@@ -140,7 +140,7 @@ eventbuttontablecolumnwidths=70, 297, 100, 50, 150, 109, 84, 90, 90
 buttonsize=1
 marklastbuttonpressed=true
 showextrabuttontooltips=false
-buttonpalette_label=Trobrat Bernin: ручное управление
+buttonpalette_label=Trobrat: ручное управление
 buttonpalette=
 
 [DefaultButtons]

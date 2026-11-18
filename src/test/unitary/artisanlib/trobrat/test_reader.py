@@ -8,7 +8,7 @@ from typing import override
 import unittest
 from unittest import mock
 
-from artisanlib.trobrat import bernin_metrics as bm
+from artisanlib.trobrat import metrics as bm
 
 FIXTURE = json.loads((Path(__file__).parent / "recorded_payloads.json").read_text())
 

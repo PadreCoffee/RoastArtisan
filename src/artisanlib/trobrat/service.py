@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import threading
 
-from . import bernin_control
+from . import control
 
 
 class TrobratService:
@@ -16,19 +16,19 @@ class TrobratService:
 
     def __init__(self, host: str) -> None:
         self.host = host
-        self.gateway = bernin_control.ControlGateway(bernin_control.ControlReader(host))
+        self.gateway = control.ControlGateway(control.ControlReader(host))
         self.stop_event = threading.Event()
-        self.server: bernin_control.Server | None = None
+        self.server: control.Server | None = None
         self.poll_thread: threading.Thread | None = None
         self.server_thread: threading.Thread | None = None
 
     def start(self) -> None:
         # Bind first: a previously started standalone client must not silently
         # compete with this instance on the local Modbus port.
-        self.server = bernin_control.Server(self.gateway)
+        self.server = control.Server(self.gateway)
         try:
             self.poll_thread = threading.Thread(
-                target=bernin_control.poll,
+                target=control.poll,
                 args=(self.gateway, self.stop_event),
                 name='trobrat-poll',
                 daemon=True,

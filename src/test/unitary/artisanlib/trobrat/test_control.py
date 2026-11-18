@@ -9,7 +9,7 @@ import threading
 import unittest
 from unittest import mock
 
-from artisanlib.trobrat import bernin_control as c
+from artisanlib.trobrat import control as c
 
 
 class FakeReader:
@@ -106,7 +106,7 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(len(scripted_socket.sent), 1)
 
     def test_generated_palette_commands_and_gas_tenths(self):
-        palette = ast.literal_eval((Path(__file__).parent / "Bernin-Direct.apal").read_text())["0"]
+        palette = ast.literal_eval((Path(__file__).parent / "Trobrat-Direct.apal").read_text())["0"]
         self.assertEqual(palette[19][:3], [0, 0, 0])
         self.assertEqual(palette[20][:3], [65, 300, 200])
         self.assertEqual(palette[13][:3], [1, 1, 0.1])

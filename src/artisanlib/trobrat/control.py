@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Three verified Bernin setpoint selectors -> local Artisan Modbus commands.
+"""Verified Trobrat setpoint selectors -> local Artisan Modbus commands.
 
 Positive gas SP can cause ignition/heat in a panel-enabled operating mode.
 This client does not reproduce HMI validation or provide a safety controller.
@@ -19,9 +19,9 @@ import threading
 import time
 from typing import cast, override
 
-from . import bernin_metrics as core
+from . import metrics as core
 
-LOG = logging.getLogger("bernin-control")
+LOG = logging.getLogger("trobrat-control")
 DRUM_SP = core.Metric("drum_recipe_sp", "Recipe[DB20]-M1:SP", 100,
                       0x8A0E, 20, 0xB128DEF4, ((2, 29), (4, 9)))
 AIR_SP = core.METRICS[9]
@@ -453,7 +453,7 @@ def main() -> int:
         except ValueError as exc:
             parser.error(str(exc))
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    log_path = Path(__file__).resolve().parent / "bernin-control.log"
+    log_path = Path(__file__).resolve().parent / "trobrat-control.log"
     handler = RotatingFileHandler(log_path, maxBytes=1_000_000, backupCount=3, encoding="utf-8")
     handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
     LOG.addHandler(handler)

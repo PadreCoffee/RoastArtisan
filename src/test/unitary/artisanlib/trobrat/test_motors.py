@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import struct
 import unittest
-from artisanlib.trobrat import bernin_control as c
+from artisanlib.trobrat import control as c
 from test_control import FakeReader
 
 

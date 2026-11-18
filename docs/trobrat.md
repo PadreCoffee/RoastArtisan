@@ -1,6 +1,6 @@
-# Trobrat Bernin in RoastArtisan
+# Trobrat in RoastArtisan
 
-The machine preset **Config → Machine → Trobrat → Bernin-Control** enables the
+The machine preset **Config → Machine → Trobrat** enables the
 roaster-specific gateway inside RoastArtisan. The separate `Start-Control`
 window is not needed with this preset. The gateway connects to the Siemens PLC
 at `192.168.0.1:102` and exposes the validated telemetry and command map only
@@ -9,10 +9,10 @@ The Weintek panel remains connected as before. Other machine presets do not
 start the gateway.
 
 This mapping comes from the owner's Weintek project and captured traffic for
-**this specific Bernin/Trobrat controller program**. It is not a preset for
-other Trobrat machines or PLC projects. Save the current settings before
-selecting the machine preset. If a standalone BerninControl window is already
-using port 15020, close it and reload the preset.
+**this specific Trobrat PLC program**. Other PLC programs require their own
+verified map. Save the current settings before selecting the machine preset.
+If a standalone control window is already using port 15020, close it and
+reload the preset.
 
 ## What the preset provides
 

@@ -6,11 +6,11 @@ from unittest import mock
 
 from PyQt6.QtCore import QSettings  # type: ignore[import-not-found]
 
-from artisanlib.trobrat import bernin_control, service
+from artisanlib.trobrat import control, service
 
 
 def test_machine_preset_maps_only_this_roaster() -> None:
-    path = Path(__file__).resolve().parents[4] / 'includes/Machines/Trobrat/Bernin-Control.aset'
+    path = Path(__file__).resolve().parents[4] / 'includes/Machines/Trobrat.aset'
     settings = QSettings(str(path), QSettings.Format.IniFormat)
     assert settings.value('Trobrat/enabled') == 'true'
     assert settings.value('Trobrat/host') == settings.value('S7/host')
@@ -50,8 +50,8 @@ def test_gateway_lifecycle_does_not_write_on_start() -> None:
     def fake_poll(_gateway, stop_event: threading.Event) -> None:
         stop_event.wait()
 
-    with mock.patch.object(bernin_control, 'Server', FakeServer), mock.patch.object(bernin_control, 'poll', fake_poll), \
-            mock.patch.object(bernin_control.ControlReader, 'close', autospec=True) as close:
+    with mock.patch.object(control, 'Server', FakeServer), mock.patch.object(control, 'poll', fake_poll), \
+            mock.patch.object(control.ControlReader, 'close', autospec=True) as close:
         gateway = service.TrobratService('127.0.0.1')
         gateway.start()
         assert not gateway.stop_event.is_set()

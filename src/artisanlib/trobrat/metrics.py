@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Read-only Bernin S7-1200 symbolic telemetry -> local read-only Modbus TCP.
+"""Read-only Trobrat S7-1200 symbolic telemetry -> local read-only Modbus TCP.
 
 No third-party dependencies. No PLC writes, controls, scans, or program transfers.
-Selectors are specific to the supplied Bernin EXOB/capture, not other roasters.
+Selectors are specific to the verified PLC program and capture.
 """
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ import threading
 import time
 from typing import cast, override
 
-LOG = logging.getLogger("bernin")
+LOG = logging.getLogger("trobrat")
 PLC_HOST = "192.168.0.1"
 MODBUS_HOST = "127.0.0.1"
 MODBUS_PORT = 15020
@@ -359,7 +359,7 @@ def main() -> int:
         import unittest
         suite = unittest.defaultTestLoader.discover(str(Path(__file__).parent / "tests"), pattern="test_*.py")
         return 0 if unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful() else 1
-    log_path = Path(__file__).resolve().parent / "bernin-metrics.log"
+    log_path = Path(__file__).resolve().parent / "trobrat-metrics.log"
     try:
         handler = RotatingFileHandler(log_path, maxBytes=1_000_000, backupCount=2, encoding="utf-8")
         handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
