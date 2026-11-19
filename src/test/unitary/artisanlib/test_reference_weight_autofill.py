@@ -95,3 +95,47 @@ def test_unit_conversion_g_to_kg() -> None:
     o = _dlg(typed=False, manual=False, ref_changed=False)
     editGraphDlg._setWeightInFromReference(o, 300.0, 'g')
     assert o.weightinedit.text() == '0.3'
+
+
+def test_cloud_reference_weight_ignores_manual_background_checkbox() -> None:
+    o = _dlg(typed=False, manual=False, ref_changed=False)
+    o.aw.qmc.setBatchSizeFromBackground = False
+    o.aw.qmc.flagon = False
+    o.aw.curFile = None
+    o.aw.schedule_window = None
+    o._referenceWeightAllowed = lambda: editGraphDlg._referenceWeightAllowed(o)
+
+    editGraphDlg._setWeightInFromReference(o, 11.0, 'Kg')
+    assert o.weightinedit.text() == '11'
+
+
+def test_cloud_reference_weight_respects_loaded_roast_and_scheduler() -> None:
+    o = _dlg(typed=False, manual=False, ref_changed=False)
+    o.aw.qmc.setBatchSizeFromBackground = False
+    o.aw.qmc.flagon = False
+    o.aw.curFile = 'loaded.alog'
+    o.aw.schedule_window = None
+    o._referenceWeightAllowed = lambda: editGraphDlg._referenceWeightAllowed(o)
+
+    editGraphDlg._setWeightInFromReference(o, 11.0, 'Kg')
+    assert o.weightinedit.text() == '0'
+    o.aw.curFile = None
+    o.aw.schedule_window = object()
+    editGraphDlg._setWeightInFromReference(o, 11.0, 'Kg')
+    assert o.weightinedit.text() == '0'
+
+
+def test_cached_cloud_reference_weight_applies_with_checkbox_off(tmp_path) -> None:
+    profile = tmp_path / 'reference.alog'
+    profile.write_text("{'weight': [11.0, 9.35, 'Kg']}", encoding='utf-8')
+    o = _dlg(typed=False, manual=False, ref_changed=True)
+    o.aw.qmc.setBatchSizeFromBackground = False
+    o.aw.qmc.flagon = False
+    o.aw.curFile = None
+    o.aw.schedule_window = None
+    o.template_file = str(profile)
+    o._referenceWeightAllowed = lambda: editGraphDlg._referenceWeightAllowed(o)
+    o._setWeightInFromReference = lambda weight, unit: editGraphDlg._setWeightInFromReference(o, weight, unit)
+
+    editGraphDlg._applyReferenceWeight(o)
+    assert o.weightinedit.text() == '11'

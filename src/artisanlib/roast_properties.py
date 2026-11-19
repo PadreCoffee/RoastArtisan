@@ -2827,6 +2827,11 @@ class editGraphDlg(ArtisanResizeablDialog):
                 # coffee/blend changed by user — saved reference no longer applies
                 self.template_uuid = None
                 self.template_file = None
+                self.template_is_reference = False
+                previous_reference_title = self.reference_auto_title
+                self.reference_auto_title = None
+                if previous_reference_title is not None and self.titleedit.currentText() == previous_reference_title:
+                    self._applyAutoTitle(self._autoTitleCandidate())
             else:
                 # retained reference missing from the filtered fetch — inject it so it stays
                 # visible and selected instead of falling back to «Без эталона»
@@ -2849,6 +2854,7 @@ class editGraphDlg(ArtisanResizeablDialog):
         # the cloud orders them (lot-matched, then newest). One-shot, consumed here so a later
         # background refetch does not re-drive a selection the user may have since changed.
         auto_selected_label:str|None = None
+        auto_selected = False
         if self._select_reference_after_fetch:
             self._select_reference_after_fetch = False
             # only auto-select a reference actually BOUND to the picked coffee/blend. When the
@@ -2864,7 +2870,9 @@ class editGraphDlg(ArtisanResizeablDialog):
                     self.template_uuid = uuid_str
                     self.template_file = plus.register.getPath(self.template_uuid)
                     self.template_is_reference = True
+                    self.weight_in_user_edited = False
                     selected_idx = 1
+                    auto_selected = True
                     auto_selected_label = (first.get('label') or '').strip() or None
         self.plus_templates_combo.setCurrentIndex(selected_idx)
         self.plus_templates_combo.setEnabled(len(templates) > 0)
@@ -2876,12 +2884,14 @@ class editGraphDlg(ArtisanResizeablDialog):
         # auto-selected, so rules 2/3 (no reference -> title unchanged) stay untouched.
         if auto_selected_label:
             self._setTitleFromReference(auto_selected_label)
+        if auto_selected:
+            self._applyReferenceWeight()
         self._updateSnapshotBlock()
 
-    # the reference's batch weight is taken over only if "set batch size from background" is on, the roast
-    # is sampling or no saved profile is loaded, and the scheduler (which sets its own weight) is inactive
+    # Cloud references supply their own batch weight independently of the setting for manually
+    # loaded backgrounds. A loaded roast and the scheduler still retain their own weight.
     def _referenceWeightAllowed(self) -> bool:
-        return bool(self.aw.qmc.setBatchSizeFromBackground and (self.aw.qmc.flagon or not self.aw.curFile) and
+        return bool((self.aw.qmc.flagon or not self.aw.curFile) and
                     self.aw.schedule_window is None)
 
     # fills the weight-in field with the selected reference's batch weight unless the roaster typed the weight
