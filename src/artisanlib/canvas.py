@@ -7942,7 +7942,8 @@ class tgraphcanvas(QObject):
                 self.closePhidgetAMBIENTs()
             except Exception as e:  # pylint: disable=broad-except
                 _log.exception(e)
-        self.reset()
+        if self.reset():
+            self.aw.clearbackgroundRedraw()
 
     #Resets graph. Called from reset button. Deletes all data. Calls redraw() at the end
     # returns False if action was canceled, True otherwise

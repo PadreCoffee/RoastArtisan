@@ -149,11 +149,14 @@ def test_rule1_auto_select_first_reference_and_retitle() -> None:
                  coffee_title_label='El Paraiso', last_auto_title='El Paraiso',
                  template_uuid=None, user_updated=True, select_after_fetch=True,
                  plus_coffee_selected='colombia-el-paraiso')
+    applied_weights = []
+    o._applyReferenceWeight = lambda: applied_weights.append(o.template_uuid)
     o._applyTemplatesToCombo([{'uuid': 'c' * 32, 'label': 'Reference Roast #7', '_raw': {}}])
     assert o.plus_templates_combo.currentIndex() == 1
     assert o.titleedit.currentText() == 'Reference Roast #7'
     assert o.template_uuid == 'c' * 32
     assert o.template_is_reference is True
+    assert applied_weights == ['c' * 32]
 
 
 def test_rule1_auto_select_takes_first_of_several() -> None:
@@ -197,6 +200,29 @@ def test_rule2_coffee_with_no_reference_does_not_force_a_reference_title() -> No
     assert o.plus_templates_combo.currentIndex() == 0
     assert o.titleedit.currentText() == 'El Paraiso'
     assert o.reference_auto_title is None
+
+
+def test_rule2_new_stock_without_reference_replaces_old_reference_title() -> None:
+    o = _harness('Old Reference', coffee_label='Colombia, El Paraiso',
+                 coffee_title_label='El Paraiso', last_auto_title='Old Reference',
+                 reference_auto_title='Old Reference', template_uuid='a' * 32,
+                 user_updated=True, select_after_fetch=True,
+                 plus_coffee_selected='colombia-el-paraiso')
+    o.template_is_reference = True
+    o._applyTemplatesToCombo([])
+    assert o.template_uuid is None
+    assert o.template_is_reference is False
+    assert o.titleedit.currentText() == 'El Paraiso'
+    assert o.reference_auto_title is None
+
+
+def test_rule2_new_stock_without_reference_preserves_custom_title() -> None:
+    o = _harness('Моя обжарка', coffee_label='Colombia, El Paraiso',
+                 coffee_title_label='El Paraiso', reference_auto_title='Old Reference',
+                 template_uuid='a' * 32, user_updated=True, select_after_fetch=True,
+                 plus_coffee_selected='colombia-el-paraiso')
+    o._applyTemplatesToCombo([])
+    assert o.titleedit.currentText() == 'Моя обжарка'
 
 
 def test_rule2_fallback_references_not_auto_selected_blend_keeps_its_name() -> None:
